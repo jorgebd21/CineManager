@@ -1,6 +1,9 @@
 #include "models/sala.hpp"
 
+int Sala::contador = 0;
+
 Sala::Sala(int f, int c) {
+    id = ++contador;
     filas = f;
     columnas = c;
 
@@ -18,6 +21,10 @@ Sala::Sala(int f, int c) {
 
 bool dentroRango(int fila, int columna, int filas, int columnas) {
     return fila >= 0 && fila < filas && columna >= 0 && columna < columnas;
+}
+
+int Sala::getId() const {
+    return id;
 }
 
 Asiento Sala::getAsiento(int f, int c) {
@@ -53,4 +60,22 @@ int Sala::getAsientosOcupados() const{
 
 int Sala::getAsientosLibres() const{
     return getTotalAsientos() - getAsientosOcupados();
+}
+
+bool Sala::reservarSala(const Pelicula& pelicula) {
+    if (this->estado == OCUPADO) {
+        return false;
+    }
+    this->estado = OCUPADO;
+    this->pelicula = pelicula;
+    return true;
+}
+
+bool Sala::liberarSala() {
+    if (this->estado == LIBRE) {
+        return false;
+    }
+    this->estado = LIBRE;
+    this->pelicula = Pelicula();
+    return true;
 }
