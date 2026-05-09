@@ -72,7 +72,7 @@ int Sala::getAsientosLibres() const{
 }
 
 bool Sala::reservarAsiento(int fila, int columna) {
-    if (!dentroRango(fila, columna, filas, columnas)) {
+    if (!dentroRango(fila, columna, filas, columnas) || estado == LIBRE) {
         return false;
     }
     return asientos[fila][columna].reservar();
