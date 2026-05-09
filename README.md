@@ -16,7 +16,7 @@ El proyecto está diseñado para evolucionar drásticamente en 5 fases: comenzan
 
 Actualmente el proyecto se está desarrollando siguiendo estas fases. Marcaré los avances a medida que se completen:
 
-- [ ] **Fase 1: El Motor Básico (Consola y POO)**
+- [X] **Fase 1: El Motor Básico (Consola y POO)**
   Creación de las entidades principales (Asiento, Sala, Película), lógica de reserva transaccional básica y renderizado visual de butacas en la terminal.
 - [ ] **Fase 2: Persistencia Básica**
   Implementación de flujos de entrada/salida (I/O) para guardar y cargar el estado de las salas en archivos de texto/CSV, evitando la pérdida de datos al cerrar.
