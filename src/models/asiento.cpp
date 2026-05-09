@@ -6,15 +6,15 @@ Asiento::Asiento(int f, int c){
     estado = LIBRE;
 }
 
-int Asiento::getFila(){
+int Asiento::getFila() const{
     return fila;
 }
 
-int Asiento::getColumna(){
+int Asiento::getColumna() const{
     return columna;
 }
 
-Estado Asiento::getEstado(){
+Estado Asiento::getEstado() const{
     return estado;
 }
 

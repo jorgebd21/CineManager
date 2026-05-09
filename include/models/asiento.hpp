@@ -11,9 +11,9 @@ private:
 public:
     Asiento(int f = 0, int c = 0);
 
-    int getFila();
-    int getColumna();
-    Estado getEstado();
+    int getFila() const;
+    int getColumna() const;
+    Estado getEstado() const;
 
     bool reservar();
     bool liberar();

@@ -27,19 +27,19 @@ Asiento Sala::getAsiento(int f, int c) {
     return asientos[f][c];
 }
 
-int Sala::getFilas() {
+int Sala::getFilas() const{
     return filas;
 }
 
-int Sala::getColumnas() {
+int Sala::getColumnas() const{
     return columnas;
 }
 
-int Sala::getTotalAsientos() {
+int Sala::getTotalAsientos() const{
     return filas * columnas;
 }
 
-int Sala::getAsientosOcupados() {
+int Sala::getAsientosOcupados() const{
     int count = 0;
     for (int i = 0; i < filas; i++) {
         for (int j = 0; j < columnas; j++) {
@@ -51,6 +51,6 @@ int Sala::getAsientosOcupados() {
     return count;
 }
 
-int Sala::getAsientosLibres() {
+int Sala::getAsientosLibres() const{
     return getTotalAsientos() - getAsientosOcupados();
 }

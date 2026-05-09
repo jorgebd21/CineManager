@@ -12,12 +12,12 @@ public:
     Sala(int f, int c);
 
     Asiento getAsiento(int f, int j);
-    int getFilas();
-    int getColumnas();
+    int getFilas() const;
+    int getColumnas() const;
 
-    int getTotalAsientos();
-    int getAsientosOcupados();
-    int getAsientosLibres();
+    int getTotalAsientos() const;
+    int getAsientosOcupados() const;
+    int getAsientosLibres() const;
 
     bool reservarAsiento(int fila, int columna);
     bool liberarAsiento(int fila, int columna);
