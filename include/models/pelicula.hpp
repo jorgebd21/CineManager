@@ -25,7 +25,7 @@ private:
     int duracion;
     
 public:
-    Pelicula(int id = -1, const std::string& titulo = "", Genero genero = Genero::NONE, int duracion = 0);
+    Pelicula(const std::string& titulo = "", Genero genero = Genero::NONE, int duracion = 0);
     
     int getId() const;
     std::string getTitulo() const;
