@@ -6,10 +6,11 @@
 using namespace std;
 
 void Consola::mostrarMenu(){
-    cout << "=== Menú Principal ===" << endl;
-    cout << "1. Gestionar Salas" << endl;
-    cout << "2. Gestionar Películas" << endl;
-    cout << "3. Salir" << endl;
+    cout << "=== CineManager ===" << endl;
+    cout << "1. Cartelera" << endl;
+    cout << "2. Elegir Pelicula" << endl;
+    cout << "3. Comprar Entrada" << endl;
+    cout << "4. Salir" << endl;
     cout << "Seleccione una opción: ";
 }
 

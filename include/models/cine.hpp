@@ -12,8 +12,11 @@ private:
 public:
     Cine();
 
-    std::vector<Sala> getSalas() const;
-    std::vector<Pelicula> getPeliculas() const;
+    std::vector<Sala>& getSalas();
+    std::vector<Pelicula>& getPeliculas();
+
+    std::vector<Sala> getSalasDisponibles();
+    std::vector<Sala> getSalasOcupadas();
 
     bool agregarSala(const Sala& sala);
     bool agregarPelicula(const Pelicula& pelicula);

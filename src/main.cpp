@@ -10,31 +10,108 @@ using namespace std;
 int main() {
     Consola consola;
 
-    // Test: Mostrar una película
-    cout << "\n=== TEST: Mostrar Película ===" << endl;
-    Pelicula pelicula1("Avatar 2", Genero::CIENCIA_FICCION, 192);
-    Pelicula pelicula2("Pulp Fiction", Genero::DRAMA, 154);
+    Cine cine;
+    
+    cine.agregarPelicula(Pelicula("Avatar 2", Genero::CIENCIA_FICCION, 192));
+    cine.agregarPelicula(Pelicula("Pulp Fiction", Genero::DRAMA, 154));
+    cine.agregarSala(Sala(5,6));
+    cine.getSalas()[0].reservarSala(cine.getPeliculas()[0]);
 
-    consola.mostrarPelicula(pelicula1);
-    cout << endl;
-    consola.mostrarPelicula(pelicula2);
+    auto salas = cine.getSalas();
+    auto peliculas = cine.getPeliculas();
+    Asiento asiento_seleccionado = Asiento();
 
-    // Test: Mostrar sala libre
-    cout << "\n=== TEST: Mostrar Sala Libre ===" << endl;
-    Sala sala1(5, 6);
-    consola.mostrarSala(sala1);
+    Sala *sala_seleccionada = nullptr;
+    Pelicula *pelicula_seleccionada = nullptr;
 
-    // Test: Mostrar sala ocupada con película y asientos reservados
-    cout << "\n=== TEST: Mostrar Sala Ocupada ===" << endl;
-    Sala sala2(5, 6);
-    sala2.reservarSala(pelicula1);
-    sala2.reservarAsiento(0, 0);
-    sala2.reservarAsiento(0, 1);
-    sala2.reservarAsiento(1, 3);
-    sala2.reservarAsiento(2, 4);
-    sala2.reservarAsiento(4, 5);
+    while(true) {
+        consola.mostrarMenu();
 
-    consola.mostrarSala(sala2);
+        int opcion;
+
+        cin >> opcion;
+        cout << endl << "=======================================" << endl;
+        switch(opcion) {
+            case 1:
+                for(auto& pelicula : peliculas) {
+                    consola.mostrarPelicula(pelicula);
+                    cout << endl << "=======================================" << endl;
+                }
+                break;
+            case 2: {
+                for(const auto& sala : cine.getSalasOcupadas()) {
+                    consola.mostrarPelicula(sala.getPelicula());
+                    consola.mostrarSala(sala);
+                    cout << endl;
+                    cout << endl << "=======================================" << endl;
+                }
+
+                cout << "Seleccione una película: ";
+                int pelicula_id;
+                cin >> pelicula_id;
+
+                for(auto& sala : cine.getSalas()) {
+                    if(sala.estaOcupada() && sala.getPelicula().getId() == pelicula_id) {
+                        cout << "Película seleccionada: " << endl;
+                        consola.mostrarPelicula(sala.getPelicula());
+                        sala_seleccionada = &sala;
+                        pelicula_seleccionada = &sala.getPelicula();
+                        break;
+                    }
+                }
+
+                if(sala_seleccionada == nullptr) {
+                    cout << "Película no encontrada" << endl;
+                    break;
+                }
+
+                cout << endl << "=======================================" << endl;
+                cout << "Sala seleccionada: " << endl;
+                consola.mostrarSala(*sala_seleccionada);
+                cout << "Elija asiento (fila columna): " << endl;
+                int fila, columna;
+                cin >> fila >> columna;
+
+                Asiento& asiento = sala_seleccionada->getAsiento(fila-1, columna-1);
+                if(asiento.getFila() == -1) {
+                    cout << "Asiento invalido" << endl;
+                    cout << endl << "=======================================" << endl;
+                    break;
+                }
+                if(asiento.estaOcupado()) {
+                    cout << "Asiento ocupado" << endl;
+                    cout << endl << "=======================================" << endl;
+                    break;
+                }
+
+                sala_seleccionada->reservarAsiento(fila, columna);
+                asiento_seleccionado = asiento;
+                cout << "Asiento seleccionado: " << fila << ", " << columna << endl;
+                cout << endl << "=======================================" << endl;
+                break;
+            }
+            case 3:
+                if(pelicula_seleccionada == nullptr) {
+                    cout << "Debe seleccionar una película primero" << endl;
+                    break;
+                }else if(asiento_seleccionado.getFila() == -1) {
+                    cout << "Debe seleccionar un asiento primero" << endl;
+                    break;
+                }
+
+                cout << "Compra realizada con éxito" << endl;
+                cout << "Película: " << pelicula_seleccionada->getTitulo() << endl;
+                cout << "Sala: " << sala_seleccionada->getId() << endl;
+                cout << "Asiento: " << asiento_seleccionado.getFila()+1 << ", " << asiento_seleccionado.getColumna()+1 << endl;
+
+            case 4:
+                cout << "Gracias por usar el sistema de gestión de cine" << endl;
+                return 0;
+            default:
+                cout << "Opción no válida" << endl;
+                cout << "Vuelva a intentarlo\n\n";
+        }
+    }
 
     return 0;
 }

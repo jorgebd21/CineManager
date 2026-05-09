@@ -2,12 +2,32 @@
 
 Cine::Cine() {}
 
-std::vector<Sala> Cine::getSalas() const {
+std::vector<Sala>& Cine::getSalas( ){
     return salas;
 }
 
-std::vector<Pelicula> Cine::getPeliculas() const {
+std::vector<Pelicula>& Cine::getPeliculas(){
     return peliculas;
+}
+
+std::vector<Sala> Cine::getSalasDisponibles(){
+    std::vector<Sala> salasDisponibles;
+    for (auto& sala : salas) {
+        if (!sala.estaOcupada()) {
+            salasDisponibles.push_back(sala);
+        }
+    }
+    return salasDisponibles;
+}
+
+std::vector<Sala> Cine::getSalasOcupadas(){
+    std::vector<Sala> salasOcupadas;
+    for (auto& sala : salas) {
+        if (sala.estaOcupada()) {
+            salasOcupadas.push_back(sala);
+        }
+    }
+    return salasOcupadas;
 }
 
 bool Cine::agregarSala(const Sala& sala) {

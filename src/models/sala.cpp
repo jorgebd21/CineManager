@@ -28,9 +28,18 @@ int Sala::getId() const {
     return id;
 }
 
-Asiento Sala::getAsiento(int f, int c) const {
+Asiento& Sala::getAsiento(int f, int c) {
     if (!dentroRango(f, c, filas, columnas)) {
-        return Asiento(-1, -1);
+        static Asiento dummy(-1, -1);
+        return dummy;
+    }
+    return asientos[f][c];
+}
+
+const Asiento& Sala::getAsiento(int f, int c) const {
+    if (!dentroRango(f, c, filas, columnas)) {
+        static Asiento dummy(-1, -1);
+        return dummy;
     }
     return asientos[f][c];
 }
@@ -47,7 +56,11 @@ Estado Sala::getEstado() const {
     return estado;
 }
 
-Pelicula Sala::getPelicula() const {
+Pelicula& Sala::getPelicula(){
+    return pelicula;
+}
+
+const Pelicula& Sala::getPelicula() const {
     return pelicula;
 }
 
@@ -59,7 +72,7 @@ int Sala::getAsientosOcupados() const{
     int count = 0;
     for (int i = 0; i < filas; i++) {
         for (int j = 0; j < columnas; j++) {
-            if (asientos[i][j].getEstado() == OCUPADO) {
+            if (asientos[i][j].estaOcupado()) {
                 count++;
             }
         }
@@ -86,7 +99,7 @@ bool Sala::liberarAsiento(int fila, int columna) {
 }
 
 bool Sala::reservarSala(const Pelicula& pelicula) {
-    if (this->estado == OCUPADO) {
+    if (estaOcupada()) {
         return false;
     }
     this->estado = OCUPADO;
@@ -95,10 +108,14 @@ bool Sala::reservarSala(const Pelicula& pelicula) {
 }
 
 bool Sala::liberarSala() {
-    if (this->estado == LIBRE) {
+    if (!estaOcupada()) {
         return false;
     }
     this->estado = LIBRE;
     this->pelicula = Pelicula();
     return true;
+}
+
+bool Sala::estaOcupada() const {
+    return estado == OCUPADO;
 }

@@ -9,7 +9,7 @@ private:
     Estado estado;
 
 public:
-    Asiento(int f = 0, int c = 0);
+    Asiento(int f = -1, int c = -1);
 
     int getFila() const;
     int getColumna() const;
@@ -17,6 +17,8 @@ public:
 
     bool reservar();
     bool liberar();
+
+    bool estaOcupado() const;
 };
 
 #endif

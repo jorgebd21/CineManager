@@ -37,3 +37,7 @@ bool Asiento::liberar()
         return false;
     }
 }
+
+bool Asiento::estaOcupado() const {
+    return estado == OCUPADO;
+}

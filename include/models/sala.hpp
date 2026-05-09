@@ -19,15 +19,19 @@ public:
     Sala(int f=0, int c=0);
 
     int getId() const;
-    Asiento getAsiento(int f, int j) const;
+    Asiento& getAsiento(int f, int j);
+    const Asiento& getAsiento(int f, int j) const;
     int getFilas() const;
     int getColumnas() const;
     Estado getEstado() const;
-    Pelicula getPelicula() const;
+    Pelicula& getPelicula();
+    const Pelicula& getPelicula() const;
 
     int getTotalAsientos() const;
     int getAsientosOcupados() const;
     int getAsientosLibres() const;
+
+    bool estaOcupada() const;
 
     bool reservarAsiento(int fila, int columna);
     bool liberarAsiento(int fila, int columna);
