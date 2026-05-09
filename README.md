@@ -1,8 +1,8 @@
-# 🎬 [Aquí el Nombre que Elijas, ej: Butaca++]
+# 🎬 CineManager
 
 > 🚧 **Estado del proyecto:** En desarrollo activo (Work in Progress).
 
-**[Nombre del Proyecto]** es un sistema de gestión y venta de entradas de cine escrito en C++. El objetivo principal de este repositorio no es solo crear una aplicación funcional, sino servir como un **laboratorio de aprendizaje progresivo** de C++. 
+**CineManage** es un sistema de gestión y venta de entradas de cine escrito en C++. El objetivo principal de este repositorio no es solo crear una aplicación funcional, sino servir como un **laboratorio de aprendizaje progresivo** de C++. 
 
 El proyecto está diseñado para evolucionar drásticamente en 5 fases: comenzando como una simple aplicación de consola que maneja la memoria directamente mediante Programación Orientada a Objetos (POO), hasta transformarse en una API RESTful multihilo capaz de manejar peticiones concurrentes y persistir datos en una base de datos relacional.
 
