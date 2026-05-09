@@ -14,7 +14,7 @@ int Asiento::getColumna(){
     return columna;
 }
 
-Asiento::Estado Asiento::getEstado(){
+Estado Asiento::getEstado(){
     return estado;
 }
 

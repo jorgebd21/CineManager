@@ -1,9 +1,14 @@
 #ifndef ASIENTO_H
 #define ASIENTO_H
 
+enum Estado {OCUPADO, LIBRE};
 class Asiento{
+private:
+    int fila;
+    int columna;
+    Estado estado;
+
 public:
-    enum Estado {OCUPADO, LIBRE};
     Asiento(int f = 0, int c = 0);
 
     int getFila();
@@ -12,11 +17,6 @@ public:
 
     bool reservar();
     bool liberar();
-    
-private:
-    int fila;
-    int columna;
-    Estado estado;
 };
 
 #endif

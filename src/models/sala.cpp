@@ -43,7 +43,7 @@ int Sala::getAsientosOcupados() {
     int count = 0;
     for (int i = 0; i < filas; i++) {
         for (int j = 0; j < columnas; j++) {
-            if (asientos[i][j].getEstado() == Asiento::OCUPADO) {
+            if (asientos[i][j].getEstado() == OCUPADO) {
                 count++;
             }
         }
