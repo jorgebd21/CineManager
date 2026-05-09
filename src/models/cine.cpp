@@ -1,25 +1,22 @@
 #include "models/cine.hpp"
 
-Cine::Cine() {
-    salas = std::set<Sala>();
-    peliculas = std::set<Pelicula>();
-}
+Cine::Cine() {}
 
-std::set<Sala> Cine::getSalas() const {
+std::vector<Sala> Cine::getSalas() const {
     return salas;
 }
 
-std::set<Pelicula> Cine::getPeliculas() const {
+std::vector<Pelicula> Cine::getPeliculas() const {
     return peliculas;
 }
 
 bool Cine::agregarSala(const Sala& sala) {
-    salas.insert(sala);
+    salas.push_back(sala);
     return true;
 }
 
 bool Cine::agregarPelicula(const Pelicula& pelicula) {
-    peliculas.insert(pelicula);
+    peliculas.push_back(pelicula);
     return true;
 }
 

@@ -3,17 +3,17 @@
 
 #include "models/sala.hpp"
 #include "models/pelicula.hpp"
-#include <set>
+#include <vector>
 
 class Cine{
 private:
-    std::set<Sala> salas;
-    std::set<Pelicula> peliculas;
+    std::vector<Sala> salas;
+    std::vector<Pelicula> peliculas;
 public:
     Cine();
 
-    std::set<Sala> getSalas() const;
-    std::set<Pelicula> getPeliculas() const;
+    std::vector<Sala> getSalas() const;
+    std::vector<Pelicula> getPeliculas() const;
 
     bool agregarSala(const Sala& sala);
     bool agregarPelicula(const Pelicula& pelicula);

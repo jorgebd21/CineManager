@@ -6,6 +6,7 @@ Sala::Sala(int f, int c) {
     id = ++contador;
     filas = f;
     columnas = c;
+    estado = LIBRE;
 
     asientos.resize(filas);
     for (int i = 0; i < filas; i++) {
@@ -27,7 +28,7 @@ int Sala::getId() const {
     return id;
 }
 
-Asiento Sala::getAsiento(int f, int c) {
+Asiento Sala::getAsiento(int f, int c) const {
     if (!dentroRango(f, c, filas, columnas)) {
         return Asiento(-1, -1);
     }
@@ -40,6 +41,14 @@ int Sala::getFilas() const{
 
 int Sala::getColumnas() const{
     return columnas;
+}
+
+Estado Sala::getEstado() const {
+    return estado;
+}
+
+Pelicula Sala::getPelicula() const {
+    return pelicula;
 }
 
 int Sala::getTotalAsientos() const{
@@ -60,6 +69,20 @@ int Sala::getAsientosOcupados() const{
 
 int Sala::getAsientosLibres() const{
     return getTotalAsientos() - getAsientosOcupados();
+}
+
+bool Sala::reservarAsiento(int fila, int columna) {
+    if (!dentroRango(fila, columna, filas, columnas)) {
+        return false;
+    }
+    return asientos[fila][columna].reservar();
+}
+
+bool Sala::liberarAsiento(int fila, int columna) {
+    if (!dentroRango(fila, columna, filas, columnas)) {
+        return false;
+    }
+    return asientos[fila][columna].liberar();
 }
 
 bool Sala::reservarSala(const Pelicula& pelicula) {
