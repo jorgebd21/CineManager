@@ -4,9 +4,9 @@ Sala::Sala(int f, int c) {
     filas = f;
     columnas = c;
 
-    asientos = new Asiento*[filas];
+    asientos.resize(filas);
     for (int i = 0; i < filas; i++) {
-        asientos[i] = new Asiento[columnas]();
+        asientos[i].resize(columnas);
     }
 
     for (int i = 0; i < filas; i++) {

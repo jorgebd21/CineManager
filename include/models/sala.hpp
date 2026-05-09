@@ -1,12 +1,14 @@
 #ifndef SALA_H
 #define SALA_H
 
+#include <vector>
+
 #include "models/asiento.hpp"
 class Sala {
 private:
     int filas;
     int columnas;
-    Asiento** asientos;
+    std::vector<std::vector<Asiento>> asientos;
 
 public:
     Sala(int f, int c);
