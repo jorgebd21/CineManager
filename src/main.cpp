@@ -1,11 +1,56 @@
+#include <cstdio>
 #include <iostream>
 #include "models/pelicula.hpp"
 #include "models/asiento.hpp"
 #include "models/sala.hpp"
 #include "models/cine.hpp"
 #include "UI/consola.hpp"
+#include <fstream>
 
 using namespace std;
+
+void lecturaSalas(Cine& cine){
+    FILE *sala = fopen("./data/sala.txt", "r");
+    if(sala != nullptr){
+        int filas, columnas, asientos_ocupados;
+        
+        while(fscanf(sala, "%d %d %d", &filas, &columnas, &asientos_ocupados) != EOF){
+            Sala nueva_sala(filas, columnas);
+            
+            int f,c;
+            for(int i = 0; i < asientos_ocupados; i++){
+                fscanf(sala, "%d %d", &f, &c);
+                nueva_sala.reservarAsiento(f, c);
+            }
+
+            cine.agregarSala(nueva_sala);
+        }
+
+        fclose(sala);
+    }
+}
+
+bool escribirSalas(Cine& cine){
+    FILE *sala = fopen("./data/sala.txt", "w");
+    if(sala != nullptr){
+        for(auto& sala_obj : cine.getSalas()) {
+            fprintf(sala, "%d %d %d\n", sala_obj.getFilas(), sala_obj.getColumnas(), sala_obj.getAsientosOcupados());
+            int contador = sala_obj.getAsientosOcupados();
+            for(int i = 0; i < sala_obj.getFilas() && contador > 0; i++) {
+                for(int j = 0; j < sala_obj.getColumnas() && contador > 0; j++) {
+                    if(sala_obj.getAsiento(i, j).estaOcupado()) {
+                        fprintf(sala, "%d %d\n", i, j);
+                        contador--;
+                    }
+                }
+            }
+        }
+
+        fclose(sala);
+        return true;
+    }
+    return false;
+}
 
 int main() {
     Consola consola;
@@ -14,7 +59,7 @@ int main() {
     
     cine.agregarPelicula(Pelicula("Avatar 2", Genero::CIENCIA_FICCION, 192));
     cine.agregarPelicula(Pelicula("Pulp Fiction", Genero::DRAMA, 154));
-    cine.agregarSala(Sala(5,6));
+    lecturaSalas(cine);
     cine.getSalas()[0].reservarSala(cine.getPeliculas()[0]);
 
     auto salas = cine.getSalas();
@@ -98,6 +143,9 @@ int main() {
                     cout << "Debe seleccionar un asiento primero" << endl;
                     break;
                 }
+
+                cine.getSalas().at(sala_seleccionada->getId()-1).reservarAsiento(asiento_seleccionado.getFila(), asiento_seleccionado.getColumna());
+                escribirSalas(cine);
 
                 cout << "Compra realizada con éxito" << endl;
                 cout << "Película: " << pelicula_seleccionada->getTitulo() << endl;

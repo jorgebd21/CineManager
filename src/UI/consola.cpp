@@ -17,11 +17,15 @@ void Consola::mostrarMenu(){
 void Consola::mostrarSala(const Sala& sala){
     cout << "=== Sala " << sala.getId() << " ===" << endl;
     cout << "Capacidad: " << sala.getTotalAsientos() << endl;
+    
     if(sala.getEstado() == OCUPADO){
         cout << "Estado: Ocupado" << endl;
         cout << "Película: " << sala.getPelicula().getTitulo() << endl;
-        
-        for(int i = 0; i < sala.getFilas(); i++){
+    } else{
+        cout << "Estado: Libre" << endl;
+    }
+
+    for(int i = 0; i < sala.getFilas(); i++){
             for(int j = 0; j < sala.getColumnas(); j++){
                  if(sala.getAsiento(i, j).getEstado() == OCUPADO){
                     cout << " [X] ";
@@ -31,9 +35,6 @@ void Consola::mostrarSala(const Sala& sala){
             }
             cout << endl;
         }
-    } else{
-        cout << "Estado: Libre" << endl;
-    }
 }
 
 void Consola::mostrarPelicula(const Pelicula& pelicula){
