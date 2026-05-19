@@ -5,7 +5,6 @@
 #include "models/sala.hpp"
 #include "models/cine.hpp"
 #include "UI/consola.hpp"
-#include <fstream>
 
 using namespace std;
 
@@ -27,6 +26,22 @@ void lecturaSalas(Cine& cine){
         }
 
         fclose(sala);
+    }
+}
+
+void lecturaPeliculas(Cine& cine){
+    FILE *pelicula = fopen("./data/pelicula.txt", "r");
+    if(pelicula != nullptr){
+        char titulo[100];
+        char genero[50];
+        int duracion;
+        
+        while(fscanf(pelicula, "%s\t%s\t%d", titulo, genero, &duracion) != EOF){
+            Genero genero_enum = stringToGenero(genero);
+            cine.agregarPelicula(Pelicula(titulo, genero_enum, duracion));
+        }
+
+        fclose(pelicula);
     }
 }
 
@@ -57,8 +72,7 @@ int main() {
 
     Cine cine;
     
-    cine.agregarPelicula(Pelicula("Avatar 2", Genero::CIENCIA_FICCION, 192));
-    cine.agregarPelicula(Pelicula("Pulp Fiction", Genero::DRAMA, 154));
+    lecturaPeliculas(cine);
     lecturaSalas(cine);
     cine.getSalas()[0].reservarSala(cine.getPeliculas()[0]);
 

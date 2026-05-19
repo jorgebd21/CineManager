@@ -15,6 +15,7 @@ enum class Genero {
     OTHER
 };
 
+Genero stringToGenero(const std::string& generoStr);
 class Pelicula{
 private:
     static int contador;
