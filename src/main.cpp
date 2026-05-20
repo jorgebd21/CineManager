@@ -74,7 +74,7 @@ int main() {
     
     lecturaPeliculas(cine);
     lecturaSalas(cine);
-    cine.getSalas()[0].reservarSala(cine.getPeliculas()[0]);
+    cine.agregarSesion(cine.getSalas()[0], cine.getPeliculas()[0], std::tm());
 
     auto salas = cine.getSalas();
     auto peliculas = cine.getPeliculas();
@@ -98,9 +98,9 @@ int main() {
                 }
                 break;
             case 2: {
-                for(const auto& sala : cine.getSalasOcupadas()) {
-                    consola.mostrarPelicula(sala.getPelicula());
-                    consola.mostrarSala(sala);
+                for(const auto& sesion : cine.getSesiones()) {
+                    consola.mostrarPelicula(*sesion.getPelicula());
+                    consola.mostrarSala(*sesion.getSala());
                     cout << endl;
                     cout << endl << "=======================================" << endl;
                 }
