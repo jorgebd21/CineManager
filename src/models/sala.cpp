@@ -1,4 +1,5 @@
 #include "models/sala.hpp"
+#include "models/reserva.hpp"
 
 int Sala::contador = 0;
 
@@ -70,11 +71,9 @@ int Sala::getTotalAsientos() const{
 
 int Sala::getAsientosOcupados() const{
     int count = 0;
-    for (int i = 0; i < filas; i++) {
-        for (int j = 0; j < columnas; j++) {
-            if (asientos[i][j].estaOcupado()) {
-                count++;
-            }
+    for (const auto& reserva : reservas) {
+        if (reserva.getEstado() == OCUPADO) {
+            count++;
         }
     }
     return count;
@@ -84,18 +83,37 @@ int Sala::getAsientosLibres() const{
     return getTotalAsientos() - getAsientosOcupados();
 }
 
-bool Sala::reservarAsiento(int fila, int columna) {
+bool Sala::isAsientoOcupado(int fila, int columna) const {
     if (!dentroRango(fila, columna, filas, columnas)) {
         return false;
     }
-    return asientos[fila][columna].reservar();
+    for (const auto& reserva : reservas) {
+        if (reserva.getFila() == fila && reserva.getColumna() == columna && reserva.getEstado() == OCUPADO) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Sala::reservarAsiento(int fila, int columna) {
+    if (!dentroRango(fila, columna, filas, columnas) || isAsientoOcupado(fila, columna)) {
+        return false;
+    }
+    reservas.push_back(Reserva(reservas.size() + 1, 0, fila, columna, OCUPADO));
+    return true;
 }
 
 bool Sala::liberarAsiento(int fila, int columna) {
     if (!dentroRango(fila, columna, filas, columnas)) {
         return false;
     }
-    return asientos[fila][columna].liberar();
+    for (auto& reserva : reservas) {
+        if (reserva.getFila() == fila && reserva.getColumna() == columna && reserva.getEstado() == OCUPADO) {
+            reserva.setEstado(LIBRE);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Sala::reservarSala(const Pelicula& pelicula) {

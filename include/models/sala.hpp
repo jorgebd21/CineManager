@@ -4,6 +4,7 @@
 #include <vector>
 #include "models/asiento.hpp"
 #include "models/pelicula.hpp"
+#include "models/reserva.hpp"
 class Sala {
 private:
     static int contador;
@@ -12,6 +13,7 @@ private:
     int filas;
     int columnas;
     std::vector<std::vector<Asiento>> asientos;
+    std::vector<Reserva> reservas;
     Estado estado;
     Pelicula pelicula;
 
@@ -32,6 +34,8 @@ public:
     int getAsientosLibres() const;
 
     bool estaOcupada() const;
+
+    bool isAsientoOcupado(int fila, int columna) const;
 
     bool reservarAsiento(int fila, int columna);
     bool liberarAsiento(int fila, int columna);

@@ -5,17 +5,20 @@
 #include "models/sala.hpp"
 #include "models/cine.hpp"
 #include "UI/consola.hpp"
+#include "db/datamanager.hpp"
 
 using namespace std;
 
 int main() {
     Consola consola;
 
+    DataManager db;
+
+    db.abrirSQL();
+
     Cine cine;
-    
-    lecturaPeliculas(cine);
-    lecturaSalas(cine);
-    cine.agregarSesion(cine.getSalas()[0], cine.getPeliculas()[0], std::tm());
+
+    cine = db.obtenerCine(1);
 
     auto salas = cine.getSalas();
     auto peliculas = cine.getPeliculas();
@@ -99,8 +102,8 @@ int main() {
                     break;
                 }
 
-                cine.getSalas().at(sala_seleccionada->getId()-1).reservarAsiento(asiento_seleccionado.getFila(), asiento_seleccionado.getColumna());
-                escribirSalas(cine);
+                Reserva reserva;
+                db.crearReserva(reserva);
 
                 cout << "Compra realizada con éxito" << endl;
                 cout << "Película: " << pelicula_seleccionada->getTitulo() << endl;
@@ -109,6 +112,7 @@ int main() {
 
             case 4:
                 cout << "Gracias por usar el sistema de gestión de cine" << endl;
+                db.cerrarSQL();
                 return 0;
             default:
                 cout << "Opción no válida" << endl;

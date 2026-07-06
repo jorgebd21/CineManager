@@ -17,7 +17,11 @@ find_package(SQLite3 REQUIRED)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(CineManager ${SOURCES}
-    src/main_admin.cpp)
+    app/main_admin.cpp)
+add_executable(CineManagerClient ${SOURCES}
+    app/main_client.cpp)
 
 target_link_libraries(CineManager PRIVATE SQLite3::SQLite3)
 target_include_directories(CineManager PRIVATE include)
+target_link_libraries(CineManagerClient PRIVATE SQLite3::SQLite3)
+target_include_directories(CineManagerClient PRIVATE include)
