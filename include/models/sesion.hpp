@@ -3,30 +3,25 @@
 
 #include <ctime>
 #include "pelicula.hpp"
-#include "sala.hpp"
 
 class Sesion{
 private:
-    static int contador;
-
-    void calcularHoraFin();
-
     int id;
-    const class Pelicula *pelicula;
-    class Sala *sala;
-    std::tm horaInicio;
-    std::tm horaFin;
+    const Pelicula* pelicula;
+    int idSala;
+    std::time_t horaInicio;
+    std::time_t horaFin;
 public:
-    Sesion(const Pelicula &pelicula, Sala &sala, std::tm horaInicio);
+    Sesion(int id, const Pelicula* pelicula, int idSala, std::time_t horaInicio);
 
     int getId() const;
     const Pelicula* getPelicula() const;
-    const Sala* getSala() const;
-    std::tm getHoraInicio() const;
-    std::tm getHoraFin() const;
+    int getIdSala() const;
+    std::time_t getHoraInicio() const;
+    std::time_t getHoraFin() const;
 
-    void setPelicula(const Pelicula& pelicula);
-    void setSala(Sala& sala);
-    void setHoraInicio(std::tm horaInicio);
+    void setPelicula(const Pelicula* pelicula);
+    void setIdSala(int idSala);
+    void setHoraInicio(std::time_t horaInicio);
 };
 #endif // SESION_H

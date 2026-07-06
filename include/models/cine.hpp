@@ -1,31 +1,22 @@
 #ifndef CINE_H
 #define CINE_H
 
-#include "models/sala.hpp"
-#include "models/pelicula.hpp"
-#include "models/sesion.hpp"
-#include <vector>
+#include <string>
 
 class Cine{
 private:
-    std::vector<Sala> salas;
-    std::vector<Pelicula> peliculas;
-    std::vector<Sesion> sesiones;
+    int id;
+    std::string nombre;
+    std::string direccion;
 public:
-    Cine();
+    Cine(int id, const std::string& nombre, const std::string& direccion);
+ 
+    int getId() const;
+    std::string getNombre() const;
+    std::string getDireccion() const;
 
-    std::vector<Sala>& getSalas();
-    std::vector<Pelicula>& getPeliculas();
-    std::vector<Sesion>& getSesiones();
-
-    std::vector<Sala> getSalasDisponibles();
-
-    bool agregarSala(Sala& sala);
-    bool agregarPelicula(const Pelicula& pelicula);
-    bool agregarSesion(Sala& sala, const Pelicula& pelicula, std::tm horaInicio);
-
-    bool eliminarSala(int id);
-    bool eliminarPelicula(int id);
+    void setNombre(const std::string& nombre);
+    void setDireccion(const std::string& direccion);
 };
 
 #endif

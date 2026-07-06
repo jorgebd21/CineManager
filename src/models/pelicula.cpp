@@ -1,7 +1,5 @@
 #include "models/pelicula.hpp"
 
-int Pelicula::contador = 0;
-
 Genero stringToGenero(const std::string& generoStr) {
     if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
     if (generoStr == "COMEDIA") return Genero::COMEDIA;
@@ -14,12 +12,7 @@ Genero stringToGenero(const std::string& generoStr) {
     return Genero::OTHER;
 }
 
-Pelicula::Pelicula(const std::string& titulo, Genero genero, int duracion) {
-    id = ++contador;
-    this->titulo = titulo;
-    this->genero = genero;
-    this->duracion = duracion;
-}
+Pelicula::Pelicula(int id, const std::string& titulo, Genero genero, int duracion) : id(id), titulo(titulo), genero(genero), duracion(duracion) {}
         
 int Pelicula::getId() const{
     return id;

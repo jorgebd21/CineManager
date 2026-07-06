@@ -2,6 +2,7 @@
 #define CONSOLA_HPP
 
 #include "models/sala.hpp"
+#include "models/pelicula.hpp"
 
 class Consola {
 public:

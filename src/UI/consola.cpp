@@ -25,16 +25,16 @@ void Consola::mostrarSala(const Sala& sala){
         cout << "Estado: Libre" << endl;
     }
 
-    for(int i = 0; i < sala.getFilas(); i++){
-            for(int j = 0; j < sala.getColumnas(); j++){
-                 if(sala.getAsiento(i, j).getEstado() == OCUPADO){
-                    cout << " [X] ";
-                 } else {
-                    cout << " [-] ";
-                 }
+    for (int i = 0; i < sala.getFilas(); i++){
+        for (int j = 0 ; j < sala.getColumnas(); j++){
+            if(sala.isAsientoOcupado(i, j)){
+                cout << "[X] ";
+            } else{
+                cout << "[-] ";
             }
-            cout << endl;
         }
+        cout << endl;
+    }
 }
 
 void Consola::mostrarPelicula(const Pelicula& pelicula){

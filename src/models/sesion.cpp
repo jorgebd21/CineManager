@@ -1,24 +1,7 @@
 #include "models/sesion.hpp"
-#include "models/pelicula.hpp"
-#include "models/sala.hpp"
 
-int Sesion::contador = 0;
-
-void Sesion::calcularHoraFin(){
-    horaFin.tm_min = horaInicio.tm_min + pelicula->getDuracion();
-}
-
-Sesion::Sesion(const Pelicula &pelicula, Sala &sala, std::tm horaInicio) {
-    if(&pelicula == nullptr || &sala == nullptr || !sala.reservarSala(pelicula)) {
-        id = -1;
-    }else{
-        id = ++contador;
-    }
-
-    this->pelicula = &pelicula;
-    this->sala = &sala;
-    this->horaInicio = horaInicio;
-    calcularHoraFin();
+Sesion::Sesion(int id, const Pelicula* pelicula, int idSala, std::time_t horaInicio) : id(id), pelicula(pelicula), idSala(idSala), horaInicio(horaInicio) {
+    horaFin = horaInicio + (pelicula->getDuracion() * 60);
 }
 
 int Sesion::getId() const {
@@ -29,27 +12,28 @@ const Pelicula* Sesion::getPelicula() const {
     return pelicula;
 }
 
-const Sala* Sesion::getSala() const {
-    return sala;
+int Sesion::getIdSala() const {
+    return idSala;
 }
 
-std::tm Sesion::getHoraInicio() const {
+std::time_t Sesion::getHoraInicio() const {
     return horaInicio;
 }
 
-std::tm Sesion::getHoraFin() const {
+std::time_t Sesion::getHoraFin() const {
     return horaFin;
 }
 
-void Sesion::setPelicula(const Pelicula& pelicula) {
-    this->pelicula = &pelicula;
+void Sesion::setPelicula(const Pelicula* pelicula) {
+    this->pelicula = pelicula;
+    horaFin = horaInicio + (this->pelicula->getDuracion() * 60);
 }
 
-void Sesion::setSala(Sala& sala) {
-    this->sala = &sala;
+void Sesion::setIdSala(int idSala) {
+    this->idSala = idSala;
 }
 
-void Sesion::setHoraInicio(std::tm horaInicio) {
+void Sesion::setHoraInicio(std::time_t horaInicio) {
     this->horaInicio = horaInicio;
-    calcularHoraFin();
+    horaFin = horaInicio + (pelicula->getDuracion() * 60);
 }

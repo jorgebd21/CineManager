@@ -18,15 +18,13 @@ enum class Genero {
 Genero stringToGenero(const std::string& generoStr);
 class Pelicula{
 private:
-    static int contador;
-
     int id;
     std::string titulo;
     Genero genero;
     int duracion;
     
 public:
-    Pelicula(const std::string& titulo = "", Genero genero = Genero::NONE, int duracion = 0);
+    Pelicula(int id, const std::string& titulo, Genero genero, int duracion);
     
     int getId() const;
     std::string getTitulo() const;

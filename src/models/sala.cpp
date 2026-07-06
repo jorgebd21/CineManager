@@ -1,139 +1,36 @@
 #include "models/sala.hpp"
-#include "models/reserva.hpp"
 
-int Sala::contador = 0;
-
-Sala::Sala(int f, int c) {
-    id = ++contador;
-    filas = f;
-    columnas = c;
-    estado = LIBRE;
-
-    asientos.resize(filas);
-    for (int i = 0; i < filas; i++) {
-        asientos[i].resize(columnas);
-    }
-
-    for (int i = 0; i < filas; i++) {
-        for (int j = 0; j < columnas; j++) {
-            asientos[i][j] = Asiento(i, j);
-        }
-    }
-}
-
-bool dentroRango(int fila, int columna, int filas, int columnas) {
-    return fila >= 0 && fila < filas && columna >= 0 && columna < columnas;
-}
+Sala::Sala(int id, int cineId, int numeroSala, int filas, int columnas) 
+    : id(id), cineId(cineId), numeroSala(numeroSala), filas(filas), columnas(columnas) {}
 
 int Sala::getId() const {
     return id;
 }
 
-Asiento& Sala::getAsiento(int f, int c) {
-    if (!dentroRango(f, c, filas, columnas)) {
-        static Asiento dummy(-1, -1);
-        return dummy;
-    }
-    return asientos[f][c];
+int Sala::getCineId() const {
+    return cineId;
 }
 
-const Asiento& Sala::getAsiento(int f, int c) const {
-    if (!dentroRango(f, c, filas, columnas)) {
-        static Asiento dummy(-1, -1);
-        return dummy;
-    }
-    return asientos[f][c];
+int Sala::getNumeroSala() const {
+    return numeroSala;
 }
 
-int Sala::getFilas() const{
+int Sala::getFilas() const {
     return filas;
 }
 
-int Sala::getColumnas() const{
+int Sala::getColumnas() const {
     return columnas;
 }
 
-Estado Sala::getEstado() const {
-    return estado;
+void Sala::setNumeroSala(int numeroSala) {
+    this->numeroSala = numeroSala;
 }
 
-Pelicula& Sala::getPelicula(){
-    return pelicula;
+void Sala::setFilas(int filas) {
+    this->filas = filas;
 }
 
-const Pelicula& Sala::getPelicula() const {
-    return pelicula;
-}
-
-int Sala::getTotalAsientos() const{
-    return filas * columnas;
-}
-
-int Sala::getAsientosOcupados() const{
-    int count = 0;
-    for (const auto& reserva : reservas) {
-        if (reserva.getEstado() == OCUPADO) {
-            count++;
-        }
-    }
-    return count;
-}
-
-int Sala::getAsientosLibres() const{
-    return getTotalAsientos() - getAsientosOcupados();
-}
-
-bool Sala::isAsientoOcupado(int fila, int columna) const {
-    if (!dentroRango(fila, columna, filas, columnas)) {
-        return false;
-    }
-    for (const auto& reserva : reservas) {
-        if (reserva.getFila() == fila && reserva.getColumna() == columna && reserva.getEstado() == OCUPADO) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Sala::reservarAsiento(int fila, int columna) {
-    if (!dentroRango(fila, columna, filas, columnas) || isAsientoOcupado(fila, columna)) {
-        return false;
-    }
-    reservas.push_back(Reserva(reservas.size() + 1, 0, fila, columna, OCUPADO));
-    return true;
-}
-
-bool Sala::liberarAsiento(int fila, int columna) {
-    if (!dentroRango(fila, columna, filas, columnas)) {
-        return false;
-    }
-    for (auto& reserva : reservas) {
-        if (reserva.getFila() == fila && reserva.getColumna() == columna && reserva.getEstado() == OCUPADO) {
-            reserva.setEstado(LIBRE);
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Sala::reservarSala(const Pelicula& pelicula) {
-    if (estaOcupada()) {
-        return false;
-    }
-    this->estado = OCUPADO;
-    this->pelicula = pelicula;
-    return true;
-}
-
-bool Sala::liberarSala() {
-    if (!estaOcupada()) {
-        return false;
-    }
-    this->estado = LIBRE;
-    this->pelicula = Pelicula();
-    return true;
-}
-
-bool Sala::estaOcupada() const {
-    return estado == OCUPADO;
+void Sala::setColumnas(int columnas) {
+    this->columnas = columnas;
 }
