@@ -32,7 +32,7 @@ public:
     Reserva obtenerReserva(int id);
 
     std::vector<Pelicula> obtenerCartelera(int idCine);
-    std::vector<Sesion> obtenerSesionesDePelicula(int idPelicula);
+    std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula);
     std::vector<Reserva> obtenerReservasDeSesion(int idSesion);
     std::vector<Sala> obtenerSalasDeCine(int idCine);
 

@@ -7,20 +7,20 @@
 class Sesion{
 private:
     int id;
-    const Pelicula* pelicula;
+    Pelicula pelicula;
     int idSala;
     std::time_t horaInicio;
     std::time_t horaFin;
 public:
-    Sesion(int id, const Pelicula* pelicula, int idSala, std::time_t horaInicio);
+    Sesion(int id, Pelicula pelicula, int idSala, std::time_t horaInicio);
 
     int getId() const;
-    const Pelicula* getPelicula() const;
+    Pelicula getPelicula() const;
     int getIdSala() const;
     std::time_t getHoraInicio() const;
     std::time_t getHoraFin() const;
 
-    void setPelicula(const Pelicula* pelicula);
+    void setPelicula(Pelicula pelicula);
     void setIdSala(int idSala);
     void setHoraInicio(std::time_t horaInicio);
 };

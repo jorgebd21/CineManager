@@ -1,7 +1,10 @@
 #include <cstdio>
 #include <iostream>
+#include <iomanip>
+
 #include "models/pelicula.hpp"
 #include "models/asiento.hpp"
+#include "models/reserva.hpp"
 #include "models/sala.hpp"
 #include "models/cine.hpp"
 #include "UI/consola.hpp"
@@ -16,16 +19,12 @@ int main() {
 
     db.abrirSQL();
 
-    Cine cine;
+    int idCine = 1;
+    Cine cine = db.obtenerCine(idCine);
 
-    cine = db.obtenerCine(1);
-
-    auto salas = cine.getSalas();
-    auto peliculas = cine.getPeliculas();
-    Asiento asiento_seleccionado = Asiento();
-
-    Sala *sala_seleccionada = nullptr;
-    Pelicula *pelicula_seleccionada = nullptr;
+    Reserva reserva_actual(-1, -1, -1, -1);
+    int pelicula_id = -1;
+    int sesion_id = -1;
 
     while(true) {
         consola.mostrarMenu();
@@ -36,80 +35,90 @@ int main() {
         cout << endl << "=======================================" << endl;
         switch(opcion) {
             case 1:
-                for(auto& pelicula : peliculas) {
+                for(auto& pelicula : db.obtenerCartelera(idCine)) {
                     consola.mostrarPelicula(pelicula);
                     cout << endl << "=======================================" << endl;
                 }
                 break;
             case 2: {
-                for(const auto& sesion : cine.getSesiones()) {
-                    consola.mostrarPelicula(*sesion.getPelicula());
-                    consola.mostrarSala(*sesion.getSala());
-                    cout << endl;
+                for(auto& pelicula : db.obtenerCartelera(idCine)) {
+                    consola.mostrarPelicula(pelicula);
                     cout << endl << "=======================================" << endl;
                 }
 
-                cout << "Seleccione una película: ";
-                int pelicula_id;
+                cout << "Seleccione el ID de una película: ";
                 cin >> pelicula_id;
 
-                for(auto& sala : cine.getSalas()) {
-                    if(sala.estaOcupada() && sala.getPelicula().getId() == pelicula_id) {
-                        cout << "Película seleccionada: " << endl;
-                        consola.mostrarPelicula(sala.getPelicula());
-                        sala_seleccionada = &sala;
-                        pelicula_seleccionada = &sala.getPelicula();
-                        break;
-                    }
+                auto sesiones = db.obtenerSesionesDePelicula(idCine, pelicula_id);
+                if(sesiones.empty()) {
+                    cout << "No se encontraron sesiones para esta película" << endl;
+                    break;
+                }
+                for(auto& sesion : sesiones) {
+                    cout << "=======================================" << endl;
+                    cout << "ID Sesion: " << sesion.getId() << endl;
+                    std::time_t hora = sesion.getHoraInicio();
+                    cout << "Hora: " << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M:%S") << endl;
+                    cout << "Sala: " << sesion.getIdSala() << endl;
+                    cout << "=======================================" << endl;
                 }
 
-                if(sala_seleccionada == nullptr) {
-                    cout << "Película no encontrada" << endl;
+                cout << "Seleccione el ID de una sesion: ";
+                cin >> sesion_id;
+
+                Sala sala_seleccionada = db.obtenerSala(db.obtenerSesion(sesion_id).getIdSala());
+                if(sala_seleccionada.getId() == 0) {
+                    cout << "Sala no encontrada" << endl;
                     break;
                 }
 
                 cout << endl << "=======================================" << endl;
-                cout << "Sala seleccionada: " << endl;
-                consola.mostrarSala(*sala_seleccionada);
+                cout << "Sesion seleccionada: " << endl;
+                auto reservas = db.obtenerReservasDeSesion(sesion_id);
+                consola.mostrarSala(sala_seleccionada, reservas);
                 cout << "Elija asiento (fila columna): " << endl;
                 int fila, columna;
                 cin >> fila >> columna;
 
-                Asiento& asiento = sala_seleccionada->getAsiento(fila-1, columna-1);
-                if(asiento.getFila() == -1) {
+                Reserva reserva_nueva(-1, sesion_id, fila-1, columna-1);
+                if(reserva_nueva.getFila() < 0 || reserva_nueva.getColumna() < 0) {
                     cout << "Asiento invalido" << endl;
                     cout << endl << "=======================================" << endl;
                     break;
                 }
-                if(sala_seleccionada->isAsientoOcupado(fila-1, columna-1)) {
-                    cout << "Asiento ocupado" << endl;
-                    cout << endl << "=======================================" << endl;
+
+                bool ya_ocupado = false;
+                for (const auto& r : reservas) {
+                    if (r.getFila() == reserva_nueva.getFila() && r.getColumna() == reserva_nueva.getColumna()) {
+                        ya_ocupado = true;
+                        break;
+                    }
+                }
+
+                if(ya_ocupado){
+                    cout << "Asiento ya seleccionado, elija otro" << endl;
+                    cout << "=======================================" << endl;
                     break;
                 }
 
-                sala_seleccionada->reservarAsiento(fila, columna);
-                asiento_seleccionado = asiento;
+                reserva_actual = reserva_nueva;
                 cout << "Asiento seleccionado: " << fila << ", " << columna << endl;
-                cout << endl << "=======================================" << endl;
+                cout << "=======================================" << endl;
                 break;
             }
             case 3:
-                if(pelicula_seleccionada == nullptr) {
-                    cout << "Debe seleccionar una película primero" << endl;
-                    break;
-                }else if(asiento_seleccionado.getFila() == -1) {
-                    cout << "Debe seleccionar un asiento primero" << endl;
+                if(reserva_actual.getFila() == -1) {
+                    cout << "Debe selecionar una sesión y un asiento para poder continuar" << endl;
                     break;
                 }
 
-                Reserva reserva;
-                db.crearReserva(reserva);
+                db.crearReserva(reserva_actual);
 
                 cout << "Compra realizada con éxito" << endl;
-                cout << "Película: " << pelicula_seleccionada->getTitulo() << endl;
-                cout << "Sala: " << sala_seleccionada->getId() << endl;
-                cout << "Asiento: " << asiento_seleccionado.getFila()+1 << ", " << asiento_seleccionado.getColumna()+1 << endl;
-
+                cout << "Película: " << pelicula_id << endl;
+                cout << "Sala: " << sesion_id << endl;
+                cout << "Asiento: " << reserva_actual.getFila()+1 << ", " << reserva_actual.getColumna()+1 << endl;
+                break;
             case 4:
                 cout << "Gracias por usar el sistema de gestión de cine" << endl;
                 db.cerrarSQL();

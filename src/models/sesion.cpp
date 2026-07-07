@@ -1,14 +1,14 @@
 #include "models/sesion.hpp"
 
-Sesion::Sesion(int id, const Pelicula* pelicula, int idSala, std::time_t horaInicio) : id(id), pelicula(pelicula), idSala(idSala), horaInicio(horaInicio) {
-    horaFin = horaInicio + (pelicula->getDuracion() * 60);
+Sesion::Sesion(int id, Pelicula pelicula, int idSala, std::time_t horaInicio) : id(id), pelicula(pelicula), idSala(idSala), horaInicio(horaInicio) {
+    horaFin = horaInicio + (pelicula.getDuracion() * 60);
 }
 
 int Sesion::getId() const {
     return id;
 }
 
-const Pelicula* Sesion::getPelicula() const {
+Pelicula Sesion::getPelicula() const {
     return pelicula;
 }
 
@@ -24,9 +24,9 @@ std::time_t Sesion::getHoraFin() const {
     return horaFin;
 }
 
-void Sesion::setPelicula(const Pelicula* pelicula) {
+void Sesion::setPelicula(Pelicula pelicula) {
     this->pelicula = pelicula;
-    horaFin = horaInicio + (this->pelicula->getDuracion() * 60);
+    horaFin = horaInicio + (this->pelicula.getDuracion() * 60);
 }
 
 void Sesion::setIdSala(int idSala) {
@@ -35,5 +35,5 @@ void Sesion::setIdSala(int idSala) {
 
 void Sesion::setHoraInicio(std::time_t horaInicio) {
     this->horaInicio = horaInicio;
-    horaFin = horaInicio + (pelicula->getDuracion() * 60);
+    horaFin = horaInicio + (pelicula.getDuracion() * 60);
 }
