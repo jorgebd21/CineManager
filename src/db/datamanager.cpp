@@ -1,13 +1,63 @@
 #include "db/datamanager.hpp"
 #include <iostream>
+#include <filesystem>
 
 using namespace std;
 
+std::string generoToString(Genero genero){
+    switch(genero){
+        case Genero::NONE:
+            return "NONE";
+        case Genero::ACCION:
+            return "ACCION";
+        case Genero::COMEDIA:
+            return "COMEDIA";
+        case Genero::DRAMA:
+            return "DRAMA";
+        case Genero::TERROR:
+            return "TERROR";
+        case Genero::CIENCIA_FICCION:
+            return "CIENCIA_FICCION";
+        case Genero::ROMANCE:
+            return "ROMANCE";
+        case Genero::DOCUMENTAL:
+            return "DOCUMENTAL";
+        default:
+            return "OTHER";
+    }
+}
+
 bool DataManager::abrirSQL() {
-    int rc = sqlite3_open("../data/cine.db", &db);
+    std::string dbPath = "../data/cine.db"; // Fallback por defecto
+
+    // 1. Intentar buscar relativo al ejecutable
+    try {
+        std::filesystem::path exePath = std::filesystem::read_symlink("/proc/self/exe");
+        std::filesystem::path dbTry = exePath.parent_path() / "../.." / "data" / "cine.db";
+        if (std::filesystem::exists(dbTry)) {
+            dbPath = std::filesystem::canonical(dbTry).string();
+        }
+    } catch (...) {
+        // Ignorar excepciones y continuar con otras opciones
+    }
+    if (!std::filesystem::exists(dbPath)) {
+        std::vector<std::string> potentialPaths = {
+            "data/cine.db",
+            "../data/cine.db",
+            "../../data/cine.db"
+        };
+        for (const auto& path : potentialPaths) {
+            if (std::filesystem::exists(path)) {
+                dbPath = path;
+                break;
+            }
+        }
+    }
+
+    int rc = sqlite3_open(dbPath.c_str(), &db);
 
     if (rc != SQLITE_OK) {
-        std::cerr << "No se pudo abrir: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "No se pudo abrir la base de datos: " << sqlite3_errmsg(db) << std::endl;
     }
     return rc == SQLITE_OK;
 }
@@ -204,7 +254,7 @@ Cine DataManager::obtenerCine(int id){
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido crear la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
         sqlite3_finalize(stmt);
         return Cine(-1, "", "");;
     }else{
@@ -233,7 +283,7 @@ Sala DataManager::obtenerSala(int id) {
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido crear la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
         sqlite3_finalize(stmt);
         return Sala(-1, -1, -1, -1, -1);
     }else{
@@ -264,7 +314,7 @@ Sesion DataManager::obtenerSesion(int id) {
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido crear la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
         sqlite3_finalize(stmt);
         return Sesion(-1, Pelicula(-1, "", Genero::NONE, 0), -1, 0);
     }else{
@@ -276,25 +326,584 @@ Sesion DataManager::obtenerSesion(int id) {
     }
 }
 
-bool DataManager::crearCine(const Cine& cine) { return true; }
-bool DataManager::crearSala(const Sala& sala) { return true; }
-bool DataManager::crearPelicula(const Pelicula& pelicula) { return true; }
-bool DataManager::crearSesion(const Sesion& sesion) { return true; }
+std::vector<Sala> DataManager::obtenerSalasDeCine(int idCine) {
+    const char* query = "SELECT id, cine_id, numero_sala, filas, columnas FROM salas WHERE cine_id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+    
+    rc = sqlite3_bind_int(stmt, 1, idCine);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return {};
+    }
+    
+    std::vector<Sala> salas;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        int cine_id = sqlite3_column_int(stmt, 1);
+        int numero_sala = sqlite3_column_int(stmt, 2);
+        int fila = sqlite3_column_int(stmt, 3);
+        int columna = sqlite3_column_int(stmt, 4);
+        salas.push_back(Sala(id, cine_id, numero_sala, fila, columna));
+    }
+    
+    sqlite3_finalize(stmt);
+    return salas;
+}
 
-static Pelicula mockPelicula(1, "Pelicula Mock", Genero::NONE, 120);
+std::vector<Pelicula> DataManager::obtenerPeliculas(){
+    const char* query = "SELECT id, titulo, genero, duracion FROM peliculas";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+    
+    std::vector<Pelicula> peliculas;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        std::string titulo = (const char*)sqlite3_column_text(stmt, 1);
+        std::string genero = (const char*)sqlite3_column_text(stmt, 2);
+        Genero generoEnum = stringToGenero(genero);
+        int duracion = sqlite3_column_int(stmt, 3);
+        peliculas.push_back(Pelicula(id, titulo, generoEnum, duracion));
+    }
+    
+    sqlite3_finalize(stmt);
+    return peliculas;
+}
 
-Reserva DataManager::obtenerReserva(int id) { return Reserva(id, 1, 1, 1); }
+std::vector<Sesion> DataManager::obtenerSesionesDeCine(int idCine){
+    const char* query = "SELECT s.id, s.pelicula_id, s.sala_id, strftime('%s', s.fecha_hora) FROM sesiones s JOIN salas sa ON s.sala_id = sa.id WHERE sa.cine_id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+    
+    rc = sqlite3_bind_int(stmt, 1, idCine);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return {};
+    }
+    
+    std::vector<Sesion> sesiones;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        int pelicula_id = sqlite3_column_int(stmt, 1);
+        int sala_id = sqlite3_column_int(stmt, 2);
+        int fecha_hora = sqlite3_column_int(stmt, 3);
+        const Pelicula pelicula = obtenerPelicula(pelicula_id);
+        sesiones.push_back(Sesion(id, pelicula, sala_id, fecha_hora));
+    }
+    
+    sqlite3_finalize(stmt);
+    return sesiones;
+}
 
-std::vector<Sala> DataManager::obtenerSalasDeCine(int idCine) { return {}; }
+bool DataManager::crearCine(const Cine& cine) {
+    const char* query = "INSERT INTO cines (nombre, direccion) VALUES (?, ?)";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
 
-bool DataManager::actualizarCine(int id, const Cine& cine) { return true; }
-bool DataManager::actualizarSala(int id, const Sala& sala) { return true; }
-bool DataManager::actualizarPelicula(int id, const Pelicula& pelicula) { return true; }
-bool DataManager::actualizarSesion(int id, const Sesion& sesion) { return true; }
-bool DataManager::actualizarReserva(int id, const Reserva& reserva) { return true; }
+    rc = sqlite3_bind_text(stmt, 1, cine.getNombre().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_text(stmt, 2, cine.getDireccion().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
 
-bool DataManager::eliminarCine(int id) { return true; }
-bool DataManager::eliminarSala(int id) { return true; }
-bool DataManager::eliminarPelicula(int id) { return true; }
-bool DataManager::eliminarSesion(int id) { return true; }
-bool DataManager::eliminarReserva(int id) { return true; }
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido crear el cine correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::crearSala(const Sala& sala) {
+    const char* query = "INSERT INTO salas (cine_id, numero_sala, filas, columnas) VALUES (?, ?, ?, ?)";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, sala.getCineId());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 2, sala.getNumeroSala());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, sala.getFilas());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 4, sala.getColumnas());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido crear la sala correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::crearPelicula(const Pelicula& pelicula) {
+    const char* query = "INSERT INTO peliculas (titulo, genero, duracion) VALUES (?, ?, ?)";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_text(stmt, 1, pelicula.getTitulo().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_text(stmt, 2, generoToString(pelicula.getGenero()).c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, pelicula.getDuracion());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido crear la pelicula correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::crearSesion(const Sesion& sesion) {
+    const char* query = "INSERT INTO sesiones (pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (?, ?, datetime(?, 'unixepoch'), 10.0)";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, sesion.getPelicula().getId());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 2, sesion.getIdSala());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, sesion.getHoraInicio());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido crear la sesion correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::actualizarCine(int id, const Cine& cine) {
+    const char* query = "UPDATE cines SET nombre = ?, direccion = ? WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_text(stmt, 1, cine.getNombre().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_text(stmt, 2, cine.getDireccion().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido actualizar el cine correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::actualizarSala(int id, const Sala& sala) {
+    const char* query = "UPDATE salas SET cine_id = ?, numero_sala = ?, filas = ?, columnas = ? WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, sala.getCineId());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 2, sala.getNumeroSala());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, sala.getFilas());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 4, sala.getColumnas());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 5, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido actualizar la sala correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::actualizarPelicula(int id, const Pelicula& pelicula) {
+    const char* query = "UPDATE peliculas SET titulo = ?, genero = ?, duracion = ? WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_text(stmt, 1, pelicula.getTitulo().c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_text(stmt, 2, generoToString(pelicula.getGenero()).c_str(), -1, SQLITE_TRANSIENT);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, pelicula.getDuracion());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 4, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido actualizar la pelicula correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::actualizarSesion(int id, const Sesion& sesion) {
+    const char* query = "UPDATE sesiones SET pelicula_id = ?, sala_id = ?, fecha_hora = datetime(?, 'unixepoch') WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, sesion.getPelicula().getId());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 2, sesion.getIdSala());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, sesion.getHoraInicio());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 4, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido actuaizar la sesion correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::actualizarReserva(int id, const Reserva& reserva) {
+    const char* query = "UPDATE reservas SET sesion_id = ?, fila = ?, columna = ? WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, reserva.getIdSesion());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 2, reserva.getFila());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 3, reserva.getColumna());
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int(stmt, 4, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido crear la reserva correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool DataManager::eliminarCine(int id) {
+    const char* query = "DELETE FROM cines WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido eliminar el cine correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::eliminarSala(int id) {
+    const char* query = "DELETE FROM salas WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido eliminar la sala correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::eliminarPelicula(int id) {
+    const char* query = "DELETE FROM peliculas WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido eliminar la pelicula correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::eliminarSesion(int id) {
+    const char* query = "DELETE FROM sesiones WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido eliminar la sesion correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}
+bool DataManager::eliminarReserva(int id) {
+    const char* query = "DELETE FROM reservas WHERE id = ?";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    rc = sqlite3_bind_int(stmt, 1, id);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    if(sqlite3_step(stmt) != SQLITE_DONE){
+        cout << "No se ha conseguido eliminar la reserva correctamente" << endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    sqlite3_finalize(stmt);
+    return true;
+}

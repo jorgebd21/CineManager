@@ -35,6 +35,8 @@ public:
     std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula);
     std::vector<Reserva> obtenerReservasDeSesion(int idSesion);
     std::vector<Sala> obtenerSalasDeCine(int idCine);
+    std::vector<Pelicula> obtenerPeliculas();
+    std::vector<Sesion> obtenerSesionesDeCine(int idCine);
 
     bool actualizarCine(int id, const Cine& cine);
     bool actualizarSala(int id, const Sala& sala);
