@@ -15,7 +15,7 @@ CineManager
 .cache
 build
 roadmap.md
-.agent
+.agents
 data/cine.db
 # CLion
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
