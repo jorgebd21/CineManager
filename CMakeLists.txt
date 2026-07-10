@@ -20,8 +20,11 @@ add_executable(CineManager ${SOURCES}
     app/main_admin.cpp)
 add_executable(CineManagerClient ${SOURCES}
     app/main_client.cpp)
+add_executable(CineManagerTest ${SOURCES})
 
 target_link_libraries(CineManager PRIVATE SQLite3::SQLite3)
 target_include_directories(CineManager PRIVATE include)
 target_link_libraries(CineManagerClient PRIVATE SQLite3::SQLite3)
 target_include_directories(CineManagerClient PRIVATE include)
+target_link_libraries(CineManagerTest PRIVATE SQLite3::SQLite3)
+target_include_directories(CineManagerTest PRIVATE include)

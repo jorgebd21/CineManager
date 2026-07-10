@@ -30,6 +30,10 @@ public:
     std::string getTitulo() const;
     Genero getGenero() const;
     int getDuracion() const;
+
+    void setTitulo(std::string titulo);
+    void setGenero(Genero genero);
+    void setDuracion(int duracion);
 };
 
 #endif

@@ -29,3 +29,15 @@ Genero Pelicula::getGenero() const{
 int Pelicula::getDuracion() const{
     return duracion;
 }
+
+void Pelicula::setTitulo(std::string titulo){
+    this->titulo = titulo;
+}
+
+void Pelicula::setGenero(Genero genero){
+    this->genero = genero;
+}
+
+void Pelicula::setDuracion(int duracion){
+    this->duracion = duracion;
+}

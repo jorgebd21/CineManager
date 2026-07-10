@@ -20,7 +20,7 @@ Actualmente el proyecto se está desarrollando siguiendo estas fases. Marcaré l
   Creación de las entidades principales (Asiento, Sala, Película), lógica de reserva transaccional básica y renderizado visual de butacas en la terminal.
 - [X] **Fase 2: Persistencia Básica**
   Implementación de flujos de entrada/salida (I/O) para guardar y cargar el estado de las salas en archivos de texto/CSV, evitando la pérdida de datos al cerrar.
-- [ ] **Fase 3: Integración de Base de Datos (SQLite)**
+- [X] **Fase 3: Integración de Base de Datos (SQLite)**
   Sustitución de los archivos de texto por un motor relacional ligero. Migración de la lógica a consultas SQL (SELECT, INSERT, UPDATE).
 - [ ] **Fase 4: Concurrencia y Multihilo**
   Refactorización del código para soportar alta demanda simulada. Uso de *mutex* y bloqueos transaccionales para prevenir condiciones de carrera (evitar vender la misma butaca a dos hilos distintos).

@@ -254,14 +254,14 @@ Cine DataManager::obtenerCine(int id){
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener el cine correctamente" << endl;
         sqlite3_finalize(stmt);
         return Cine(-1, "", "");;
     }else{
         std::string nombre = (const char*)sqlite3_column_text(stmt, 0);
-        std::string dirrecion = (const char*)sqlite3_column_text(stmt, 1);
+        std::string direccion = (const char*)sqlite3_column_text(stmt, 1);
         sqlite3_finalize(stmt);
-        return Cine(id, nombre, dirrecion);
+        return Cine(id, nombre, direccion);
     }
 }
 
@@ -283,7 +283,7 @@ Sala DataManager::obtenerSala(int id) {
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener la sala correctamente" << endl;
         sqlite3_finalize(stmt);
         return Sala(-1, -1, -1, -1, -1);
     }else{
@@ -314,7 +314,7 @@ Sesion DataManager::obtenerSesion(int id) {
     }
 
     if(sqlite3_step(stmt) != SQLITE_ROW){
-        cout << "No se ha conseguido obtener la reserva correctamente" << endl;
+        cout << "No se ha conseguido obtener la sesion correctamente" << endl;
         sqlite3_finalize(stmt);
         return Sesion(-1, Pelicula(-1, "", Genero::NONE, 0), -1, 0);
     }else{
@@ -395,6 +395,76 @@ std::vector<Sesion> DataManager::obtenerSesionesDeCine(int idCine){
     if (rc != SQLITE_OK) {
         std::cerr << "Error al enlazar parámetro: " << sqlite3_errmsg(db) << std::endl;
         sqlite3_finalize(stmt);
+        return {};
+    }
+    
+    std::vector<Sesion> sesiones;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        int pelicula_id = sqlite3_column_int(stmt, 1);
+        int sala_id = sqlite3_column_int(stmt, 2);
+        int fecha_hora = sqlite3_column_int(stmt, 3);
+        const Pelicula pelicula = obtenerPelicula(pelicula_id);
+        sesiones.push_back(Sesion(id, pelicula, sala_id, fecha_hora));
+    }
+    
+    sqlite3_finalize(stmt);
+    return sesiones;
+}
+
+std::vector<Cine> DataManager::obtenerCines(){
+    const char* query = "SELECT id, nombre, direccion FROM cines";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+    
+    std::vector<Cine> cines;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        std::string nombre = (const char*)sqlite3_column_text(stmt, 1);
+        std::string direccion = (const char*)sqlite3_column_text(stmt, 2);
+        cines.push_back(Cine(id, nombre, direccion));
+    }
+    
+    sqlite3_finalize(stmt);
+    return cines;
+}
+
+std::vector<Sala> DataManager::obtenerSalas(){
+    const char* query = "SELECT id, cine_id, numero_sala, filas, columnas FROM salas";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+    
+    std::vector<Sala> salas;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        int cine_id = sqlite3_column_int(stmt, 1);
+        int numero_sala = sqlite3_column_int(stmt, 2);
+        int fila = sqlite3_column_int(stmt, 3);
+        int columna = sqlite3_column_int(stmt, 4);
+        salas.push_back(Sala(id, cine_id, numero_sala, fila, columna));
+    }
+    
+    sqlite3_finalize(stmt);
+    return salas;
+}
+
+std::vector<Sesion> DataManager::obtenerSesiones(){
+    const char* query = "SELECT id, pelicula_id, sala_id, strftime('%s', fecha_hora) FROM sesiones";
+    sqlite3_stmt* stmt;
+    
+    int rc = sqlite3_prepare_v2(db, query, -1, &stmt, nullptr);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Error al preparar la consulta: " << sqlite3_errmsg(db) << std::endl;
         return {};
     }
     
@@ -774,7 +844,7 @@ bool DataManager::actualizarReserva(int id, const Reserva& reserva) {
     }
 
     if(sqlite3_step(stmt) != SQLITE_DONE){
-        cout << "No se ha conseguido crear la reserva correctamente" << endl;
+        cout << "No se ha conseguido actualizar la reserva correctamente" << endl;
         sqlite3_finalize(stmt);
         return false;
     }
@@ -807,6 +877,7 @@ bool DataManager::eliminarCine(int id) {
     sqlite3_finalize(stmt);
     return true;
 }
+
 bool DataManager::eliminarSala(int id) {
     const char* query = "DELETE FROM salas WHERE id = ?";
     sqlite3_stmt* stmt;
@@ -832,6 +903,7 @@ bool DataManager::eliminarSala(int id) {
     sqlite3_finalize(stmt);
     return true;
 }
+
 bool DataManager::eliminarPelicula(int id) {
     const char* query = "DELETE FROM peliculas WHERE id = ?";
     sqlite3_stmt* stmt;
@@ -857,6 +929,7 @@ bool DataManager::eliminarPelicula(int id) {
     sqlite3_finalize(stmt);
     return true;
 }
+
 bool DataManager::eliminarSesion(int id) {
     const char* query = "DELETE FROM sesiones WHERE id = ?";
     sqlite3_stmt* stmt;
@@ -882,6 +955,7 @@ bool DataManager::eliminarSesion(int id) {
     sqlite3_finalize(stmt);
     return true;
 }
+
 bool DataManager::eliminarReserva(int id) {
     const char* query = "DELETE FROM reservas WHERE id = ?";
     sqlite3_stmt* stmt;

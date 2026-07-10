@@ -39,3 +39,42 @@ void Consola::mostrarPelicula(const Pelicula& pelicula){
     cout << "Duración: " << pelicula.getDuracion() << " minutos" << endl;
     cout << "Género: " << (int)pelicula.getGenero() << endl;
 }
+
+void Consola::mostrarMenuAdmin(){
+    cout << "=== CineManager ADMIN ===" << endl;
+    cout << "1. Gestion Cines" << endl;
+    cout << "2. Gestion Peliculas" << endl;
+    cout << "3. Gestion Salas" << endl;
+    cout << "4. Gestion Sesiones" << endl;
+    cout << "5. Reporte de Ocupacion" << endl;
+    cout << "6. Salir" << endl;
+    cout << "Seleccione una opción: ";
+    cout << "=========================" << endl;
+}
+
+void subMenuAdmin(string nombre){
+    cout << "=== Menu Gestion " << nombre << " ===" << endl;
+    cout << "1. Listar" << endl;
+    cout << "2. Añadir" << endl;
+    cout << "3. Modificar" << endl;
+    cout << "4. Eliminar" << endl;
+    cout << "5. Volver" << endl;
+    cout << "Seleccione una opción: ";
+    cout << "=========================" << endl;
+}
+
+void Consola::mostrarSubmenuCines(){
+    subMenuAdmin("Cine");
+}
+
+void Consola::mostrarSubmenuPeliculas(){
+    subMenuAdmin("Peliculas");
+}
+
+void Consola::mostrarSubmenuSalas(){
+    subMenuAdmin("Salas");
+}
+
+void Consola::mostrarSubmenuSesiones(){
+    subMenuAdmin("Seciones");
+}
