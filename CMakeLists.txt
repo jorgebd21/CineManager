@@ -10,6 +10,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(ENABLE_ASAN "Habilitar AddressSanitizer y UndefinedBehaviorSanitizer" ON)
+if(ENABLE_ASAN)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
+endif()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(include)
 find_package(SQLite3 REQUIRED)
@@ -20,7 +25,6 @@ add_executable(CineManager ${SOURCES}
     app/main_admin.cpp)
 add_executable(CineManagerClient ${SOURCES}
     app/main_client.cpp)
-add_executable(CineManagerTest ${SOURCES})
 
 target_link_libraries(CineManager PRIVATE SQLite3::SQLite3)
 target_include_directories(CineManager PRIVATE include)
