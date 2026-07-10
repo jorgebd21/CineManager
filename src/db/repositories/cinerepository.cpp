@@ -8,8 +8,9 @@ bool CineRepository::crear(const Cine& cine) {
   try {
     SqliteStatement stmt(db.getDb(),
                          "INSERT INTO cines (nombre, direccion) VALUES (?, ?)");
-    if (!stmt.bindText(1, cine.getNombre())) return false;
-    if (!stmt.bindText(2, cine.getDireccion())) return false;
+    if (!stmt.bindText(1, cine.getNombre()) ||
+        !stmt.bindText(2, cine.getDireccion()))
+      return false;
     return stmt.step() == SQLITE_DONE;
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;

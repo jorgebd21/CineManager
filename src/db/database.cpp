@@ -84,5 +84,10 @@ int SqliteStatement::getColumnInt(int index) {
   return sqlite3_column_int(stmt, index);
 }
 std::string SqliteStatement::getColumnText(int index) {
-  return (const char*)sqlite3_column_text(stmt, index);
+  const char* textoCrudo = (const char*)sqlite3_column_text(stmt, index);
+  if (textoCrudo != nullptr) {
+      return std::string(textoCrudo);
+  } else {
+      return ""; 
+  }
 }
