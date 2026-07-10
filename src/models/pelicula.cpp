@@ -1,43 +1,32 @@
 #include "models/pelicula.hpp"
 
 Genero stringToGenero(const std::string& generoStr) {
-    if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
-    if (generoStr == "COMEDIA") return Genero::COMEDIA;
-    if (generoStr == "DRAMA") return Genero::DRAMA;
-    if (generoStr == "TERROR") return Genero::TERROR;
-    if (generoStr == "CIENCIA_FICCION" || generoStr == "CIENCIA-FICCION") return Genero::CIENCIA_FICCION;
-    if (generoStr == "ROMANCE") return Genero::ROMANCE;
-    if (generoStr == "DOCUMENTAL") return Genero::DOCUMENTAL;
- 
-    return Genero::OTHER;
+  if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
+  if (generoStr == "COMEDIA") return Genero::COMEDIA;
+  if (generoStr == "DRAMA") return Genero::DRAMA;
+  if (generoStr == "TERROR") return Genero::TERROR;
+  if (generoStr == "CIENCIA_FICCION" || generoStr == "CIENCIA-FICCION")
+    return Genero::CIENCIA_FICCION;
+  if (generoStr == "ROMANCE") return Genero::ROMANCE;
+  if (generoStr == "DOCUMENTAL") return Genero::DOCUMENTAL;
+
+  return Genero::OTHER;
 }
 
-Pelicula::Pelicula(int id, const std::string& titulo, Genero genero, int duracion) : id(id), titulo(titulo), genero(genero), duracion(duracion) {}
-        
-int Pelicula::getId() const{
-    return id;
-}
+Pelicula::Pelicula(int id, const std::string& titulo, Genero genero,
+                   int duracion)
+    : id(id), titulo(titulo), genero(genero), duracion(duracion) {}
 
-std::string Pelicula::getTitulo() const{
-    return titulo;
-}
+int Pelicula::getId() const { return id; }
 
-Genero Pelicula::getGenero() const{
-    return genero;
-}
+std::string Pelicula::getTitulo() const { return titulo; }
 
-int Pelicula::getDuracion() const{
-    return duracion;
-}
+Genero Pelicula::getGenero() const { return genero; }
 
-void Pelicula::setTitulo(std::string titulo){
-    this->titulo = titulo;
-}
+int Pelicula::getDuracion() const { return duracion; }
 
-void Pelicula::setGenero(Genero genero){
-    this->genero = genero;
-}
+void Pelicula::setTitulo(std::string titulo) { this->titulo = titulo; }
 
-void Pelicula::setDuracion(int duracion){
-    this->duracion = duracion;
-}
+void Pelicula::setGenero(Genero genero) { this->genero = genero; }
+
+void Pelicula::setDuracion(int duracion) { this->duracion = duracion; }
