@@ -1,6 +1,7 @@
 #include "models/pelicula.hpp"
 
 Genero stringToGenero(const std::string& generoStr) {
+  if (generoStr == "NONE") return Genero::NONE;
   if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
   if (generoStr == "COMEDIA") return Genero::COMEDIA;
   if (generoStr == "DRAMA") return Genero::DRAMA;
@@ -11,6 +12,29 @@ Genero stringToGenero(const std::string& generoStr) {
   if (generoStr == "DOCUMENTAL") return Genero::DOCUMENTAL;
 
   return Genero::OTHER;
+}
+
+std::string generoToString(Genero genero) {
+  switch (genero) {
+    case Genero::NONE:
+      return "NONE";
+    case Genero::ACCION:
+      return "ACCION";
+    case Genero::COMEDIA:
+      return "COMEDIA";
+    case Genero::DRAMA:
+      return "DRAMA";
+    case Genero::TERROR:
+      return "TERROR";
+    case Genero::CIENCIA_FICCION:
+      return "CIENCIA_FICCION";
+    case Genero::ROMANCE:
+      return "ROMANCE";
+    case Genero::DOCUMENTAL:
+      return "DOCUMENTAL";
+    default:
+      return "OTHER";
+  }
 }
 
 Pelicula::Pelicula(int id, const std::string& titulo, Genero genero,

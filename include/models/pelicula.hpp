@@ -16,6 +16,7 @@ enum class Genero {
 };
 
 Genero stringToGenero(const std::string& generoStr);
+std::string generoToString(Genero genero);
 class Pelicula {
  private:
   int id;
