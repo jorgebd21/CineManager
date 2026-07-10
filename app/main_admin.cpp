@@ -16,11 +16,7 @@ using namespace std;
 
 int main() {
   Consola consola;
-
   DataManager db;
-
-  db.abrirSQL();
-
   bool volver, fin;
   int id;
 
@@ -717,7 +713,6 @@ int main() {
       case 6:
         cout << "Gracias por usar el sistema administrador de gestión de cine"
              << endl;
-        db.cerrarSQL();
         return 0;
       default:
         cout << "Opción no válida" << endl;

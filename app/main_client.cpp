@@ -14,8 +14,6 @@ int main() {
 
   DataManager db;
 
-  db.abrirSQL();
-
   int idCine = 1;
   Cine cine = db.obtenerCine(idCine);
 
@@ -124,7 +122,6 @@ int main() {
         break;
       case 4:
         cout << "Gracias por usar el sistema de gestión de cine" << endl;
-        db.cerrarSQL();
         return 0;
       default:
         cout << "Opción no válida" << endl;

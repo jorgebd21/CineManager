@@ -5,6 +5,12 @@
 
 #include <vector>
 
+#include "db/database.hpp"
+#include "db/repositories/cinerepository.hpp"
+#include "db/repositories/pelicularepository.hpp"
+#include "db/repositories/reservarepository.hpp"
+#include "db/repositories/salarepository.hpp"
+#include "db/repositories/sesionrepository.hpp"
 #include "models/cine.hpp"
 #include "models/pelicula.hpp"
 #include "models/reserva.hpp"
@@ -13,12 +19,22 @@
 
 class DataManager {
  private:
-  sqlite3* db;
+  SqliteDatabase db;
+
+  CineRepository cineRepo;
+  PeliculaRepository peliculaRepo;
+  SalaRepository salaRepo;
+  SesionRepository sesionRepo;
+  ReservaRepository reservaRepo;
 
  public:
-  DataManager() {};
-  bool abrirSQL();
-  void cerrarSQL();
+  DataManager()
+      : db(),
+        cineRepo(db),
+        peliculaRepo(db),
+        salaRepo(db),
+        sesionRepo(db),
+        reservaRepo(db) {};
 
   bool crearCine(const Cine& cine);
   bool crearSala(const Sala& sala);
