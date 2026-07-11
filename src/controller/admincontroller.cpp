@@ -1,15 +1,6 @@
 #include "controller/admincontroller.hpp"
 
-#include <endian.h>
-
-#include <iostream>
-
-#include "models/pelicula.hpp"
-
 using namespace std;
-
-AdminController::AdminController(DataManager& database, Consola& ui)
-    : db(database), consola(ui) {}
 
 void AdminController::ejecutar() {
   bool fin = false;
