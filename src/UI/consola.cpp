@@ -18,7 +18,6 @@ void Consola::mostrarMenu() {
   cout << "2. Elegir Pelicula" << endl;
   cout << "3. Comprar Entrada" << endl;
   cout << "4. Salir" << endl;
-  cout << "Seleccione una opción: ";
 }
 
 void Consola::mostrarSala(const Sala& sala,
@@ -92,7 +91,6 @@ void Consola::mostrarMenuAdmin() {
   cout << "4. Gestion Sesiones" << endl;
   cout << "5. Reporte de Ocupacion" << endl;
   cout << "6. Salir" << endl;
-  cout << "Seleccione una opción: ";
   cout << "=========================" << endl;
 }
 
@@ -103,7 +101,6 @@ void subMenuAdmin(string nombre) {
   cout << "3. Modificar" << endl;
   cout << "4. Eliminar" << endl;
   cout << "5. Volver" << endl;
-  cout << "Seleccione una opción: ";
   cout << "=========================" << endl;
 }
 

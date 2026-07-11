@@ -1,5 +1,28 @@
 #include "models/pelicula.hpp"
 
+Genero intToGenero(int generoN) {
+  switch (generoN) {
+    case 1:
+      return Genero::NONE;
+    case 2:
+      return Genero::ACCION;
+    case 3:
+      return Genero::COMEDIA;
+    case 4:
+      return Genero::DRAMA;
+    case 5:
+      return Genero::TERROR;
+    case 6:
+      return Genero::CIENCIA_FICCION;
+    case 7:
+      return Genero::ROMANCE;
+    case 8:
+      return Genero::DOCUMENTAL;
+    default:
+      return Genero::OTHER;
+  }
+}
+
 Genero stringToGenero(const std::string& generoStr) {
   if (generoStr == "NONE") return Genero::NONE;
   if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
