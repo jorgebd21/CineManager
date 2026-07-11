@@ -1,7 +1,11 @@
 #include "UI/consola.hpp"
 
 #include <algorithm>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <string>
+#include <vector>
 
 #include "models/pelicula.hpp"
 #include "models/sala.hpp"
@@ -45,6 +49,41 @@ void Consola::mostrarPelicula(const Pelicula& pelicula) {
   cout << "Género: " << (int)pelicula.getGenero() << endl;
 }
 
+void Consola::mostrarCine(const Cine& cine) {
+  cout << "ID: " << cine.getId() << endl;
+  cout << "Nombre: " << cine.getNombre() << endl;
+  cout << "Direccion: " << cine.getDireccion() << endl;
+  cout << "==========================================" << endl;
+}
+void Consola::mostrarSesion(const Sesion& sesion) {
+  cout << "ID: " << sesion.getId() << endl;
+  cout << "Pelicula: " << sesion.getPelicula().getTitulo() << endl;
+  cout << "Sala: " << sesion.getIdSala() << endl;
+  std::time_t hora = sesion.getHoraInicio();
+  cout << "Hora: " << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M:%S")
+       << endl;
+  cout << "==========================================" << endl;
+}
+void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
+  cout << endl << "=== Reporte de Ocupación " << titulo << " ===" << endl;
+  cout << "Entradas Vendidas: " << ocupados << " / " << totales << endl;
+  if (totales > 0) {
+    double porcentaje = (ocupados * 100.0) / totales;
+    cout << "Porcentaje de Ocupación: " << porcentaje << "%" << endl;
+  } else {
+    cout << "Este cine no tiene sesiones programadas." << endl;
+  }
+  cout << "==========================================" << endl;
+}
+void Consola::mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
+                            const Sesion& sesion) {
+  cout << "Compra realizada con éxito" << endl;
+  cout << "Película: " << pelicula.getId() << endl;
+  cout << "Sala: " << sesion.getId() << endl;
+  cout << "Asiento: " << reserva.getFila() + 1 << ", "
+       << reserva.getColumna() + 1 << endl;
+}
+
 void Consola::mostrarMenuAdmin() {
   cout << "=== CineManager ADMIN ===" << endl;
   cout << "1. Gestion Cines" << endl;
@@ -75,3 +114,25 @@ void Consola::mostrarSubmenuPeliculas() { subMenuAdmin("Peliculas"); }
 void Consola::mostrarSubmenuSalas() { subMenuAdmin("Salas"); }
 
 void Consola::mostrarSubmenuSesiones() { subMenuAdmin("Seciones"); }
+
+int Consola::pedirEntero(const std::string& mensaje) {
+  int lectura;
+  cout << mensaje << endl;
+  while (true) {
+    if (cin >> lectura) {
+      cin.ignore(10000, '\n');
+      return lectura;
+    } else {
+      cout << "Valor no valido, vuelva a introducirlo" << endl;
+      cin.clear();
+      cin.ignore(10000, '\n');
+    }
+  }
+}
+
+std::string Consola::pedirCadena(const std::string& mensaje) {
+  std::string lectura;
+  std::cout << mensaje;
+  std::getline(std::cin, lectura);
+  return lectura;
+}
