@@ -1,34 +1,77 @@
 # 🎬 CineManager
 
+![C++17](https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B)
+![SQLite3](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite)
+![Arquitectura MVC](https://img.shields.io/badge/Architecture-MVC%20%7C%20Facade-success.svg)
+![Build Status](https://img.shields.io/badge/Build-CMake-orange.svg)
+
 > 🚧 **Estado del proyecto:** En desarrollo activo (Work in Progress).
 
-**CineManage** es un sistema de gestión y venta de entradas de cine escrito en C++. El objetivo principal de este repositorio no es solo crear una aplicación funcional, sino servir como un **laboratorio de aprendizaje progresivo** de C++. 
+## 📌 Descripción General
 
-El proyecto está diseñado para evolucionar drásticamente en 5 fases: comenzando como una simple aplicación de consola que maneja la memoria directamente mediante Programación Orientada a Objetos (POO), hasta transformarse en una API RESTful multihilo capaz de manejar peticiones concurrentes y persistir datos en una base de datos relacional.
+**CineManager** es un sistema transaccional de gestión y venta de entradas de cine escrito en C++17. Diseñado originalmente como un **laboratorio de aprendizaje progresivo**, este proyecto evoluciona de manera iterativa hacia una arquitectura desacoplada de nivel comercial que emula los estándares de desarrollo de software crítico y sistemas distribuidos.
 
-## 🚀 Tecnologías y Herramientas (Planeadas)
-- **Lenguaje:** C++ (C++11/C++17)
-- **Persistencia:** I/O de Archivos (CSV) ➔ SQLite
-- **Concurrencia:** `<thread>`, `<mutex>`
-- **Backend Web:** Crow / Drogon (Fase final)
+El código base se estructura aplicando principios del patrón **MVC (Model-View-Controller)** y **Repository**, aislando la lógica de negocio subyacente y empleando un motor SQLite para la persistencia transaccional (ACID). El sistema permite levantar distintos puntos de acceso separados a nivel de compilación (Administración y Ventas/Cliente) que operan sobre el mismo core.
 
-## 🗺️ Roadmap de Desarrollo
+## 🗺️ Roadmap y Fases de Desarrollo
 
-Actualmente el proyecto se está desarrollando siguiendo estas fases. Marcaré los avances a medida que se completen:
+El proyecto está diseñado bajo un modelo de iteraciones progresivas. Actualmente nos encontramos desarrollando la **Fase 4**:
 
-- [X] **Fase 1: El Motor Básico (Consola y POO)**
-  Creación de las entidades principales (Asiento, Sala, Película), lógica de reserva transaccional básica y renderizado visual de butacas en la terminal.
-- [X] **Fase 2: Persistencia Básica**
-  Implementación de flujos de entrada/salida (I/O) para guardar y cargar el estado de las salas en archivos de texto/CSV, evitando la pérdida de datos al cerrar.
-- [X] **Fase 3: Integración de Base de Datos (SQLite)**
-  Sustitución de los archivos de texto por un motor relacional ligero. Migración de la lógica a consultas SQL (SELECT, INSERT, UPDATE).
-- [ ] **Fase 4: Concurrencia y Multihilo**
-  Refactorización del código para soportar alta demanda simulada. Uso de *mutex* y bloqueos transaccionales para prevenir condiciones de carrera (evitar vender la misma butaca a dos hilos distintos).
-- [ ] **Fase 5: Backend y API REST**
-  Desacoplamiento de la consola e integración de un framework web (Crow/Drogon) para exponer el sistema mediante endpoints HTTP (JSON), permitiendo que cualquier frontend moderno pueda consumirlo.
+- [x] **Fase 1: Motor Básico (POO)**
+  Lógica principal en memoria, representación en consola y validación estática de reglas de negocio.
+- [x] **Fase 2: Persistencia I/O**
+  Carga y guardado del estado mediante archivos de texto (CSV) locales.
+- [x] **Fase 3: Base de Datos Relacional**
+  Integración de SQLite3. Sustitución de los ficheros planos por operaciones CRUD y consultas SQL bajo patrón Repository.
+- [ ] **🚧 Fase 4: Concurrencia y Multihilo**
+  Implementación de control de concurrencia y protección ante *race conditions* en entornos multi-cliente usando bloqueos nativos (`std::mutex`) y delegación en transacciones de base de datos.
+- [ ] **Fase 5: Core Library (Arquitectura Hexagonal)**
+  Separación total de la lógica de negocio y persistencia en una librería estática/compartida (`libcinemanager_core`).
+- [ ] **Fase 6: Interfaz Gráfica Nativa (Qt)**
+  Desarrollo de un front-end avanzado utilizando el framework Qt de C++, enlazando directamente con la librería central.
+- [ ] **Fase 7: Arquitectura Distribuida (gRPC)**
+  Transformación del Core en un servidor independiente, dotando a las interfaces de capacidades de red reales vía gRPC y Protocol Buffers.
 
-## ⚙️ Cómo ejecutar (Temporal)
-*(Las instrucciones de compilación mediante `g++` o `CMake` se añadirán aquí una vez que la Fase 1 esté estable y lista para ser probada).*
+## 🛠️ Instrucciones de Compilación y Ejecución
 
----
-*Nota: Este README es temporal y se actualizará con diagramas de arquitectura, ejemplos de uso de la API y capturas de pantalla una vez que se alcance la versión final.*
+El proyecto puede construirse de manera estándar con CMake o a través del script de automatización incluido, el cual está orientado a mejorar la experiencia de desarrollo (DX) y detectar fugas de memoria.
+
+### Requisitos Previos
+*   Compilador C++17 (Clang recomendado para el script, GCC/MSVC soportados por CMake).
+*   CMake (3.10 o superior) y [Ninja](https://ninja-build.org/) (opcional, usado por el script).
+*   Librería SQLite3 y [Valgrind](https://valgrind.org/) (opcional, para análisis de memoria).
+
+### Opción A: Compilación Rápida (Script Automático)
+El script `build.sh` automatiza la configuración con Ninja, compila el código e inicia el programa con herramientas de análisis dinámico.
+
+**1. Ejecución estándar (con AddressSanitizer activo):**
+```bash
+./build.sh
+```
+
+**2. Ejecución bajo auditoría estricta de memoria (con Valgrind):**
+```bash
+./build.sh --valgrind
+```
+
+### Opción B: Compilación Estándar (CMake manual)
+Para entornos de producción, Windows, o sistemas que no dispongan de bash/clang:
+
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
+
+### Ejecución Manual
+Los binarios se generan dentro del directorio `build/bin/`.
+
+**Terminal de Administrador:**
+```bash
+./build/bin/CineManager
+```
+
+**Terminal de Cliente / Taquilla:**
+```bash
+./build/bin/CineManagerClient
+```
