@@ -15,7 +15,7 @@ using namespace std;
 void Consola::mostrarMenu() {
   cout << "=== CineManager ===" << endl;
   cout << "1. Cartelera" << endl;
-  cout << "2. Elegir Pelicula" << endl;
+  cout << "2. Reservar Asiento" << endl;
   cout << "3. Comprar Entrada" << endl;
   cout << "4. Salir" << endl;
 }
@@ -49,19 +49,19 @@ void Consola::mostrarPelicula(const Pelicula& pelicula) {
 }
 
 void Consola::mostrarCine(const Cine& cine) {
+  cout << "=== Cine " << cine.getId() << " ===" << endl;
   cout << "ID: " << cine.getId() << endl;
   cout << "Nombre: " << cine.getNombre() << endl;
   cout << "Direccion: " << cine.getDireccion() << endl;
-  cout << "==========================================" << endl;
 }
 void Consola::mostrarSesion(const Sesion& sesion) {
+  cout << "=== Sala " << sesion.getId() << " ===" << endl;
   cout << "ID: " << sesion.getId() << endl;
   cout << "Pelicula: " << sesion.getPelicula().getTitulo() << endl;
   cout << "Sala: " << sesion.getIdSala() << endl;
   std::time_t hora = sesion.getHoraInicio();
   cout << "Hora: " << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M:%S")
        << endl;
-  cout << "==========================================" << endl;
 }
 void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
   cout << endl << "=== Reporte de Ocupación " << titulo << " ===" << endl;
@@ -76,6 +76,7 @@ void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
 }
 void Consola::mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
                             const Sesion& sesion) {
+  cout << "=== Ticket ===" << endl;
   cout << "Compra realizada con éxito" << endl;
   cout << "Película: " << pelicula.getId() << endl;
   cout << "Sala: " << sesion.getId() << endl;
