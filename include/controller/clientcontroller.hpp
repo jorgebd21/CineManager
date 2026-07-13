@@ -11,18 +11,16 @@ class ClientController {
   DataManager& db;
   Consola& consola;
 
-  Reserva reserva;
-
  public:
   ClientController(DataManager& database, Consola& ui)
-      : db(database), consola(ui), reserva(-1, -1, -1, -1) {}
+      : db(database), consola(ui) {}
 
   void ejecutar();
 
  private:
   void cartelera(int cineId);
-  Reserva realizarReserva(int cineId);
-  bool realizarCompra(int cineId, const Reserva& reserva);
+  int realizarReserva(int cineId);
+  bool realizarCompra(int cineId, int reservaId);
 };
 
 #endif  // CLIENT_CONTROLLER_HPP
