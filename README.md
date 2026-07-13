@@ -23,9 +23,9 @@ El proyecto está diseñado bajo un modelo de iteraciones progresivas. Actualmen
   Carga y guardado del estado mediante archivos de texto (CSV) locales.
 - [x] **Fase 3: Base de Datos Relacional**
   Integración de SQLite3. Sustitución de los ficheros planos por operaciones CRUD y consultas SQL bajo patrón Repository.
-- [ ] **🚧 Fase 4: Concurrencia y Multihilo**
+- [X] **Fase 4: Concurrencia y Multihilo**
   Implementación de control de concurrencia y protección ante *race conditions* en entornos multi-cliente usando bloqueos nativos (`std::mutex`) y delegación en transacciones de base de datos.
-- [ ] **Fase 5: Core Library (Arquitectura Hexagonal)**
+- [ ] **🚧 Fase 5: Core Library (Arquitectura Hexagonal)**
   Separación total de la lógica de negocio y persistencia en una librería estática/compartida (`libcinemanager_core`).
 - [ ] **Fase 6: Interfaz Gráfica Nativa (Qt)**
   Desarrollo de un front-end avanzado utilizando el framework Qt de C++, enlazando directamente con la librería central.
