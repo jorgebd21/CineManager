@@ -4,17 +4,20 @@
 
 CineRepository::CineRepository(SqliteDatabase& database) : db(database) {}
 
-bool CineRepository::crear(const Cine& cine) {
+int CineRepository::crear(const Cine& cine) {
   try {
     SqliteStatement stmt(db.getDb(),
                          "INSERT INTO cines (nombre, direccion) VALUES (?, ?)");
     if (!stmt.bindText(1, cine.getNombre()) ||
         !stmt.bindText(2, cine.getDireccion()))
-      return false;
-    return stmt.step() == SQLITE_DONE;
+      return -1;
+
+    if (stmt.step() != SQLITE_DONE) return -1;
+
+    return sqlite3_last_insert_rowid(db.getDb());
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
-    return false;
+    return -1;
   }
 }
 

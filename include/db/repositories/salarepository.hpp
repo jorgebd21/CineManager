@@ -13,7 +13,7 @@ class SalaRepository {
  public:
   explicit SalaRepository(SqliteDatabase& database);
 
-  bool crear(const Sala& sala);
+  int crear(const Sala& sala);
   Sala obtenerPorId(int id);
   std::vector<Sala> obtenerTodos();
   std::vector<Sala> obtenerSalasDeCine(int idCine);

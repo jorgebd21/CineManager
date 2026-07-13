@@ -4,16 +4,20 @@
 
 ReservaRepository::ReservaRepository(SqliteDatabase& database) : db(database) {}
 
-bool ReservaRepository::crear(const Reserva& reserva) {
+int ReservaRepository::crear(const Reserva& reserva) {
   try {
     SqliteStatement stmt(db.getDb(),
                          "INSERT INTO reservas (sesion_id, fila, columna, "
-                         "estado) VALUES (?, ?, ?, 'COMPRADO')");
+                         "estado, timestamp_creacion) VALUES (?, ?, ?, ?, ?)");
     if (!stmt.bindInt(1, reserva.getIdSesion()) ||
         !stmt.bindInt(2, reserva.getFila()) ||
-        !stmt.bindInt(3, reserva.getColumna()))
+        !stmt.bindInt(3, reserva.getColumna()) ||
+        !stmt.bindText(4, reserva.getEstado()) ||
+        !stmt.bindInt(5, reserva.getTimestampCreacion()))
       return false;
-    return stmt.step() == SQLITE_DONE;
+    if (stmt.step() != SQLITE_DONE) return -1;
+
+    return sqlite3_last_insert_rowid(db.getDb());
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
@@ -22,20 +26,21 @@ bool ReservaRepository::crear(const Reserva& reserva) {
 
 Reserva ReservaRepository::obtenerPorId(int id) {
   try {
-    SqliteStatement stmt(
-        db.getDb(),
-        "SELECT id, sesion_id, fila, columna FROM reservas WHERE id = ?");
+    SqliteStatement stmt(db.getDb(),
+                         "SELECT id, sesion_id, fila, columna, estado, "
+                         "timestamp_creacion FROM reservas WHERE id = ?");
 
     if (!stmt.bindInt(1, id)) return Reserva(-1, -1, -1, -1);
 
     if (stmt.step() == SQLITE_ROW) {
       return Reserva(id, stmt.getColumnInt(1), stmt.getColumnInt(2),
-                     stmt.getColumnInt(3));
+                     stmt.getColumnInt(3), stmt.getColumnText(4),
+                     stmt.getColumnInt(5));
     }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
-  return Reserva(-1, -1, -1, -1);
+  return Reserva(-1, -1, -1, -1, "", -1);
 }
 
 std::vector<Reserva> ReservaRepository::obtenerPorSesion(int idSesion) {
@@ -43,14 +48,35 @@ std::vector<Reserva> ReservaRepository::obtenerPorSesion(int idSesion) {
 
   try {
     SqliteStatement stmt(db.getDb(),
-                         "SELECT id, sesion_id, fila, columna FROM reservas "
+                         "SELECT id, sesion_id, fila, columna, estado, "
+                         "timestamp_creacion FROM reservas "
                          "WHERE sesion_id = ?");
 
     if (!stmt.bindInt(1, idSesion)) return reservas;
 
     while (stmt.step() == SQLITE_ROW) {
       reservas.push_back(Reserva(stmt.getColumnInt(0), stmt.getColumnInt(1),
-                                 stmt.getColumnInt(2), stmt.getColumnInt(3)));
+                                 stmt.getColumnInt(2), stmt.getColumnInt(3),
+                                 stmt.getColumnText(4), stmt.getColumnInt(5)));
+    }
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return reservas;
+}
+
+std::vector<Reserva> ReservaRepository::obtenerPendientes() {
+  std::vector<Reserva> reservas;
+
+  try {
+    SqliteStatement stmt(db.getDb(),
+                         "SELECT id, sesion_id, timestamp_creacion FROM "
+                         "reservas WHERE estado = 'PENDIENTE'");
+
+    while (stmt.step() == SQLITE_ROW) {
+      reservas.push_back(Reserva(stmt.getColumnInt(0), stmt.getColumnInt(1), -1,
+                                 -1, "ANALIZANDO", stmt.getColumnInt(2)));
     }
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -63,10 +89,11 @@ bool ReservaRepository::actualizar(int id, const Reserva& reserva) {
   try {
     SqliteStatement stmt(db.getDb(),
                          "UPDATE reservas SET sesion_id = ?, fila = ?, columna "
-                         "= ? WHERE id = ?");
+                         "= ?, estado = ? WHERE id = ?");
     if (!stmt.bindInt(1, reserva.getIdSesion()) ||
         !stmt.bindInt(2, reserva.getFila()) ||
-        !stmt.bindInt(3, reserva.getColumna()) || !stmt.bindInt(4, id))
+        !stmt.bindInt(3, reserva.getColumna()) ||
+        !stmt.bindText(4, reserva.getEstado()) || !stmt.bindInt(5, id))
       return false;
 
     if (stmt.step() == SQLITE_DONE) {

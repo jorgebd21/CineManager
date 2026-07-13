@@ -6,7 +6,7 @@
 
 SesionRepository::SesionRepository(SqliteDatabase& database) : db(database) {}
 
-bool SesionRepository::crear(const Sesion& sesion) {
+int SesionRepository::crear(const Sesion& sesion) {
   try {
     SqliteStatement stmt(
         db.getDb(),
@@ -16,7 +16,9 @@ bool SesionRepository::crear(const Sesion& sesion) {
         !stmt.bindInt(2, sesion.getIdSala()) ||
         !stmt.bindInt(3, sesion.getHoraInicio()))
       return false;
-    return stmt.step() == SQLITE_DONE;
+    if (stmt.step() != SQLITE_DONE) return -1;
+
+    return sqlite3_last_insert_rowid(db.getDb());
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;

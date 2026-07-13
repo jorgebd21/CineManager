@@ -13,7 +13,7 @@ class SesionRepository {
  public:
   explicit SesionRepository(SqliteDatabase& database);
 
-  bool crear(const Sesion& sesion);
+  int crear(const Sesion& sesion);
   Sesion obtenerPorId(int id);
   std::vector<Sesion> obtenerTodos();
   std::vector<Sesion> obtenerSesionesDeCine(int idCine);

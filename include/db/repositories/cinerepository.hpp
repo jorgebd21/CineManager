@@ -13,7 +13,7 @@ class CineRepository {
  public:
   explicit CineRepository(SqliteDatabase& database);
 
-  bool crear(const Cine& cine);
+  int crear(const Cine& cine);
   Cine obtenerPorId(int id);
   std::vector<Cine> obtenerTodos();
   bool actualizar(int id, const Cine& cine);

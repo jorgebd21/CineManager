@@ -3,6 +3,12 @@
 
 #include <sqlite3.h>
 
+#include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include "db/database.hpp"
@@ -16,10 +22,19 @@
 #include "models/reserva.hpp"
 #include "models/sala.hpp"
 #include "models/sesion.hpp"
-
 class DataManager {
  private:
+  static constexpr int TIEMPO_EXPIRACION_SEGUNDOS = 30;
+
   SqliteDatabase db;
+
+  std::unordered_map<int, std::unique_ptr<std::mutex>> sessionMutexes;
+  std::mutex mapMutex;
+
+  std::thread cleanerThread;
+  std::atomic<bool> stopCleaner{false};
+  std::condition_variable cvCleaner;
+  std::mutex cvMutex;
 
   CineRepository cineRepo;
   PeliculaRepository peliculaRepo;
@@ -34,19 +49,27 @@ class DataManager {
         peliculaRepo(db),
         salaRepo(db),
         sesionRepo(db),
-        reservaRepo(db) {};
+        reservaRepo(db) {
+    cleanerThread = std::thread(&DataManager::iniciarLimpiezaLoop, this);
+  };
+  ~DataManager();
 
-  bool crearCine(const Cine& cine);
-  bool crearSala(const Sala& sala);
-  bool crearPelicula(const Pelicula& pelicula);
-  bool crearSesion(const Sesion& sesion);
-  bool crearReserva(const Reserva& reserva);
+  void iniciarLimpiezaLoop();
+  std::vector<Reserva> obtenerPendientes();
+
+  int crearCine(const Cine& cine);
+  int crearSala(const Sala& sala);
+  int crearPelicula(const Pelicula& pelicula);
+  int crearSesion(const Sesion& sesion);
+  int crearReserva(const Reserva& reserva);
 
   Cine obtenerCine(int id);
   Sala obtenerSala(int id);
   Pelicula obtenerPelicula(int id);
   Sesion obtenerSesion(int id);
   Reserva obtenerReserva(int id);
+
+  std::mutex& obtenerMutexSesion(int idSesion);
 
   std::vector<Pelicula> obtenerCartelera(int idCine);
   std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula);

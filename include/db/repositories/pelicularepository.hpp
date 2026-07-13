@@ -13,7 +13,7 @@ class PeliculaRepository {
  public:
   explicit PeliculaRepository(SqliteDatabase& database);
 
-  bool crear(const Pelicula& pelicula);
+  int crear(const Pelicula& pelicula);
   Pelicula obtenerPorId(int id);
   std::vector<Pelicula> obtenerTodos();
   std::vector<Pelicula> obtenerCartelera(int idCine);

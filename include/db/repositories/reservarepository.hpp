@@ -13,9 +13,10 @@ class ReservaRepository {
  public:
   explicit ReservaRepository(SqliteDatabase& database);
 
-  bool crear(const Reserva& reserva);
+  int crear(const Reserva& reserva);
   Reserva obtenerPorId(int id);
   std::vector<Reserva> obtenerPorSesion(int idSesion);
+  std::vector<Reserva> obtenerPendientes();
   bool actualizar(int id, const Reserva& reserva);
   bool eliminar(int id);
 };

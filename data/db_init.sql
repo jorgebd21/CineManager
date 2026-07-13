@@ -54,7 +54,8 @@ CREATE TABLE reservas (
     sesion_id INTEGER NOT NULL,
     fila INTEGER NOT NULL,
     columna INTEGER NOT NULL,
-    estado TEXT NOT NULL DEFAULT 'RESERVADO', -- 'RESERVADO', 'COMPRADO'
+    estado TEXT NOT NULL DEFAULT 'PENDIENTE', -- 'PENDIENTE', 'COMPRADO'
+    timestamp_creacion INTEGER NOT NULL DEFAULT 0, -- Unix timestamp de creación
     FOREIGN KEY (sesion_id) REFERENCES sesiones(id) ON DELETE CASCADE,
     UNIQUE(sesion_id, fila, columna) -- Restricción: No se puede duplicar una butaca para la misma sesión
 );
@@ -85,6 +86,6 @@ INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALU
 
 -- Insertar algunas Reservas iniciales de prueba
 INSERT INTO reservas (sesion_id, fila, columna, estado) VALUES 
-(1, 2, 3, 'RESERVADO'), -- Fila 2, Columna 3 reservada en la sesión 1
-(1, 2, 4, 'RESERVADO'),
+(1, 2, 3, 'PENDIENTE'), -- Fila 2, Columna 3 pendiente en la sesión 1
+(1, 2, 4, 'PENDIENTE'),
 (3, 4, 4, 'COMPRADO');  -- Fila 4, Columna 4 comprada en la sesión 3

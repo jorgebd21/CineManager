@@ -7,7 +7,7 @@
 PeliculaRepository::PeliculaRepository(SqliteDatabase& database)
     : db(database) {}
 
-bool PeliculaRepository::crear(const Pelicula& pelicula) {
+int PeliculaRepository::crear(const Pelicula& pelicula) {
   try {
     SqliteStatement stmt(
         db.getDb(),
@@ -16,7 +16,9 @@ bool PeliculaRepository::crear(const Pelicula& pelicula) {
         !stmt.bindText(2, generoToString(pelicula.getGenero())) ||
         !stmt.bindInt(3, pelicula.getDuracion()))
       return false;
-    return stmt.step() == SQLITE_DONE;
+    if (stmt.step() != SQLITE_DONE) return -1;
+
+    return sqlite3_last_insert_rowid(db.getDb());
   } catch (const std::exception& e) {
     std::cerr << e.what() << std::endl;
     return false;
