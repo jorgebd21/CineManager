@@ -119,7 +119,7 @@ int DataManager::crearReserva(const Reserva& reserva) {
     }
   }
   if (encontrado) {
-    return false;
+    return -1;
   } else {
     return reservaRepo.crear(reserva);
   }
