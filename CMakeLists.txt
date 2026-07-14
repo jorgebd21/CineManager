@@ -28,7 +28,7 @@ add_library(CineManagerCore STATIC ${CORE_SOURCES})
 # Al poner PUBLIC, cualquier ejecutable que enlace con esta librería heredará automáticamente las cabeceras de 'core/include'
 target_include_directories(CineManagerCore PUBLIC core/include)
 # Enlazamos SQLite públicamente para que el dominio tenga acceso a la BD
-target_link_libraries(CineManagerCore PUBLIC SQLite3::SQLite3)
+target_link_libraries(CineManagerCore PUBLIC SQLite::SQLite3)
 
 
 # ==============================================================================

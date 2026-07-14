@@ -77,7 +77,7 @@ int ClientController::realizarReserva(int cineId) {
     if (r.getFila() == reservaTemporal.getFila() &&
         r.getColumna() == reservaTemporal.getColumna()) {
       ya_ocupado = true;
-      return -1;
+      break;
     }
   }
 
