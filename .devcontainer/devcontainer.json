@@ -1,0 +1,26 @@
+{
+	"name": "CineManager (C++ & Qt6)",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"runArgs": [
+		"--net=host",
+		"-e", "DISPLAY=${localEnv:DISPLAY}",
+		"-v", "/tmp/.X11-unix:/tmp/.X11-unix"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack",
+				"ms-vscode.cmake-tools",
+				"twxs.cmake"
+			],
+			"settings": {
+				"cmake.configureOnOpen": true
+			}
+		}
+	},
+	"remoteUser": "vscode",
+	"updateRemoteUserUID": true
+}
