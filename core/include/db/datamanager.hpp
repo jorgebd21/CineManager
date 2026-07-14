@@ -24,7 +24,7 @@
 #include "models/sesion.hpp"
 class DataManager {
  private:
-  static constexpr int TIEMPO_EXPIRACION_SEGUNDOS = 30;
+  static constexpr int TIEMPO_EXPIRACION_SEGUNDOS = 300;
 
   SqliteDatabase db;
 
