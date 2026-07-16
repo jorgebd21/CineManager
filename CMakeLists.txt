@@ -46,3 +46,19 @@ target_link_libraries(CineManager PRIVATE CineManagerCore)
 add_executable(CineManagerClient ${CONSOLE_SOURCES} apps/console/app/main_client.cpp)
 target_include_directories(CineManagerClient PRIVATE apps/console/include)
 target_link_libraries(CineManagerClient PRIVATE CineManagerCore)
+
+# ==============================================================================
+# 3. INTERFAZ GRÁFICA (Capa de Presentación / Qt GUI)
+# ==============================================================================
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS "apps/gui/ui")
+
+file(GLOB_RECURSE GUI_SOURCES "apps/gui/src/*.cpp" "apps/gui/include/*.h" "apps/gui/ui/*.ui")
+
+add_executable(CineManagerGUI ${GUI_SOURCES} apps/gui/app/main_gui.cpp)
+target_include_directories(CineManagerGUI PRIVATE apps/gui/include)
+target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets)

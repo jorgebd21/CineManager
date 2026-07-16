@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CineManager - Taquilla</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      
+      <!-- PAGINA 0: SELECCION DE CINE -->
+      <widget class="QWidget" name="pageCines">
+       <layout class="QVBoxLayout" name="layoutCines">
+        <item>
+         <widget class="QLabel" name="labelCines">
+          <property name="text">
+           <string>Selecciona un Cine para empezar:</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listaCines"/>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- PAGINA 1: SELECCION DE PELICULA -->
+      <widget class="QWidget" name="pagePeliculas">
+       <layout class="QVBoxLayout" name="layoutPeliculas">
+        <item>
+         <widget class="QLabel" name="labelPeliculas">
+          <property name="text">
+           <string>Selecciona una Película de la Cartelera:</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listaPeliculas"/>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- PAGINA 2: SELECCION DE SESION -->
+      <widget class="QWidget" name="pageSesiones">
+       <layout class="QVBoxLayout" name="layoutSesiones">
+        <item>
+         <widget class="QLabel" name="labelSesiones">
+          <property name="text">
+           <string>Selecciona la sesión deseada:</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listaSesiones"/>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- PAGINA 3: SELECCION DE ASIENTO (SALA) -->
+      <widget class="QWidget" name="pageSala">
+       <layout class="QVBoxLayout" name="layoutSala">
+        <item>
+         <widget class="QLabel" name="labelSala">
+          <property name="text">
+           <string>Elige tu asiento (Verde = Libre, Rojo = Ocupado):</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>14</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <!-- Contenedor vacío donde inyectaremos la cuadrícula de botones por código -->
+        <item>
+         <widget class="QWidget" name="containerSala" native="true"/>
+        </item>
+       </layout>
+      </widget>
+
+      <!-- PAGINA 4: TICKET DE COMPRA -->
+      <widget class="QWidget" name="pageTicket">
+       <layout class="QVBoxLayout" name="layoutTicket">
+        <item>
+         <widget class="QLabel" name="labelTicketExito">
+          <property name="text">
+           <string>¡Compra realizada con éxito! 🎬</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelTicketDetalles">
+          <property name="text">
+           <string>Detalles de tu ticket...</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="botonInicio">
+          <property name="text">
+           <string>Volver a la Pantalla de Inicio</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
