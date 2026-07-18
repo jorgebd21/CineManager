@@ -95,29 +95,29 @@ INSERT INTO salas (id, cine_id, numero_sala, filas, columnas) VALUES
 -- Insertar Sesiones de prueba para hoy/mañana
 INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES 
 -- Cine 1 (Sala 1 y 2)
-(1, 1, 1, '2026-06-04 18:00:00', 7.50), -- Avatar 2 en Sala 1
-(2, 1, 1, '2026-06-04 21:30:00', 8.00), -- Avatar 2 en Sala 1
-(3, 2, 2, '2026-06-04 20:00:00', 6.00), -- Pulp Fiction en Sala 2
-(4, 3, 2, '2026-06-04 22:30:00', 7.00), -- Gladiator 2 en Sala 2
-(5, 4, 1, '2026-06-04 16:00:00', 6.50), -- Interstellar en Sala 1
-(12, 1, 1, '2026-06-05 16:30:00', 7.50), -- Avatar 2 en Sala 1 (Viernes)
-(13, 1, 1, '2026-06-05 20:00:00', 8.00), -- Avatar 2 en Sala 1 (Viernes)
-(14, 1, 2, '2026-06-06 18:00:00', 8.00), -- Avatar 2 en Sala 2 (Sábado)
-(15, 1, 2, '2026-06-06 22:00:00', 8.50), -- Avatar 2 en Sala 2 (Sábado)
-(16, 1, 1, '2026-06-07 12:00:00', 6.50), -- Avatar 2 en Sala 1 (Domingo)
-(17, 1, 1, '2026-06-07 17:30:00', 7.50), -- Avatar 2 en Sala 1 (Domingo)
+(1, 1, 1, datetime('now', '+1 hour'), 7.50), -- Avatar 2 en Sala 1 (Empieza en 1h)
+(2, 1, 1, datetime('now', '+3 hours'), 8.00), -- Avatar 2 en Sala 1 (Empieza en 3h)
+(3, 2, 2, datetime('now', '+2 hours'), 6.00), -- Pulp Fiction en Sala 2 (Empieza en 2h)
+(4, 3, 2, datetime('now', '+4 hours'), 7.00), -- Gladiator 2 en Sala 2 (Empieza en 4h)
+(5, 4, 1, datetime('now', '-1 hour'), 6.50),  -- Interstellar en Sala 1 (CADUCADA, hace 1h)
+(12, 1, 1, datetime('now', '+1 day'), 7.50),   -- Avatar 2 en Sala 1 (Mañana)
+(13, 1, 1, datetime('now', '+27 hours'), 8.00), -- Avatar 2 en Sala 1 (Mañana + 3h)
+(14, 1, 2, datetime('now', '+2 days'), 8.00),   -- Avatar 2 en Sala 2 (Pasado mañana)
+(15, 1, 2, datetime('now', '+52 hours'), 8.50), -- Avatar 2 en Sala 2 (Pasado mañana + 4h)
+(16, 1, 1, datetime('now', '+3 days'), 6.50),   -- Avatar 2 en Sala 1 (En 3 días)
+(17, 1, 1, datetime('now', '+77 hours'), 7.50), -- Avatar 2 en Sala 1 (En 3 días + 5h)
 -- Sesiones asociadas a las salas absurdas (Avatar 2, Cine 1)
-(18, 1, 5, '2026-06-05 23:00:00', 9.00), -- Avatar 2 en Sala Gigante (20x20)
-(19, 1, 6, '2026-06-06 14:00:00', 12.00),-- Avatar 2 en Sala VIP (2x2)
-(20, 1, 7, '2026-06-07 20:00:00', 7.50), -- Avatar 2 en Sala Ancha (3x15)
-(21, 1, 8, '2026-06-07 23:30:00', 7.00), -- Avatar 2 en Sala Pasillo (12x3)
+(18, 1, 5, datetime('now', '+30 hours'), 9.00), -- Avatar 2 en Sala Gigante (20x20)
+(19, 1, 6, datetime('now', '+50 hours'), 12.00),-- Avatar 2 en Sala VIP (2x2)
+(20, 1, 7, datetime('now', '+73 hours'), 7.50), -- Avatar 2 en Sala Ancha (3x15)
+(21, 1, 8, datetime('now', '+78 hours'), 7.00), -- Avatar 2 en Sala Pasillo (12x3)
 -- Cine 2 (Sala 3 y 4)
-(6, 2, 3, '2026-06-04 17:00:00', 6.00), -- Pulp Fiction en Sala 3
-(7, 3, 3, '2026-06-04 19:30:00', 7.00), -- Gladiator 2 en Sala 3
-(8, 5, 4, '2026-06-04 18:00:00', 7.50), -- The Dark Knight en Sala 4
-(9, 6, 4, '2026-06-04 20:30:00', 5.50), -- The Hangover en Sala 4
-(10, 7, 3, '2026-06-04 22:00:00', 6.00), -- The Conjuring en Sala 3
-(11, 8, 4, '2026-06-04 15:30:00', 6.50); -- La La Land en Sala 4
+(6, 2, 3, datetime('now', '+3 hours'), 6.00), -- Pulp Fiction en Sala 3
+(7, 3, 3, datetime('now', '+5 hours'), 7.00), -- Gladiator 2 en Sala 3
+(8, 5, 4, datetime('now', '+2 hours'), 7.50), -- The Dark Knight en Sala 4
+(9, 6, 4, datetime('now', '+4 hours'), 5.50), -- The Hangover en Sala 4
+(10, 7, 3, datetime('now', '+6 hours'), 6.00), -- The Conjuring en Sala 3
+(11, 8, 4, datetime('now', '-2 hours'), 6.50); -- La La Land en Sala 4 (CADUCADA, hace 2h)
 
 -- Insertar algunas Reservas iniciales de prueba
 INSERT INTO reservas (sesion_id, fila, columna, estado) VALUES 
