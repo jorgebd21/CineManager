@@ -70,7 +70,7 @@ std::vector<Pelicula> PeliculaRepository::obtenerCartelera(int idCine) {
         db.getDb(),
         "SELECT DISTINCT p.id, p.titulo, p.genero, p.duracion FROM peliculas p "
         "JOIN sesiones s ON p.id = s.pelicula_id JOIN salas sa ON s.sala_id = "
-        "sa.id WHERE sa.cine_id = ?");
+        "sa.id WHERE sa.cine_id = ? AND s.fecha_hora >= datetime('now')");
 
     if (!stmt.bindInt(1, idCine)) return peliculas;
 

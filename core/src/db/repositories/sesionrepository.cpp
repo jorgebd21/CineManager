@@ -100,7 +100,7 @@ std::vector<Sesion> SesionRepository::obtenerSesionesDePelicula(
         db.getDb(),
         "SELECT s.id, s.pelicula_id, s.sala_id, strftime('%s', s.fecha_hora) "
         "FROM sesiones s JOIN salas sa ON s.sala_id = sa.id WHERE sa.cine_id = "
-        "? AND s.pelicula_id = ?");
+        "? AND s.pelicula_id = ? AND s.fecha_hora >= datetime('now')");
 
     if (!stmt.bindInt(1, idCine) || !stmt.bindInt(2, idPelicula))
       return sesiones;
