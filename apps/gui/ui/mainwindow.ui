@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,11 +27,11 @@
         <item>
          <widget class="QLabel" name="labelCines">
           <property name="text">
-           <string>Selecciona un Cine para empezar:</string>
+           <string>Selecciona tu Cine</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
+            <pointsize>16</pointsize>
             <bold>true</bold>
            </font>
           </property>
@@ -50,20 +50,50 @@
       <widget class="QWidget" name="pagePeliculas">
        <layout class="QVBoxLayout" name="layoutPeliculas">
         <item>
-         <widget class="QLabel" name="labelPeliculas">
-          <property name="text">
-           <string>Selecciona una Película de la Cartelera:</string>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="layoutHeaderPeliculas">
+          <item>
+           <widget class="QPushButton" name="botonAtrasPeliculas">
+            <property name="text">
+             <string>← Volver</string>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelPeliculas">
+            <property name="text">
+             <string>Explora la Cartelera</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerHeaderPeliculas">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>100</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QListWidget" name="listaPeliculas"/>
@@ -74,24 +104,141 @@
       <!-- PAGINA 2: SELECCION DE SESION -->
       <widget class="QWidget" name="pageSesiones">
        <layout class="QVBoxLayout" name="layoutSesiones">
+        <!-- Cabecera de Navegación -->
         <item>
-         <widget class="QLabel" name="labelSesiones">
-          <property name="text">
-           <string>Selecciona la sesión deseada:</string>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="layoutHeaderSesiones">
+          <item>
+           <widget class="QPushButton" name="botonAtrasSesiones">
+            <property name="text">
+             <string>← Volver</string>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerHeaderSesiones">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
+
+        <!-- Cuerpo de Sesiones: Dos Columnas -->
         <item>
-         <widget class="QListWidget" name="listaSesiones"/>
+         <layout class="QHBoxLayout" name="layoutCuerpoSesiones">
+          
+          <!-- Columna Izquierda: Detalles e Imagen de Película -->
+          <item>
+           <widget class="QWidget" name="columnaIzquierdaSesiones" native="true">
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayoutIzquierdaSesiones">
+             <item>
+              <widget class="QLabel" name="labelSesionPoster">
+               <property name="text">
+                <string>Póster</string>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>270</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelSesionTitulo">
+               <property name="text">
+                <string>Título Película</string>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelSesionInfo">
+               <property name="text">
+                <string>Género • Duración</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacerIzquierdaSesiones">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+
+          <!-- Columna Derecha: Agrupación por días de Sesiones -->
+          <item>
+           <widget class="QWidget" name="columnaDerechaSesiones" native="true">
+            <layout class="QVBoxLayout" name="verticalLayoutDerechaSesiones">
+             <item>
+              <widget class="QLabel" name="labelSelectSession">
+               <property name="text">
+                <string>Selecciona un Horario</string>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QScrollArea" name="scrollAreaSesiones">
+               <property name="widgetResizable">
+                <bool>true</bool>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
+               </property>
+               <widget class="QWidget" name="scrollAreaWidgetContentsSesiones">
+                <property name="geometry">
+                 <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>100</width>
+                  <height>100</height>
+                 </rect>
+                </property>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          
+         </layout>
         </item>
        </layout>
       </widget>
@@ -100,13 +247,59 @@
       <widget class="QWidget" name="pageSala">
        <layout class="QVBoxLayout" name="layoutSala">
         <item>
-         <widget class="QLabel" name="labelSala">
+         <layout class="QHBoxLayout" name="layoutHeaderSala">
+          <item>
+           <widget class="QPushButton" name="botonAtrasSala">
+            <property name="text">
+             <string>← Volver</string>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelSala">
+            <property name="text">
+             <string>Selecciona tus Asientos</string>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerHeaderSala">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>100</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        
+        <item>
+         <widget class="QLabel" name="labelPantalla">
           <property name="text">
-           <string>Elige tu asiento (Verde = Libre, Rojo = Ocupado):</string>
+           <string>PANTALLA</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>14</pointsize>
             <bold>true</bold>
            </font>
           </property>
@@ -115,9 +308,70 @@
           </property>
          </widget>
         </item>
-        <!-- Contenedor vacío donde inyectaremos la cuadrícula de botones por código -->
+
         <item>
-         <widget class="QWidget" name="containerSala" native="true"/>
+         <layout class="QHBoxLayout" name="horizontalLayoutSala">
+          <item>
+           <spacer name="horizontalSpacerIzq">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QWidget" name="containerSala" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>500</width>
+              <height>350</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacerDer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+
+        <item>
+         <widget class="QWidget" name="leyendaSala" native="true">
+          <layout class="QHBoxLayout" name="layoutLeyenda">
+           <item>
+            <widget class="QLabel" name="labelLeyendaLibre">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot;color:#2ecc71;&quot;&gt;■&lt;/span&gt; Libre&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelLeyendaOcupada">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot;color:#e74c3c;&quot;&gt;■&lt;/span&gt; Ocupada&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelPrecioTotal">
+             <property name="text">
+              <string>Total: 0.00 €</string>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -125,14 +379,23 @@
       <!-- PAGINA 4: TICKET DE COMPRA -->
       <widget class="QWidget" name="pageTicket">
        <layout class="QVBoxLayout" name="layoutTicket">
+        <!-- Espaciador vertical superior para empujar el contenido al centro -->
+        <item>
+         <spacer name="verticalSpacerTicketTop">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </spacer>
+        </item>
+
         <item>
          <widget class="QLabel" name="labelTicketExito">
           <property name="text">
-           <string>¡Compra realizada con éxito! 🎬</string>
+           <string>¡Compra Realizada con Éxito!</string>
           </property>
           <property name="font">
            <font>
-            <pointsize>18</pointsize>
+            <pointsize>20</pointsize>
             <bold>true</bold>
            </font>
           </property>
@@ -141,22 +404,146 @@
           </property>
          </widget>
         </item>
+
+        <!-- Pequeño espaciador entre título y ticket -->
         <item>
-         <widget class="QLabel" name="labelTicketDetalles">
-          <property name="text">
-           <string>Detalles de tu ticket...</string>
+         <spacer name="verticalSpacerTicketMid1">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>15</height>
+           </size>
           </property>
-         </widget>
+         </spacer>
         </item>
+
         <item>
-         <widget class="QPushButton" name="botonInicio">
-          <property name="text">
-           <string>Volver a la Pantalla de Inicio</string>
+         <layout class="QHBoxLayout" name="layoutTicketHorizontal">
+          <item>
+           <spacer name="spacerTicketIzq">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QFrame" name="frameTicket">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>500</width>
+              <height>250</height>
+             </size>
+            </property>
+            <layout class="QHBoxLayout" name="layoutInsideTicket">
+             <item>
+              <widget class="QLabel" name="labelQR">
+               <property name="text">
+                <string>[ CÓDIGO QR ]</string>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>180</width>
+                 <height>180</height>
+                </size>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="lineaDivisoria">
+               <property name="frameShape">
+                <enum>QFrame::VLine</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Sunken</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelTicketDetalles">
+               <property name="text">
+                <string>Detalles...</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerTicketDer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+
+        <!-- Pequeño espaciador entre ticket y botón -->
+        <item>
+         <spacer name="verticalSpacerTicketMid2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+
+        <item>
+         <layout class="QHBoxLayout" name="layoutBotonInicio">
+          <item>
+           <spacer name="spacerBotonIzq">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="botonInicio">
+            <property name="text">
+             <string>Volver al Inicio</string>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>40</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBotonDer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+
+        <!-- Espaciador vertical inferior para empujar el contenido al centro -->
+        <item>
+         <spacer name="verticalSpacerTicketBottom">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
