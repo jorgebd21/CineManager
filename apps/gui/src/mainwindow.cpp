@@ -23,6 +23,15 @@ MainWindow::MainWindow(QWidget* parent)
   ui->listaPeliculas->verticalScrollBar()->setSingleStep(15);
   QScroller::grabGesture(ui->listaPeliculas, QScroller::LeftMouseButtonGesture);
 
+  ui->comboGenero->addItem("Todos los géneros");
+  ui->comboGenero->addItem("ACCION");
+  ui->comboGenero->addItem("DRAMA");
+  ui->comboGenero->addItem("CIENCIA_FICCION");
+  ui->comboGenero->addItem("COMEDIA");
+  ui->comboGenero->addItem("TERROR");
+
+  ui->labelNoResultados->hide();
+
   idCineSeleccionado = -1;
   idPeliculaSeleccionada = -1;
 
@@ -56,12 +65,26 @@ MainWindow::MainWindow(QWidget* parent)
   connect(ui->botonAtrasSala, &QPushButton::clicked, this, [this]() {
     ui->stackedWidget->setCurrentIndex(2);
   });
+
+  connect(ui->inputBuscar, &QLineEdit::textChanged, this, &MainWindow::alFiltrarPeliculas);
+  
+  connect(ui->comboGenero, &QComboBox::currentTextChanged, this, &MainWindow::alFiltrarPeliculas);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::alSeleccionarCine(int idCine) {
   idCineSeleccionado = idCine;
+
+  // Limpiar filtros al seleccionar un nuevo cine sin disparar señales intermedias
+  ui->inputBuscar->blockSignals(true);
+  ui->inputBuscar->clear();
+  ui->inputBuscar->blockSignals(false);
+  ui->comboGenero->blockSignals(true);
+  ui->comboGenero->setCurrentIndex(0);
+  ui->comboGenero->blockSignals(false);
+  ui->labelNoResultados->hide();
+  ui->listaPeliculas->show();
 
   std::vector<Pelicula> peliculas = db.obtenerCartelera(idCineSeleccionado);
 
@@ -345,4 +368,38 @@ void MainWindow::alPulsarInicio() {
   idSesionSeleccionada = -1;
 
   ui->stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::alFiltrarPeliculas() {
+  QString textoBusqueda = ui->inputBuscar->text().trimmed();
+  QString generoSeleccionado = ui->comboGenero->currentText();
+  int visibles = 0;
+
+  for (int i = 0; i < ui->listaPeliculas->count(); ++i) {
+    QListWidgetItem* item = ui->listaPeliculas->item(i);
+    QWidget* widget = ui->listaPeliculas->itemWidget(item);
+    MovieCardWidget* tarjeta = qobject_cast<MovieCardWidget*>(widget);
+
+    if (tarjeta) {
+      bool coincideTexto = textoBusqueda.isEmpty() || 
+                           tarjeta->getTitulo().contains(textoBusqueda, Qt::CaseInsensitive);
+
+      bool coincideGenero = (generoSeleccionado == "Todos los géneros") || 
+                             (tarjeta->getGenero() == generoSeleccionado);
+
+      bool ocultar = !(coincideTexto && coincideGenero);
+      item->setHidden(ocultar);
+      if (!ocultar) {
+        visibles++;
+      }
+    }
+  }
+
+  if (visibles == 0) {
+    ui->labelNoResultados->show();
+    ui->listaPeliculas->hide();
+  } else {
+    ui->labelNoResultados->hide();
+    ui->listaPeliculas->show();
+  }
 }

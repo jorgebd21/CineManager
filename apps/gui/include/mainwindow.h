@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
   void alPulsarBotonSesion();
   void alPulsarButaca();
   void alPulsarInicio();
+  void alFiltrarPeliculas();
 
  private:
   Ui::MainWindow* ui;

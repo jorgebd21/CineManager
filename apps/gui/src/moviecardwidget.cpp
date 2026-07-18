@@ -7,7 +7,10 @@
 #include <QVBoxLayout>
 
 MovieCardWidget::MovieCardWidget(const Pelicula& pelicula, QWidget* parent)
-    : QWidget(parent), idPelicula(pelicula.getId()) {
+    : QWidget(parent), 
+      idPelicula(pelicula.getId()), 
+      titulo(QString::fromStdString(pelicula.getTitulo())), 
+      genero(QString::fromStdString(generoToString(pelicula.getGenero()))) {
   QVBoxLayout* layout = new QVBoxLayout(this);
 
   QLabel* labelImagen = new QLabel(this);
@@ -25,8 +28,7 @@ MovieCardWidget::MovieCardWidget(const Pelicula& pelicula, QWidget* parent)
   labelImagen->setFixedSize(180, 240);
   layout->addWidget(labelImagen);
 
-  QLabel* labelTitulo =
-      new QLabel(QString::fromStdString(pelicula.getTitulo()), this);
+  QLabel* labelTitulo = new QLabel(QString::fromStdString(pelicula.getTitulo()), this);
   labelTitulo->setStyleSheet(
       "font-weight: bold; font-size: 13px; color: #ffffff;");
   layout->addWidget(labelTitulo);
