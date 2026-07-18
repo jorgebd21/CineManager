@@ -118,3 +118,54 @@ QPushButton#botonInicio:hover {
     background-color: #00d09c;
     border: 1px solid #00d09c;
 }
+
+/* Estilo para los cuadros de búsqueda y combo boxes */
+QLineEdit, QComboBox {
+    background-color: #1e222b;
+    border: 1px solid #3e4452;
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 5px 10px;
+    font-size: 11px;
+}
+
+QComboBox {
+    combobox-popup: 0;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #00f0b5;
+}
+
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+    border-left-width: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+/* Corregir el fondo blanco de la lista desplegable del combobox */
+QComboBox QAbstractItemView {
+    background-color: #1e222b;
+    border: 1px solid #3e4452;
+    color: #ffffff;
+    selection-background-color: #00f0b5;
+    selection-color: #121418;
+    padding: 0px;
+    margin: 0px;
+    outline: 0px;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 6px 10px;
+    background-color: #1e222b;
+    color: #ffffff;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #00f0b5;
+    color: #121418;
+}
