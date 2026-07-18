@@ -106,6 +106,7 @@ INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALU
 (15, 1, 2, datetime('now', '+52 hours'), 8.50), -- Avatar 2 en Sala 2 (Pasado mañana + 4h)
 (16, 1, 1, datetime('now', '+3 days'), 6.50),   -- Avatar 2 en Sala 1 (En 3 días)
 (17, 1, 1, datetime('now', '+77 hours'), 7.50), -- Avatar 2 en Sala 1 (En 3 días + 5h)
+(22, 1, 1, datetime('now', '-3 hours'), 7.50), -- Avatar 2 en Sala 1 (CADUCADA, hace 3h para pruebas de criba)
 -- Sesiones asociadas a las salas absurdas (Avatar 2, Cine 1)
 (18, 1, 5, datetime('now', '+30 hours'), 9.00), -- Avatar 2 en Sala Gigante (20x20)
 (19, 1, 6, datetime('now', '+50 hours'), 12.00),-- Avatar 2 en Sala VIP (2x2)
