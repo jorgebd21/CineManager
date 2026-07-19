@@ -10,6 +10,7 @@
 #include <QVariant>
 #include <iomanip>
 #include <sstream>
+#include <set>
 
 #include "db/datamanager.hpp"
 
@@ -33,6 +34,7 @@ class MainWindow : public QMainWindow {
   void alPulsarButaca();
   void alPulsarInicio();
   void alFiltrarPeliculas();
+  void alConfirmarCompra();
 
  private:
   Ui::MainWindow* ui;
@@ -41,6 +43,7 @@ class MainWindow : public QMainWindow {
   int idCineSeleccionado;
   int idPeliculaSeleccionada;
   int idSesionSeleccionada;
+  std::set<std::pair<int, int>> butacasSeleccionadas;
 };
 
 #endif  // MAINWINDOW_H

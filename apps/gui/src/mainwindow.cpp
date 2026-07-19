@@ -69,6 +69,8 @@ MainWindow::MainWindow(QWidget* parent)
   connect(ui->inputBuscar, &QLineEdit::textChanged, this, &MainWindow::alFiltrarPeliculas);
   
   connect(ui->comboGenero, &QComboBox::currentTextChanged, this, &MainWindow::alFiltrarPeliculas);
+
+  connect(ui->botonConfirmar, &QPushButton::clicked, this, &MainWindow::alConfirmarCompra);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -221,6 +223,8 @@ void MainWindow::alPulsarBotonSesion() {
 
 void MainWindow::alSeleccionarSesionPorId(int idSession) {
   idSesionSeleccionada = idSession;
+  butacasSeleccionadas.clear();
+  int precioTotal = 0;
 
   Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
   Sala sala = db.obtenerSala(sesion.getIdSala());
@@ -249,7 +253,7 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
     QVBoxLayout* avisoLayout = new QVBoxLayout(ui->containerSala);
     avisoLayout->addWidget(labelAviso);
     
-    ui->labelPrecioTotal->setText("Precio: 7.50 €");
+    ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) + "€");
     ui->stackedWidget->setCurrentIndex(3);
     return;
   }
@@ -272,7 +276,7 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
       QPushButton* boton = new QPushButton(ui->containerSala);
       boton->setFixedSize(butacaSize, butacaSize);
       boton->setObjectName("botonButaca");
-      
+      boton->setCheckable(true);
       // Tooltip informativo sobre la fila y el asiento
       boton->setToolTip("Fila " + QString::number(f + 1) + ", Asiento " + QString::number(c + 1));
 
@@ -297,7 +301,7 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
   }
 
   // Mostrar el precio de la sesión en la leyenda inferior de la sala (precio fijo para el MVP de la GUI)
-  ui->labelPrecioTotal->setText("Precio: 7.50 €");
+  ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) + "€");
 
   ui->stackedWidget->setCurrentIndex(3);
 }
@@ -307,58 +311,17 @@ void MainWindow::alPulsarButaca() {
   if (boton) {
     int fila = boton->property("fila").toInt();
     int columna = boton->property("columna").toInt();
+    std::pair<int, int> butaca = {fila, columna};
 
-    Reserva reserva(-1, idSesionSeleccionada, fila, columna, "COMPRADO",
-                    std::time(nullptr));
-    int idReserva = db.crearReserva(reserva);
-
-    if (idReserva != -1) {
-      Cine cine = db.obtenerCine(idCineSeleccionado);
-      Pelicula peli = db.obtenerPelicula(idPeliculaSeleccionada);
-      Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
-
-      // Cargar y escalar la imagen del código QR real
-      QPixmap qrPixmap("data/images/qr_mock.jpg");
-      ui->labelQR->setPixmap(qrPixmap.scaled(180, 180, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-      ui->labelQR->setFixedSize(180, 180);
-
-      // Formatear la fecha y hora legible
-      std::time_t hora = sesion.getHoraInicio();
-      std::tm* timeinfo = std::localtime(&hora);
-      char dateBuf[64];
-      std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
-      QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
-
-      // Formatear los detalles de compra en un HTML de ticket clásico de cine
-      QString detallesHTML = QString(
-          "<html><body>"
-          "<p style='font-size:11px; font-weight:bold; color:#00f0b5; margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
-          "<p style='font-size:16px; font-weight:bold; color:#ffffff; margin:0;'>%1</p>"
-          "<p style='font-size:11px; color:#abb2bf; margin-top:2px;'>%2 • %3 min</p>"
-          "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px 0;'>"
-          "<table cellspacing='4' style='color:#ffffff; font-size:11px; font-family: sans-serif;'>"
-          "<tr><td style='color:#abb2bf; font-weight:bold; width:70px;'>CINE:</td><td>%4</td></tr>"
-          "<tr><td style='color:#abb2bf; font-weight:bold;'>SALA:</td><td>Sala %5</td></tr>"
-          "<tr><td style='color:#abb2bf; font-weight:bold;'>SESIÓN:</td><td>%6</td></tr>"
-          "<tr><td style='color:#abb2bf; font-weight:bold;'>ASIENTO:</td><td>Fila %7, Asiento %8</td></tr>"
-          "</table>"
-          "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px 0;'>"
-          "<p style='font-size:14px; font-weight:bold; color:#00f0b5; margin:0;'>TOTAL COMPRA: 7.50 €</p>"
-          "</body></html>"
-      )
-      .arg(QString::fromStdString(peli.getTitulo()))
-      .arg(QString::fromStdString(generoToString(peli.getGenero())))
-      .arg(peli.getDuracion())
-      .arg(QString::fromStdString(cine.getNombre()))
-      .arg(sesion.getIdSala())
-      .arg(fechaHoraStr)
-      .arg(fila + 1)
-      .arg(columna + 1);
-
-      ui->labelTicketDetalles->setText(detallesHTML);
-
-      ui->stackedWidget->setCurrentIndex(4);
+    if (boton->isChecked()) {
+      butacasSeleccionadas.insert(butaca);
+    } else {
+      butacasSeleccionadas.erase(butaca);
     }
+
+    double precioTotal = butacasSeleccionadas.size() * 7.50;
+
+    ui->labelPrecioTotal->setText("Total: " + QString::number(precioTotal, 'f', 2) + " €");
   }
 }
 
@@ -401,5 +364,71 @@ void MainWindow::alFiltrarPeliculas() {
   } else {
     ui->labelNoResultados->hide();
     ui->listaPeliculas->show();
+  }
+}
+
+void MainWindow::alConfirmarCompra() {
+  if (butacasSeleccionadas.empty()) return;
+
+  bool exitoTotal = true;
+  for (const auto& butaca : butacasSeleccionadas) {
+    Reserva reserva(-1, idSesionSeleccionada, butaca.first, butaca.second, "COMPRADO", std::time(nullptr));
+    if (db.crearReserva(reserva) == -1) {
+      exitoTotal = false;
+    }
+  }
+
+  if (exitoTotal) {
+    Cine cine = db.obtenerCine(idCineSeleccionado);
+    Pelicula peli = db.obtenerPelicula(idPeliculaSeleccionada);
+    Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
+
+    QPixmap qrPixmap("data/images/qr_mock.jpg");
+    ui->labelQR->setPixmap(qrPixmap.scaled(180, 180, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    ui->labelQR->setFixedSize(180, 180);
+
+    QString asientosStr;
+    for (const auto& butaca : butacasSeleccionadas) {
+      if (!asientosStr.isEmpty()) {
+        asientosStr += ", ";
+      }
+      asientosStr += "F" + QString::number(butaca.first + 1) + "-A" + QString::number(butaca.second + 1);
+    }
+
+    std::time_t hora = sesion.getHoraInicio();
+    std::tm* timeinfo = std::localtime(&hora);
+    char dateBuf[64];
+    std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
+    QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
+
+    double totalCompra = butacasSeleccionadas.size() * 7.50;
+
+    QString detallesHTML = QString(
+        "<html><body>"
+        "<p style='font-size:11px; font-weight:bold; color:#00f0b5; margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
+        "<p style='font-size:16px; font-weight:bold; color:#ffffff; margin:0;'>%1</p>"
+        "<p style='font-size:11px; color:#abb2bf; margin-top:2px;'>%2 • %3 min</p>"
+        "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px 0;'>"
+        "<table cellspacing='4' style='color:#ffffff; font-size:11px; font-family: sans-serif;'>"
+        "<tr><td style='color:#abb2bf; font-weight:bold; width:70px;'>CINE:</td><td>%4</td></tr>"
+        "<tr><td style='color:#abb2bf; font-weight:bold;'>SALA:</td><td>Sala %5</td></tr>"
+        "<tr><td style='color:#abb2bf; font-weight:bold;'>SESIÓN:</td><td>%6</td></tr>"
+        "<tr><td style='color:#abb2bf; font-weight:bold;'>ASIENTOS:</td><td>%7</td></tr>" // <-- Agrupados
+        "</table>"
+        "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px 0;'>"
+        "<p style='font-size:14px; font-weight:bold; color:#00f0b5; margin:0;'>TOTAL COMPRA: %8</p>" // <-- Calculado
+        "</body></html>"
+    )
+    .arg(QString::fromStdString(peli.getTitulo()))
+    .arg(QString::fromStdString(generoToString(peli.getGenero())))
+    .arg(peli.getDuracion())
+    .arg(QString::fromStdString(cine.getNombre()))
+    .arg(sesion.getIdSala())
+    .arg(fechaHoraStr)
+    .arg(asientosStr)
+    .arg(QString::number(totalCompra, 'f', 2) + " €");
+
+    ui->labelTicketDetalles->setText(detallesHTML);
+    ui->stackedWidget->setCurrentIndex(4);
   }
 }

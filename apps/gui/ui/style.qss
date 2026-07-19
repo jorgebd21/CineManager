@@ -77,6 +77,12 @@ QPushButton#botonButaca:disabled {
     border: 1px solid #c0392b;
 }
 
+QPushButton#botonButaca:checked {
+    background-color: #00f0b5;
+    border: 1px solid #00d09c;
+}
+
+
 /* Pantalla del cine estilo mockup */
 #labelPantalla {
     color: #abb2bf;
@@ -118,6 +124,23 @@ QPushButton#botonInicio:hover {
     background-color: #00d09c;
     border: 1px solid #00d09c;
 }
+
+/* Botón de confirmar compra en la sala */
+QPushButton#botonConfirmar {
+    background-color: #00f0b5;
+    color: #121418;
+    border: 1px solid #00f0b5;
+    border-radius: 6px;
+    padding: 6px 15px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+QPushButton#botonConfirmar:hover {
+    background-color: #00d09c;
+    border: 1px solid #00d09c;
+}
+
 
 /* Estilo para los cuadros de búsqueda y combo boxes */
 QLineEdit, QComboBox {
