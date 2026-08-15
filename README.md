@@ -1,6 +1,6 @@
 # 🎬 CineManager
 
-![C++17](https://img.shields.io/badge/C%2B%2B-17--20-blue.svg?style=flat&logo=c%2B%2B)
+![C++20](https://img.shields.io/badge/C%2B%2B-17--20-blue.svg?style=flat&logo=c%2B%2B)
 ![SQLite3](https://img.shields.io/badge/SQLite-3-003B57?style=flat&logo=sqlite)
 ![Qt6](https://img.shields.io/badge/Qt-6.x-41CD52?style=flat&logo=qt)
 ![Arquitectura Hexagonal](https://img.shields.io/badge/Architecture-Hexagonal%20%7C%20Repository-success.svg)
@@ -33,9 +33,10 @@ Actualmente nos encontramos refinando la **Fase 6 (Interfaz Gráfica Nativa Qt6)
   - [x] Filtro dinámico de películas por búsqueda de texto y género en tiempo real.
   - [x] Mapa interactivo de sala con selección múltiple de butacas en `std::set`.
   - [x] **Tarifas y Precios Dinámicos (`TarifasDialog`)**: Selección de tarifas (Adulto, Niño, Jubilado, Estudiante) con cálculo automático en base de datos.
-  - [x] Generación e impresión de Ticket de Entrada HTML agrupado.
+  - [x] **Generación de Código QR Real (`qrcodegen` / `QrHelper`)**: Firma digital de la compra codificada en estándar ISO/IEC 18004 escaneable por móvil.
+  - [x] **Gestión y Bloqueo de Salas Llenas (`(LLENA)`)**: Detección en tiempo real de pases agotados y bloqueo visual de botones.
+  - [x] Generación e impresión de Ticket de Entrada HTML agrupado con desglose de tarifas por asiento.
 - [ ] **Fase 7: Arquitectura Distribuida & API**
-  - [ ] Generación de Código QR Real.
   - [ ] Autenticación de Usuarios (Login/Registro con DNI).
   - [ ] Transformación del Core en un servidor HTTP REST (Crow/Drogon) / gRPC.
 
