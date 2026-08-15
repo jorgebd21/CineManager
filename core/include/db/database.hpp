@@ -30,11 +30,13 @@ class SqliteStatement {
   ~SqliteStatement() { sqlite3_finalize(stmt); }
 
   bool bindInt(int index, int value);
+  bool bindFloat(int index, float value);
   bool bindText(int index, const std::string& value);
 
   int step();
 
   int getColumnInt(int index);
+  float getColumnFloat(int index);
   std::string getColumnText(int index);
 };
 

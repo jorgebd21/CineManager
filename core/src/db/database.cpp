@@ -61,6 +61,16 @@ bool SqliteStatement::bindInt(int index, int value) {
   return true;
 }
 
+bool SqliteStatement::bindFloat(int index, float value) {
+  int rc = sqlite3_bind_double(stmt, index, value);
+  if (rc != SQLITE_OK) {
+    std::cerr << "Error al enlazar parámetro: "
+              << sqlite3_errmsg(sqlite3_db_handle(stmt)) << std::endl;
+    return false;
+  }
+  return true;
+}
+
 bool SqliteStatement::bindText(int index, const std::string& value) {
   int rc = sqlite3_bind_text(stmt, index, value.c_str(), -1, SQLITE_TRANSIENT);
   if (rc != SQLITE_OK) {
@@ -83,11 +93,16 @@ int SqliteStatement::step() {
 int SqliteStatement::getColumnInt(int index) {
   return sqlite3_column_int(stmt, index);
 }
+
+float SqliteStatement::getColumnFloat(int index) {
+  return sqlite3_column_double(stmt, index);
+}
+
 std::string SqliteStatement::getColumnText(int index) {
   const char* textoCrudo = (const char*)sqlite3_column_text(stmt, index);
   if (textoCrudo != nullptr) {
-      return std::string(textoCrudo);
+    return std::string(textoCrudo);
   } else {
-      return ""; 
+    return "";
   }
 }
