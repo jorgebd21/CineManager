@@ -1,6 +1,6 @@
 # CineManager — Roadmap Visual de Desarrollo
 
-> **Versión:** 2.0 · **Fecha:** Agosto 2026
+> **Versión:** 2.1 · **Fecha:** Agosto 2026
 
 ---
 
@@ -20,15 +20,16 @@ gantt
     Fase 5 · Concurrencia y Multihilo     :done, f5,  2026-07-06, 2026-07-12
     Fase 6 · Core Library (Hex. Arch.)    :done, f6,  2026-07-12, 2026-07-16
     Fase 6 · GUI Qt6 — MVP               :done, f6a, 2026-07-16, 2026-07-19
-    Fase 6 · Precios dinámicos (Tarifas)  :done, f6b, 2026-07-19, 2026-08-15
+    Fase 6 · Precios dinámicos (Tarifas)  :done, f6b, 2026-07-19, 2026-08-01
+    Fase 6 · Generador Código QR Real    :done, f6c, 2026-08-01, 2026-08-15
+    Fase 6 · Bloqueo de Salas Llenas      :done, f6d, 2026-08-10, 2026-08-15
 
-    section 🚧 En Desarrollo
-    Fase 6 · QR real                      :active, f6c, 2026-08-15, 2026-08-30
+    section 🚧 En Desarrollo / Siguiente Hito
+    Fase 6 · Auth (Login/Registro DNI)    :active, f6e, 2026-08-15, 2026-09-01
 
     section ⏳ Planificado
-    Fase 6 · Auth (Login/Registro DNI)    :f6d,    2026-09-01, 2026-09-15
-    Testing · Suite GoogleTest            :f_test, 2026-09-15, 2026-09-30
-    Fase 7a · REST API (Crow/Drogon)      :f7a,    2026-10-01, 2026-10-25
+    Testing · Suite GoogleTest            :f_test, 2026-09-01, 2026-09-20
+    Fase 7a · REST API (Crow/Drogon)      :f7a,    2026-09-20, 2026-10-15
 ```
 
 ---
@@ -41,10 +42,10 @@ gantt
 |---|----------|-----------|--------|
 | 0 | Selección de Cine | `CineCardWidget` + `QListWidget` | ✅ Funcional |
 | 1 | Cartelera de Películas | `MovieCardWidget` + búsqueda/filtro | ✅ Funcional |
-| 2 | Selección de Sesión | Agrupación por días + botones horarios | ✅ Funcional |
+| 2 | Selección de Sesión | Agrupación por días + botones horarios (`LLENA` bloqueado) | ✅ Funcional |
 | 3 | Mapa de Sala (Butacas) | `QGridLayout` dinámico + multi-selección | ✅ Funcional |
-| 3b | Diálogo Modal de Tarifas | `TarifasDialog` (Adulto, Niño, Jubilado, Estudiante) | ✅ **Funcional (Agosto 2026)** |
-| 4 | Ticket de Compra | HTML rico + Total dinámico real | ✅ Funcional |
+| 3b | Diálogo Modal de Tarifas | `TarifasDialog` (Adulto, Niño, Jubilado, Estudiante) | ✅ Funcional |
+| 4 | Ticket de Compra | HTML rico + QR Real Escaneable + Desglose tarifas | ✅ **Funcional (Agosto 2026)** |
 
 ### Funcionalidades de la GUI — Checklist de Estado
 
@@ -54,11 +55,12 @@ gantt
 - [x] Búsqueda de películas por texto
 - [x] Filtrado de películas por género
 - [x] Vista de sesiones agrupadas por día
+- [x] **Detección y bloqueo visual de salas llenas (`LLENA`)**
 - [x] Mapa visual de sala con butacas
 - [x] Selección múltiple de asientos (`std::set`)
 - [x] **Precio dinámico real y Tarifas** (`TarifasDialog` + guardado SQLite)
-- [x] Confirmación de compra con ticket HTML
-- [ ] 🔴 **Generación real de QR** (actualmente imagen estática `qr_mock.jpg`)
+- [x] **Generación real de QR** (Librería Nayuki C++20 + `QrHelper` Qt)
+- [x] Confirmación de compra con ticket HTML y desglose por entrada
 - [ ] 🔴 **Autenticación de usuario** (Login/registro pospuesto al final del proyecto)
 
 ---
@@ -69,6 +71,7 @@ gantt
 |----|--------|---------|-----------|--------|
 | **DT-04** | `mainwindow.cpp` | **Precio hardcodeado 7.50€** | 🟡 Media | ✅ **RESUELTO** |
 | **DT-05** | `main_gui.cpp` | **Ruta `style.qss` relativa al CWD** | 🟡 Media | ✅ **RESUELTO** |
+| **DT-08** | `mainwindow.cpp` | **QR mock estático `qr_mock.jpg`** | 🟢 Baja | ✅ **RESUELTO** |
 | DT-02 | `database.cpp` | `PRAGMA foreign_keys = ON` no activado | 🔴 Alta | ⏳ Pendiente |
 | DT-09 | Global | Ausencia de tests automatizados | 🔴 Alta | ⏳ Pendiente |
 | DT-01 | `database.cpp` | Ruta de DB heurística frágil | 🟡 Media | ⏳ Pendiente |

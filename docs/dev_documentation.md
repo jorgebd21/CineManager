@@ -1,6 +1,6 @@
 # CineManager — Documentación Técnica de Desarrollo
 
-> **Versión del documento:** 2.0 · **Fecha:** Agosto 2026  
+> **Versión del documento:** 2.1 · **Fecha:** Agosto 2026  
 > **Proyecto:** CineManager v2.0 · **Lenguaje:** C++17/20 · **Build:** CMake + Ninja / GCC / Clang
 
 ---
@@ -28,7 +28,7 @@ CineManager implementa un patrón de **Arquitectura Hexagonal** (también llamad
 ```mermaid
 graph TB
     subgraph "Capa de Presentación (Adaptadores de Entrada)"
-        GUI["🖥️ CineManagerGUI<br/>(Qt6 Widgets + TarifasDialog)<br/>apps/gui/"]
+        GUI["🖥️ CineManagerGUI<br/>(Qt6 Widgets + TarifasDialog + QrHelper)<br/>apps/gui/"]
         ADMIN["⌨️ CineManager<br/>(Consola Admin)<br/>apps/console/"]
         CLIENT["⌨️ CineManagerClient<br/>(Consola Cliente)<br/>apps/console/"]
     end
@@ -42,6 +42,10 @@ graph TB
             SR["SalaRepository"]
             SER["SesionRepository"]
             RR["ReservaRepository"]
+        end
+
+        subgraph "Utilidades Core"
+            QR["qrcodegen<br/>(Nayuki QR Engine C++20)"]
         end
 
         subgraph "Modelos de Dominio"
@@ -63,6 +67,7 @@ graph TB
     end
 
     GUI --> DM
+    GUI --> QR
     ADMIN --> DM
     CLIENT --> DM
 
@@ -71,96 +76,6 @@ graph TB
     CR & PR & SR & SER & RR --> M1 & M2 & M3 & M4 & M5
     DB --> STMT
     STMT --> SQLITE
-```
-
-### 1.2 Estructura de Directorios
-
-```
-CineManager/
-├── CMakeLists.txt          # Build system unificado (file GLOB_RECURSE para GUI)
-├── build.sh                # Script de automatización (ASan/Valgrind)
-├── core/                   # ← Librería estática CineManagerCore
-│   ├── include/
-│   │   ├── db/
-│   │   │   ├── database.hpp          # SqliteDatabase + SqliteStatement (bindFloat, getColumnFloat)
-│   │   │   ├── datamanager.hpp       # Facade principal (API pública del core)
-│   │   │   └── repositories/
-│   │   │       ├── cinerepository.hpp
-│   │   │       ├── pelicularepository.hpp
-│   │   │       ├── salarepository.hpp
-│   │   │       ├── sesionrepository.hpp
-│   │   │       └── reservarepository.hpp (Sincronizado con tipo y precio)
-│   │   └── models/
-│   │       ├── asiento.hpp
-│   │       ├── cine.hpp
-│   │       ├── pelicula.hpp  # Incluye enum Genero
-│   │       ├── sala.hpp
-│   │       ├── sesion.hpp    # Contiene Pelicula embebida (composición)
-│   │       └── reserva.hpp   # Atributos: id, idSesion, fila, columna, estado, timestampCreacion, tipo, precio
-│   └── src/                  # Implementaciones espejo de include/
-├── apps/
-│   ├── console/              # Adaptadores CLI
-│   │   ├── app/main_admin.cpp
-│   │   ├── app/main_client.cpp
-│   │   ├── include/          # Controladores de consola
-│   │   └── src/
-│   └── gui/                  # Adaptador Qt6 Widgets
-│       ├── app/main_gui.cpp  # Búsqueda robusta multi-fallback de style.qss
-│       ├── include/
-│       │   ├── mainwindow.h
-│       │   ├── cinecardwidget.h
-│       │   ├── moviecardwidget.h
-│       │   └── tarifasdialog.h # Diálogo modal para selección de tarifas por butaca
-│       ├── src/
-│       │   ├── mainwindow.cpp
-│       │   ├── cinecardwidget.cpp
-│       │   ├── moviecardwidget.cpp
-│       │   └── tarifasdialog.cpp
-│       └── ui/
-│           ├── mainwindow.ui
-│           ├── tarifasdialog.ui # UI modal en tema oscuro
-│           └── style.qss
-└── data/
-    ├── db_init.sql           # Esquema relacional con CHECK de tarifas ('Adulto', 'Niño', 'Jubilado', 'Estudiante')
-    ├── cine.db               # Base de datos SQLite
-    └── images/               # Assets de imagen para la GUI
-```
-
----
-
-## 2. Capa de Dominio — Core Library
-
-### 2.1 Modelos de Entidad
-
-Los modelos son clases C++ puras (*Plain Old Data* con encapsulación), sin dependencia de frameworks gráficos.
-
-| Entidad | Atributos clave | Relaciones |
-|---------|----------------|------------|
-| `Cine` | `id`, `nombre`, `direccion` | Tiene `Sala`s |
-| `Sala` | `id`, `cineId`, `numeroSala`, `filas`, `columnas` | Pertenece a `Cine` |
-| `Pelicula` | `id`, `titulo`, `Genero` (enum), `duracion` | Proyectada en `Sesion` |
-| `Sesion` | `id`, `Pelicula` (composición), `idSala`, `horaInicio` (`time_t`), `precioEntrada` | Une `Pelicula` + `Sala` |
-| `Reserva` | `id`, `idSesion`, `fila`, `columna`, `estado`, `timestampCreacion`, `tipo`, `precio` | Pertenece a `Sesion` |
-
----
-
-## 3. Capa de Persistencia — Repositorios y SQLite
-
-### 3.1 Esquema de la Tabla `reservas`
-
-```sql
-CREATE TABLE reservas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sesion_id INTEGER NOT NULL,
-    fila INTEGER NOT NULL,
-    columna INTEGER NOT NULL,
-    estado TEXT NOT NULL DEFAULT 'PENDIENTE',
-    timestamp_creacion INTEGER NOT NULL DEFAULT 0,
-    tipo TEXT CHECK (tipo IN ('Adulto', 'Niño', 'Jubilado', 'Estudiante')),
-    precio REAL NOT NULL DEFAULT 7.50,
-    FOREIGN KEY (sesion_id) REFERENCES sesiones(id) ON DELETE CASCADE,
-    UNIQUE(sesion_id, fila, columna)
-);
 ```
 
 ---
@@ -177,7 +92,20 @@ El diálogo emergente modal `TarifasDialog` intercepta el botón **"Confirmar Co
   - `Jubilado` (5.50 €)
   - `Estudiante` (5.50 €)
 - Recalcula el precio total acumulado en tiempo real al conmutar cualquier desplegable.
-- Devuelve un `std::vector<TarifaAsiento>` que `MainWindow` guarda en SQLite.
+
+### 6.7 Generación de Código QR Real (`qrcodegen` & `QrHelper`)
+
+- **Motor Core:** Implementación en C++20 de la librería oficial Nayuki QR Code Generator en `core/include/utils/qrcodegen.hpp` y `core/src/utils/qrcodegen.cpp`.
+- **Adaptador Qt:** `QrHelper::generarQR(const QString& texto, int tamanoDeseado)`:
+  - Genera la matriz QR utilizando corrección de errores Reed-Solomon (Nivel Medium).
+  - Añade un margen de *Quiet Zone* de 4 módulos respetando ISO/IEC 18004.
+  - Renderiza mediante `Qt::FastTransformation` (vecino más cercano) para garantizar bordes 100% nítidos sin anti-aliasing borroso.
+- **Firma digital del Ticket:** Codifica Película, Cine, Sala, Fecha/Hora, Asientos con sus respectivas tarifas en paréntesis y Precio Total.
+
+### 6.8 Detección y Bloqueo de Salas Llenas (`(LLENA)`)
+
+- Al seleccionar una película, `MainWindow` consulta en SQLite la capacidad de la sala (`filas * columnas`) y las reservas de la sesión.
+- Si una sesión alcanza el 100% de ocupación, su botón de selección se deshabilita inmediatamente (`setEnabled(false)`), cambia su etiqueta a `18:30 \n (LLENA)` y adopta un tema visual rojo/gris de advertencia (`#e06c75`).
 
 ---
 
@@ -192,5 +120,5 @@ El diálogo emergente modal `TarifasDialog` intercepta el botón **"Confirmar Co
 | **DT-05** | `main_gui.cpp` | **Ruta `style.qss` relativa al CWD frágil** | ✅ **RESUELTO** (Búsqueda multi-fallback añadida) |
 | DT-06 | `sesionrepository.cpp` | N+1 queries en `obtenerSesionesDePelicula` | 🟢 Pendiente |
 | DT-07 | `cinecardwidget.cpp` | Rating "⭐ 4.5 • Premium" estático | 🟢 Pendiente |
-| DT-08 | `mainwindow.cpp` | QR generado desde imagen estática `qr_mock.jpg` | 🟢 Pendiente (Siguiente hito) |
+| **DT-08** | `mainwindow.cpp` | **QR generado desde imagen estática `qr_mock.jpg`** | ✅ **RESUELTO** (Integrado motor QR Nayuki + `QrHelper`) |
 | DT-09 | General | Ausencia de suite de tests automatizados | 🔴 Pendiente |
