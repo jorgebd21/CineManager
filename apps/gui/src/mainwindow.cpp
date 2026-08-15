@@ -5,6 +5,7 @@
 
 #include "cinecardwidget.h"
 #include "moviecardwidget.h"
+#include "qrhelper.h"
 #include "tarifasdialog.h"
 #include "ui_mainwindow.h"
 
@@ -202,28 +203,53 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
       char timeBuf[10];
       std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", timeinfo);
 
-      QString textoBoton =
-          QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
+      Sala sala = db.obtenerSala(sesion.getIdSala());
+      int capacidadTotal = sala.getFilas() * sala.getColumnas();
+      std::vector<Reserva> reservas = db.obtenerReservasDeSesion(sesion.getId());
+      bool estaLlena =
+          (capacidadTotal > 0 &&
+           static_cast<int>(reservas.size()) >= capacidadTotal);
+
+      QString textoBoton;
+      if (estaLlena) {
+        textoBoton = QString(timeBuf) + "\n(LLENA)";
+      } else {
+        textoBoton =
+            QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
+      }
+
       QPushButton* botonSesion =
           new QPushButton(textoBoton, ui->scrollAreaWidgetContentsSesiones);
       botonSesion->setFixedSize(90, 50);
       botonSesion->setProperty("idSesion", sesion.getId());
 
-      // Estilo de los botones de la sesión
-      botonSesion->setStyleSheet(
-          "QPushButton {"
-          "  background-color: #1e222b;"
-          "  border: 1px solid #3e4452;"
-          "  border-radius: 8px;"
-          "  color: #ffffff;"
-          "  font-weight: bold;"
-          "  font-size: 11px;"
-          "}"
-          "QPushButton:hover {"
-          "  background-color: #00f0b5;"
-          "  color: #121418;"
-          "  border: 1px solid #00f0b5;"
-          "}");
+      if (estaLlena) {
+        botonSesion->setEnabled(false);
+        botonSesion->setStyleSheet(
+            "QPushButton {"
+            "  background-color: #282c34;"
+            "  border: 1px solid #e06c75;"
+            "  border-radius: 8px;"
+            "  color: #e06c75;"
+            "  font-weight: bold;"
+            "  font-size: 11px;"
+            "}");
+      } else {
+        botonSesion->setStyleSheet(
+            "QPushButton {"
+            "  background-color: #1e222b;"
+            "  border: 1px solid #3e4452;"
+            "  border-radius: 8px;"
+            "  color: #ffffff;"
+            "  font-weight: bold;"
+            "  font-size: 11px;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: #00f0b5;"
+            "  color: #121418;"
+            "  border: 1px solid #00f0b5;"
+            "}");
+      }
 
       connect(botonSesion, &QPushButton::clicked, this,
               &MainWindow::alPulsarBotonSesion);
@@ -426,18 +452,15 @@ void MainWindow::alConfirmarCompra() {
     Pelicula peli = db.obtenerPelicula(idPeliculaSeleccionada);
     Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
 
-    QPixmap qrPixmap("data/images/qr_mock.jpg");
-    ui->labelQR->setPixmap(qrPixmap.scaled(180, 180, Qt::KeepAspectRatio,
-                                           Qt::SmoothTransformation));
-    ui->labelQR->setFixedSize(180, 180);
-
     QString asientosStr;
-    for (const auto& butaca : butacasSeleccionadas) {
+    for (const auto& t : tarifasElegidas) {
       if (!asientosStr.isEmpty()) {
         asientosStr += ", ";
       }
-      asientosStr += "F" + QString::number(butaca.first + 1) + "-A" +
-                     QString::number(butaca.second + 1);
+      asientosStr += QString("F%1-A%2 (%3)")
+                         .arg(t.fila + 1)
+                         .arg(t.columna + 1)
+                         .arg(QString::fromStdString(t.tipo));
     }
 
     std::time_t hora = sesion.getHoraInicio();
@@ -445,6 +468,26 @@ void MainWindow::alConfirmarCompra() {
     char dateBuf[64];
     std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
     QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
+
+    QString qrPayload =
+        QString(
+            "CINEMANAGER TICKET\n"
+            "Pelicula: %1\n"
+            "Cine: %2\n"
+            "Sala: Sala %3\n"
+            "Sesion: %4\n"
+            "Asientos: %5\n"
+            "Total: %6 €")
+            .arg(QString::fromStdString(peli.getTitulo()))
+            .arg(QString::fromStdString(cine.getNombre()))
+            .arg(sesion.getIdSala())
+            .arg(fechaHoraStr)
+            .arg(asientosStr)
+            .arg(QString::number(totalCompra, 'f', 2));
+
+    QPixmap qrPixmap = QrHelper::generarQR(qrPayload, 180);
+    ui->labelQR->setPixmap(qrPixmap);
+    ui->labelQR->setFixedSize(180, 180);
 
     QString detallesHTML =
         QString(
