@@ -33,11 +33,12 @@ bool ReservaRepository::crearMultiples(const std::vector<Reserva>& reservas) {
 
   SqliteTransaction tx(db.getDb());
   try {
+    SqliteStatement stmt(db.getDb(),
+                         "INSERT INTO reservas (sesion_id, fila, columna, "
+                         "estado, timestamp_creacion, tipo, precio) VALUES (?, "
+                         "?, ?, ?, ?, ?, ?)");
     for (const auto& reserva : reservas) {
-      SqliteStatement stmt(db.getDb(),
-                           "INSERT INTO reservas (sesion_id, fila, columna, "
-                           "estado, timestamp_creacion, tipo, precio) VALUES (?, "
-                           "?, ?, ?, ?, ?, ?)");
+      stmt.reset();
       if (!stmt.bindInt(1, reserva.getIdSesion()) ||
           !stmt.bindInt(2, reserva.getFila()) ||
           !stmt.bindInt(3, reserva.getColumna()) ||
