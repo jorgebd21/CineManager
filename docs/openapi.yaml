@@ -130,12 +130,18 @@ paths:
                 sesiones:
                   - id: 1
                     pelicula_id: 1
+                    pelicula_titulo: "Inception"
+                    pelicula_genero: "CIENCIA_FICCION"
+                    pelicula_duracion: 148
                     sala_id: 1
-                    fecha_hora: "2026-08-20 18:30"
+                    fecha_hora: 1700000000
                   - id: 2
                     pelicula_id: 2
+                    pelicula_titulo: "El Padrino"
+                    pelicula_genero: "DRAMA"
+                    pelicula_duracion: 175
                     sala_id: 2
-                    fecha_hora: "2026-08-20 21:00"
+                    fecha_hora: 1700009000
 
   /api/v1/auth/login:
     post:
@@ -333,11 +339,18 @@ components:
           type: integer
         pelicula_id:
           type: integer
+        pelicula_titulo:
+          type: string
+        pelicula_genero:
+          type: string
+        pelicula_duracion:
+          type: integer
         sala_id:
           type: integer
         fecha_hora:
-          type: string
-          example: "2026-08-20 18:30"
+          type: integer
+          description: Marca de tiempo UNIX epoch (segundos)
+          example: 1700000000
 
     Usuario:
       type: object

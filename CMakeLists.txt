@@ -176,6 +176,9 @@ set(TEST_SOURCES
     tests/test_reserva_repo.cpp
     tests/test_cinema_repos.cpp
     tests/test_concurrency.cpp
+    tests/test_expiration_toctou.cpp
+    tests/test_database_integrity.cpp
+    tests/test_domain_rules.cpp
 )
 
 add_executable(CineManagerTests ${TEST_SOURCES})
