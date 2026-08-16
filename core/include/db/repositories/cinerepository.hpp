@@ -9,11 +9,11 @@
 class ICineRepository {
  public:
   virtual ~ICineRepository() = default;
-  virtual int crear(const Cine& cine) = 0;
-  virtual Cine obtenerPorId(int id) = 0;
-  virtual std::vector<Cine> obtenerTodos() = 0;
-  virtual bool actualizar(int id, const Cine& cine) = 0;
-  virtual bool eliminar(int id) = 0;
+  [[nodiscard]] virtual int crear(const Cine& cine) = 0;
+  [[nodiscard]] virtual Cine obtenerPorId(int id) = 0;
+  [[nodiscard]] virtual std::vector<Cine> obtenerTodos() = 0;
+  [[nodiscard]] virtual bool actualizar(int id, const Cine& cine) = 0;
+  [[nodiscard]] virtual bool eliminar(int id) = 0;
 };
 
 class CineRepository : public ICineRepository {
@@ -23,11 +23,11 @@ class CineRepository : public ICineRepository {
  public:
   explicit CineRepository(SqliteDatabase& database);
 
-  int crear(const Cine& cine) override;
-  Cine obtenerPorId(int id) override;
-  std::vector<Cine> obtenerTodos() override;
-  bool actualizar(int id, const Cine& cine) override;
-  bool eliminar(int id) override;
+  [[nodiscard]] int crear(const Cine& cine) override;
+  [[nodiscard]] Cine obtenerPorId(int id) override;
+  [[nodiscard]] std::vector<Cine> obtenerTodos() override;
+  [[nodiscard]] bool actualizar(int id, const Cine& cine) override;
+  [[nodiscard]] bool eliminar(int id) override;
 };
 
 #endif  // CINEREPOSITORY_HPP

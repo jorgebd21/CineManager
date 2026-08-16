@@ -63,7 +63,7 @@ void DataManager::iniciarLimpiezaLoop(std::stop_token stoken) {
         auto sesionMtx = obtenerMutexSesion(reserva.getIdSesion());
         std::lock_guard<std::mutex> lockSesion(*sesionMtx);
         std::lock_guard<std::mutex> lockDb(db.getMutex());
-        reservaRepo.eliminar(reserva.getId());
+        static_cast<void>(reservaRepo.eliminar(reserva.getId()));
       }
     }
   }

@@ -29,7 +29,7 @@ class SqliteDatabase {
   SqliteDatabase(SqliteDatabase&& other) noexcept;
   SqliteDatabase& operator=(SqliteDatabase&& other) noexcept;
 
-  bool abrirSQL(const std::string& customPath = "");
+  [[nodiscard]] bool abrirSQL(const std::string& customPath = "");
   void cerrarSQL();
 
   [[nodiscard]] bool estaAbierta() const noexcept { return db != nullptr; }
@@ -52,15 +52,15 @@ class SqliteStatement {
   SqliteStatement(SqliteStatement&& other) noexcept;
   SqliteStatement& operator=(SqliteStatement&& other) noexcept;
 
-  bool bindInt(int index, int value);
-  bool bindInt64(int index, sqlite3_int64 value);
-  bool bindFloat(int index, float value);
-  bool bindDouble(int index, double value);
-  bool bindText(int index, std::string_view value);
-  bool bindNull(int index);
+  [[nodiscard]] bool bindInt(int index, int value);
+  [[nodiscard]] bool bindInt64(int index, sqlite3_int64 value);
+  [[nodiscard]] bool bindFloat(int index, float value);
+  [[nodiscard]] bool bindDouble(int index, double value);
+  [[nodiscard]] bool bindText(int index, std::string_view value);
+  [[nodiscard]] bool bindNull(int index);
 
   template <typename T>
-  bool bind(int index, T&& val) {
+  [[nodiscard]] bool bind(int index, T&& val) {
     using Decayed = std::decay_t<T>;
     if constexpr (std::is_same_v<Decayed, int>) {
       return bindInt(index, val);
@@ -79,7 +79,7 @@ class SqliteStatement {
     }
   }
 
-  int step();
+  [[nodiscard]] int step();
   void reset();
 
   [[nodiscard]] int getColumnInt(int index) const;
@@ -106,7 +106,7 @@ class SqliteTransaction {
   SqliteTransaction(SqliteTransaction&& other) noexcept;
   SqliteTransaction& operator=(SqliteTransaction&& other) noexcept;
 
-  bool commit();
+  [[nodiscard]] bool commit();
   void rollback();
 };
 

@@ -12,11 +12,11 @@
 class IUsuarioRepository {
  public:
   virtual ~IUsuarioRepository() = default;
-  virtual bool crear(const Usuario& usuario) = 0;
-  virtual Usuario obtenerPorDni(const std::string& dni) = 0;
-  virtual Usuario autenticar(const std::string& dni, const std::string& password) = 0;
-  virtual bool actualizar(const Usuario& usuario) = 0;
-  virtual bool eliminar(const std::string& dni) = 0;
+  [[nodiscard]] virtual bool crear(const Usuario& usuario) = 0;
+  [[nodiscard]] virtual Usuario obtenerPorDni(const std::string& dni) = 0;
+  [[nodiscard]] virtual Usuario autenticar(const std::string& dni, const std::string& password) = 0;
+  [[nodiscard]] virtual bool actualizar(const Usuario& usuario) = 0;
+  [[nodiscard]] virtual bool eliminar(const std::string& dni) = 0;
 };
 
 class UsuarioRepository : public IUsuarioRepository {
@@ -26,11 +26,11 @@ class UsuarioRepository : public IUsuarioRepository {
  public:
   explicit UsuarioRepository(SqliteDatabase& database);
 
-  bool crear(const Usuario& usuario) override;
-  Usuario obtenerPorDni(const std::string& dni) override;
-  Usuario autenticar(const std::string& dni, const std::string& password) override;
-  bool actualizar(const Usuario& usuario) override;
-  bool eliminar(const std::string& dni) override;
+  [[nodiscard]] bool crear(const Usuario& usuario) override;
+  [[nodiscard]] Usuario obtenerPorDni(const std::string& dni) override;
+  [[nodiscard]] Usuario autenticar(const std::string& dni, const std::string& password) override;
+  [[nodiscard]] bool actualizar(const Usuario& usuario) override;
+  [[nodiscard]] bool eliminar(const std::string& dni) override;
 };
 
 #endif  // USUARIOREPOSITORY_HPP

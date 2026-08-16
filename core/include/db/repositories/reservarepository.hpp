@@ -9,13 +9,13 @@
 class IReservaRepository {
  public:
   virtual ~IReservaRepository() = default;
-  virtual int crear(const Reserva& reserva) = 0;
-  virtual bool crearMultiples(const std::vector<Reserva>& reservas) = 0;
-  virtual Reserva obtenerPorId(int id) = 0;
-  virtual std::vector<Reserva> obtenerPorSesion(int idSesion) = 0;
-  virtual std::vector<Reserva> obtenerPendientes() = 0;
-  virtual bool actualizar(int id, const Reserva& reserva) = 0;
-  virtual bool eliminar(int id) = 0;
+  [[nodiscard]] virtual int crear(const Reserva& reserva) = 0;
+  [[nodiscard]] virtual bool crearMultiples(const std::vector<Reserva>& reservas) = 0;
+  [[nodiscard]] virtual Reserva obtenerPorId(int id) = 0;
+  [[nodiscard]] virtual std::vector<Reserva> obtenerPorSesion(int idSesion) = 0;
+  [[nodiscard]] virtual std::vector<Reserva> obtenerPendientes() = 0;
+  [[nodiscard]] virtual bool actualizar(int id, const Reserva& reserva) = 0;
+  [[nodiscard]] virtual bool eliminar(int id) = 0;
 };
 
 class ReservaRepository : public IReservaRepository {
@@ -25,13 +25,13 @@ class ReservaRepository : public IReservaRepository {
  public:
   explicit ReservaRepository(SqliteDatabase& database);
 
-  int crear(const Reserva& reserva) override;
-  bool crearMultiples(const std::vector<Reserva>& reservas) override;
-  Reserva obtenerPorId(int id) override;
-  std::vector<Reserva> obtenerPorSesion(int idSesion) override;
-  std::vector<Reserva> obtenerPendientes() override;
-  bool actualizar(int id, const Reserva& reserva) override;
-  bool eliminar(int id) override;
+  [[nodiscard]] int crear(const Reserva& reserva) override;
+  [[nodiscard]] bool crearMultiples(const std::vector<Reserva>& reservas) override;
+  [[nodiscard]] Reserva obtenerPorId(int id) override;
+  [[nodiscard]] std::vector<Reserva> obtenerPorSesion(int idSesion) override;
+  [[nodiscard]] std::vector<Reserva> obtenerPendientes() override;
+  [[nodiscard]] bool actualizar(int id, const Reserva& reserva) override;
+  [[nodiscard]] bool eliminar(int id) override;
 };
 
 #endif  // RESERVAREPOSITORY_HPP
