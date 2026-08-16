@@ -353,10 +353,10 @@ CineManager/
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo la licencia **MIT**. Consulte el archivo `LICENSE` para más información.
+Este proyecto se distribuye bajo los términos de la licencia **MIT**. Para más detalles, consulte el archivo oficial [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
-  <sub>Desarrollado con pasión y rigor de ingeniería por <strong>Jorge Beneyto</strong> · 2026</sub>
+  <sub>Desarrollado con pasión y rigor de ingeniería por <strong>Jorge Baeza Diaz</strong> · 2026</sub>
 </div>
