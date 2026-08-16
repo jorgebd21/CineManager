@@ -2,6 +2,27 @@
 #define USUARIO_HPP
 
 #include <string>
+#include <string_view>
+#include <utility>
+
+enum class Rol { CLIENTE, ADMIN };
+
+[[nodiscard]] inline std::string rolToString(Rol rol) {
+  switch (rol) {
+    case Rol::ADMIN:
+      return "ADMIN";
+    case Rol::CLIENTE:
+    default:
+      return "CLIENTE";
+  }
+}
+
+[[nodiscard]] inline Rol stringToRol(std::string_view rolStr) {
+  if (rolStr == "ADMIN" || rolStr == "admin") {
+    return Rol::ADMIN;
+  }
+  return Rol::CLIENTE;
+}
 
 class Usuario {
  private:
@@ -10,30 +31,40 @@ class Usuario {
   std::string apellidos;
   std::string email;
   std::string passwordHash;
-  std::string rol;
+  std::string rol{"CLIENTE"};
 
  public:
   Usuario() = default;
   Usuario(std::string dni, std::string nombre, std::string apellidos,
-          std::string email, std::string passwordHash, std::string rol);
+          std::string email, std::string passwordHash, std::string rol = "CLIENTE");
 
-  std::string getDni() const;
-  std::string getNombre() const;
-  std::string getApellidos() const;
-  std::string getEmail() const;
-  std::string getPasswordHash() const;
-  std::string getRol() const;
+  [[nodiscard]] const std::string& getDni() const noexcept;
+  [[nodiscard]] const std::string& getNombre() const noexcept;
+  [[nodiscard]] const std::string& getApellidos() const noexcept;
+  [[nodiscard]] const std::string& getEmail() const noexcept;
+  [[nodiscard]] const std::string& getPasswordHash() const noexcept;
+  [[nodiscard]] const std::string& getRol() const noexcept;
+  [[nodiscard]] Rol getRolEnum() const noexcept;
 
-  bool esValido() const { return !dni.empty() && dni != "-1"; }
-
-  void setDni(std::string dni) { this->dni = dni; }
-  void setNombre(std::string nombre) { this->nombre = nombre; }
-  void setApellidos(std::string apellidos) { this->apellidos = apellidos; }
-  void setEmail(std::string email) { this->email = email; }
-  void setPasswordHash(std::string passwordHash) {
-    this->passwordHash = passwordHash;
+  [[nodiscard]] bool esValido() const noexcept {
+    return !dni.empty() && dni != "-1";
   }
-  void setRol(std::string rol) { this->rol = rol; }
+
+  void setDni(std::string nuevoDni) noexcept { dni = std::move(nuevoDni); }
+  void setNombre(std::string nuevoNombre) noexcept {
+    nombre = std::move(nuevoNombre);
+  }
+  void setApellidos(std::string nuevosApellidos) noexcept {
+    apellidos = std::move(nuevosApellidos);
+  }
+  void setEmail(std::string nuevoEmail) noexcept {
+    email = std::move(nuevoEmail);
+  }
+  void setPasswordHash(std::string nuevoHash) noexcept {
+    passwordHash = std::move(nuevoHash);
+  }
+  void setRol(std::string nuevoRol) noexcept { rol = std::move(nuevoRol); }
+  void setRolEnum(Rol nuevoRol) noexcept { rol = rolToString(nuevoRol); }
 };
 
-#endif
+#endif  // USUARIO_HPP

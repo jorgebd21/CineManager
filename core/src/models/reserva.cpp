@@ -7,29 +7,45 @@ Reserva::Reserva(int id, int idSesion, int fila, int columna,
       idSesion(idSesion),
       fila(fila),
       columna(columna),
-      estado(estado),
+      estado(std::move(estado)),
       timestampCreacion(timestampCreacion),
-      tipo(tipo),
+      tipo(std::move(tipo)),
       precio(precio) {}
 
-int Reserva::getId() const { return id; }
+int Reserva::getId() const noexcept { return id; }
 
-int Reserva::getIdSesion() const { return idSesion; }
+int Reserva::getIdSesion() const noexcept { return idSesion; }
 
-int Reserva::getFila() const { return fila; }
+int Reserva::getFila() const noexcept { return fila; }
 
-int Reserva::getColumna() const { return columna; }
+int Reserva::getColumna() const noexcept { return columna; }
 
-std::string Reserva::getTipo() const { return tipo; }
+const std::string& Reserva::getTipo() const noexcept { return tipo; }
 
-float Reserva::getPrecio() const { return precio; }
+float Reserva::getPrecio() const noexcept { return precio; }
 
-std::string Reserva::getEstado() const { return estado; }
+const std::string& Reserva::getEstado() const noexcept { return estado; }
 
-std::time_t Reserva::getTimestampCreacion() const { return timestampCreacion; }
+EstadoReserva Reserva::getEstadoEnum() const noexcept {
+  return stringToEstadoReserva(estado);
+}
 
-void Reserva::setEstado(std::string estado) { this->estado = estado; }
+std::time_t Reserva::getTimestampCreacion() const noexcept {
+  return timestampCreacion;
+}
 
-void Reserva::setTipo(std::string tipo) { this->tipo = tipo; }
+void Reserva::setEstado(std::string nuevoEstado) noexcept {
+  estado = std::move(nuevoEstado);
+}
 
-void Reserva::setPrecio(float precio) { this->precio = precio; }
+void Reserva::setEstadoEnum(EstadoReserva nuevoEstado) noexcept {
+  estado = estadoReservaToString(nuevoEstado);
+}
+
+void Reserva::setTipo(std::string nuevoTipo) noexcept {
+  tipo = std::move(nuevoTipo);
+}
+
+void Reserva::setPrecio(float nuevoPrecio) noexcept {
+  precio = nuevoPrecio;
+}

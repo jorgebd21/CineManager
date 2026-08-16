@@ -2,6 +2,8 @@
 #define PELICULA_H
 
 #include <string>
+#include <string_view>
+#include <utility>
 
 enum class Genero {
   NONE,
@@ -15,27 +17,30 @@ enum class Genero {
   OTHER
 };
 
-Genero intToGenero(int generoN);
-Genero stringToGenero(const std::string& generoStr);
-std::string generoToString(Genero genero);
+[[nodiscard]] Genero intToGenero(int generoN) noexcept;
+[[nodiscard]] Genero stringToGenero(std::string_view generoStr) noexcept;
+[[nodiscard]] std::string generoToString(Genero genero);
+
 class Pelicula {
  private:
-  int id;
+  int id{-1};
   std::string titulo;
-  Genero genero;
-  int duracion;
+  Genero genero{Genero::NONE};
+  int duracion{0};
 
  public:
-  Pelicula(int id, const std::string& titulo, Genero genero, int duracion);
+  Pelicula() = default;
+  Pelicula(int id, std::string titulo, Genero genero, int duracion);
 
-  int getId() const;
-  std::string getTitulo() const;
-  Genero getGenero() const;
-  int getDuracion() const;
+  [[nodiscard]] int getId() const noexcept;
+  [[nodiscard]] const std::string& getTitulo() const noexcept;
+  [[nodiscard]] Genero getGenero() const noexcept;
+  [[nodiscard]] int getDuracion() const noexcept;
+  [[nodiscard]] bool esValido() const noexcept { return id != -1; }
 
-  void setTitulo(std::string titulo);
-  void setGenero(Genero genero);
-  void setDuracion(int duracion);
+  void setTitulo(std::string nuevoTitulo) noexcept;
+  void setGenero(Genero nuevoGenero) noexcept;
+  void setDuracion(int nuevaDuracion) noexcept;
 };
 
-#endif
+#endif  // PELICULA_H

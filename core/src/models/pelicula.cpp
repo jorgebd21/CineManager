@@ -1,6 +1,6 @@
 #include "models/pelicula.hpp"
 
-Genero intToGenero(int generoN) {
+Genero intToGenero(int generoN) noexcept {
   switch (generoN) {
     case 1:
       return Genero::NONE;
@@ -23,7 +23,7 @@ Genero intToGenero(int generoN) {
   }
 }
 
-Genero stringToGenero(const std::string& generoStr) {
+Genero stringToGenero(std::string_view generoStr) noexcept {
   if (generoStr == "NONE") return Genero::NONE;
   if (generoStr == "ACCION" || generoStr == "ACCIÓN") return Genero::ACCION;
   if (generoStr == "COMEDIA") return Genero::COMEDIA;
@@ -60,20 +60,28 @@ std::string generoToString(Genero genero) {
   }
 }
 
-Pelicula::Pelicula(int id, const std::string& titulo, Genero genero,
-                   int duracion)
-    : id(id), titulo(titulo), genero(genero), duracion(duracion) {}
+Pelicula::Pelicula(int id, std::string titulo, Genero genero, int duracion)
+    : id(id),
+      titulo(std::move(titulo)),
+      genero(genero),
+      duracion(duracion) {}
 
-int Pelicula::getId() const { return id; }
+int Pelicula::getId() const noexcept { return id; }
 
-std::string Pelicula::getTitulo() const { return titulo; }
+const std::string& Pelicula::getTitulo() const noexcept { return titulo; }
 
-Genero Pelicula::getGenero() const { return genero; }
+Genero Pelicula::getGenero() const noexcept { return genero; }
 
-int Pelicula::getDuracion() const { return duracion; }
+int Pelicula::getDuracion() const noexcept { return duracion; }
 
-void Pelicula::setTitulo(std::string titulo) { this->titulo = titulo; }
+void Pelicula::setTitulo(std::string nuevoTitulo) noexcept {
+  titulo = std::move(nuevoTitulo);
+}
 
-void Pelicula::setGenero(Genero genero) { this->genero = genero; }
+void Pelicula::setGenero(Genero nuevoGenero) noexcept {
+  genero = nuevoGenero;
+}
 
-void Pelicula::setDuracion(int duracion) { this->duracion = duracion; }
+void Pelicula::setDuracion(int nuevaDuracion) noexcept {
+  duracion = nuevaDuracion;
+}

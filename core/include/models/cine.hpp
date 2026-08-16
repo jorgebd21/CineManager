@@ -2,22 +2,25 @@
 #define CINE_H
 
 #include <string>
+#include <utility>
 
 class Cine {
  private:
-  int id;
+  int id{-1};
   std::string nombre;
   std::string direccion;
 
  public:
-  Cine(int id, const std::string& nombre, const std::string& direccion);
+  Cine() = default;
+  Cine(int id, std::string nombre, std::string direccion);
 
-  int getId() const;
-  std::string getNombre() const;
-  std::string getDireccion() const;
+  [[nodiscard]] int getId() const noexcept;
+  [[nodiscard]] const std::string& getNombre() const noexcept;
+  [[nodiscard]] const std::string& getDireccion() const noexcept;
+  [[nodiscard]] bool esValido() const noexcept { return id != -1; }
 
-  void setNombre(const std::string& nombre);
-  void setDireccion(const std::string& direccion);
+  void setNombre(std::string nuevoNombre) noexcept;
+  void setDireccion(std::string nuevaDireccion) noexcept;
 };
 
-#endif
+#endif  // CINE_H
