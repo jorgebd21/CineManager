@@ -1,6 +1,16 @@
 build/
+build*/
+cmake-build-*/
 .git/
 .vscode/
+.idea/
+.fleet/
 .gemini/
+.agents/
 *.user
 *.user.*
+*.log
+*.db-wal
+*.db-shm
+*.db-journal
+test_*.db

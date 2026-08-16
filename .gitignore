@@ -1,24 +1,57 @@
+# ==============================================================================
+# Build Artifacts & CMake Directories
+# ==============================================================================
+build/
+build*/
+cmake-build-*/
+bin/
+lib/
+_deps/
+CMakeFiles/
+CMakeScripts/
+Testing/
+.cache/
+.CMakeCache/
+
+# CMake Generated Files
 CMakeLists.txt.user
+CMakeLists.txt.user.*
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
+CMakeUserPresets.json
 Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-_deps
-CMakeUserPresets.json
-CineManager
-.CMakeCache
-.cache
-build
-.agents
+
+# ==============================================================================
+# Database & SQLite Runtime Artifacts
+# ==============================================================================
 data/cine.db
-# CLion
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#cmake-build-*
+*.db-wal
+*.db-shm
+*.db-journal
+test_*.db
+
+# ==============================================================================
+# IDEs, Editors & OS Temporary Files
+# ==============================================================================
+.vscode/
+.idea/
+.fleet/
+.agents/
+*.autosave
+*.user
+*.user.*
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# ==============================================================================
+# Logs & Profiler Outputs
+# ==============================================================================
+*.log
+valgrind*.txt
+callgrind.out.*
+
