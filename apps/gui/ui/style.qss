@@ -1,18 +1,67 @@
+/* ==============================================================================
+   CineManager v2.0 - Dark Cinema Theme Design System
+   Paleta: Gold (#E5C07B), Soft Blue (#61AFEF), Emerald (#10B981), Crimson (#EF4444)
+   Superficies: Background (#12141D), Card/Container (#1A1D28), Panel (#212534)
+   ============================================================================== */
+
 QMainWindow {
-    background-color: #121418;
+    background-color: #12141D;
+    color: #FFFFFF;
 }
 
-/* Color global para las etiquetas de texto */
+QDialog {
+    background-color: #181B26;
+    color: #FFFFFF;
+}
+
+/* ==============================================================================
+   Cuadros de Diálogo del Sistema (QMessageBox y Alertas)
+   ============================================================================== */
+QMessageBox {
+    background-color: #181B26;
+    color: #FFFFFF;
+}
+
+QMessageBox QLabel {
+    color: #F3F4F6;
+    font-size: 13px;
+    background-color: transparent;
+    padding: 6px;
+}
+
+QMessageBox QPushButton {
+    background-color: #E5C07B;
+    color: #12141D;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 22px;
+    font-size: 13px;
+    min-width: 80px;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #D4AF37;
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #C09A2E;
+}
+
+/* ==============================================================================
+   Tipografía y Etiquetas
+   ============================================================================== */
 QLabel {
-    color: #ffffff;
+    color: #FFFFFF;
 }
 
-/* Etiquetas secundarias de información */
 #labelSesionInfo, #labelDireccion, #labelPrecioTotal {
-    color: #abb2bf;
+    color: #ABB2BF;
 }
 
-/* Quitar fondos grises/blancos del ScrollArea */
+/* ==============================================================================
+   Áreas de Desplazamiento y Scrollbars
+   ============================================================================== */
 QScrollArea {
     background-color: transparent;
     border: none;
@@ -26,140 +75,211 @@ QScrollArea > QWidget > QWidget {
     background-color: transparent;
 }
 
-/* Listas con bordes redondeados y fondo pizarra */
+QScrollBar:vertical {
+    background-color: #141620;
+    width: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #2D3345;
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #434B64;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background-color: #141620;
+    height: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #2D3345;
+    min-width: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #434B64;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+/* ==============================================================================
+   Listas de Cines y Películas
+   ============================================================================== */
 QListWidget {
-    background-color: #1e222b;
-    border: 1px solid #282c34;
+    background-color: #1A1D28;
+    border: 1px solid #282C3C;
     border-radius: 12px;
-    color: #ffffff;
+    color: #FFFFFF;
     padding: 10px;
 }
 
-QListWidget::item:hover {
-    background-color: #282c34;
+QListWidget::item {
     border-radius: 8px;
+    padding: 4px;
 }
 
-/* Estilo para los botones de atrás */
+QListWidget::item:hover {
+    background-color: #222634;
+}
+
+/* ==============================================================================
+   Botones de Navegación y Acción
+   ============================================================================== */
 QPushButton#botonAtrasPeliculas, 
 QPushButton#botonAtrasSesiones, 
 QPushButton#botonAtrasSala {
-    background-color: #1e222b;
-    border: 1px solid #3e4452;
+    background-color: #1E202D;
+    border: 1px solid #2B2E3D;
     border-radius: 6px;
-    color: #ffffff;
-    padding: 5px 10px;
+    color: #FFFFFF;
+    padding: 6px 14px;
     font-weight: bold;
+    font-size: 12px;
 }
 
 QPushButton#botonAtrasPeliculas:hover, 
 QPushButton#botonAtrasSesiones:hover, 
 QPushButton#botonAtrasSala:hover {
-    background-color: #00f0b5;
-    color: #121418;
-    border: 1px solid #00f0b5;
+    background-color: #2B2E3D;
+    color: #61AFEF;
+    border: 1px solid #61AFEF;
 }
 
-/* Estilo para las butacas del cine */
+/* Botón de confirmar compra en la sala */
+QPushButton#botonConfirmar {
+    background-color: #E5C07B;
+    color: #12141D;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+QPushButton#botonConfirmar:hover {
+    background-color: #D4AF37;
+}
+
+QPushButton#botonConfirmar:pressed {
+    background-color: #C09A2E;
+}
+
+/* Botón de volver al inicio de página final */
+QPushButton#botonInicio {
+    background-color: #E5C07B;
+    color: #12141D;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+QPushButton#botonInicio:hover {
+    background-color: #D4AF37;
+}
+
+QPushButton#botonInicio:pressed {
+    background-color: #C09A2E;
+}
+
+/* ==============================================================================
+   Butacas de la Sala de Cine
+   ============================================================================== */
 QPushButton#botonButaca {
-    background-color: #2ecc71;
-    border: 1px solid #27ae60;
-    border-radius: 4px;
+    background-color: #10B981;
+    border: 1px solid #059669;
+    border-radius: 5px;
 }
 
 QPushButton#botonButaca:hover {
-    background-color: #00f0b5;
-    border: 1px solid #00d09c;
+    background-color: #34D399;
+    border: 1px solid #10B981;
 }
 
 QPushButton#botonButaca:disabled {
-    background-color: #e74c3c;
-    border: 1px solid #c0392b;
+    background-color: #EF4444;
+    border: 1px solid #DC2626;
 }
 
 QPushButton#botonButaca:checked {
-    background-color: #00f0b5;
-    border: 1px solid #00d09c;
+    background-color: #E5C07B;
+    border: 1px solid #D4AF37;
 }
-
 
 /* Pantalla del cine estilo mockup */
 #labelPantalla {
-    color: #abb2bf;
-    background-color: #1e222b;
-    border: 1px solid #3e4452;
+    color: #ABB2BF;
+    background-color: #1A1D28;
+    border: 1px solid #2B2E3D;
     border-radius: 12px;
     padding: 8px;
     letter-spacing: 4px;
     font-size: 11px;
 }
 
-/* Estilo para el contenedor del ticket de compra */
+/* ==============================================================================
+   Ticket de Compra Final
+   ============================================================================== */
 QFrame#frameTicket {
-    background-color: #1e222b;
-    border: 2px solid #282c34;
+    background-color: #1A1D28;
+    border: 1px solid #2B2E3D;
     border-radius: 16px;
-    padding: 15px;
+    padding: 18px;
 }
 
-/* Estilo del código QR dentro del ticket */
 QLabel#labelQR {
-    background-color: #ffffff;
+    background-color: #FFFFFF;
     border-radius: 10px;
     padding: 8px;
 }
 
-/* Botón de volver al inicio de página final */
-QPushButton#botonInicio {
-    background-color: #00f0b5;
-    color: #121418;
-    border: 1px solid #00f0b5;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-weight: bold;
-    font-size: 13px;
-}
-
-QPushButton#botonInicio:hover {
-    background-color: #00d09c;
-    border: 1px solid #00d09c;
-}
-
-/* Botón de confirmar compra en la sala */
-QPushButton#botonConfirmar {
-    background-color: #00f0b5;
-    color: #121418;
-    border: 1px solid #00f0b5;
-    border-radius: 6px;
-    padding: 6px 15px;
-    font-weight: bold;
-    font-size: 11px;
-}
-
-QPushButton#botonConfirmar:hover {
-    background-color: #00d09c;
-    border: 1px solid #00d09c;
-}
-
-
-/* Estilo para los cuadros de búsqueda y combo boxes */
+/* ==============================================================================
+   Inputs, Buscadores y ComboBoxes
+   ============================================================================== */
 QLineEdit, QComboBox {
-    background-color: #1e222b;
-    border: 1px solid #3e4452;
+    background-color: #161822;
+    border: 1px solid #2B2E3D;
     border-radius: 6px;
-    color: #ffffff;
-    padding: 5px 10px;
-    font-size: 11px;
+    color: #FFFFFF;
+    padding: 7px 12px;
+    font-size: 12px;
+}
+
+QLineEdit::placeholder {
+    color: #5C6370;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #61AFEF;
 }
 
 QComboBox {
     combobox-popup: 0;
 }
-
-QLineEdit:focus, QComboBox:focus {
-    border: 1px solid #00f0b5;
-}
-
 
 QComboBox::drop-down {
     subcontrol-origin: padding;
@@ -170,25 +290,24 @@ QComboBox::drop-down {
     border-bottom-right-radius: 6px;
 }
 
-/* Corregir el fondo blanco de la lista desplegable del combobox */
 QComboBox QAbstractItemView {
-    background-color: #1e222b;
-    border: 1px solid #3e4452;
-    color: #ffffff;
-    selection-background-color: #00f0b5;
-    selection-color: #121418;
-    padding: 0px;
-    margin: 0px;
+    background-color: #1A1D28;
+    border: 1px solid #2B2E3D;
+    color: #FFFFFF;
+    selection-background-color: #E5C07B;
+    selection-color: #12141D;
+    padding: 4px;
     outline: 0px;
 }
 
 QComboBox QAbstractItemView::item {
     padding: 6px 10px;
-    background-color: #1e222b;
-    color: #ffffff;
+    background-color: #1A1D28;
+    color: #FFFFFF;
+    border-radius: 4px;
 }
 
 QComboBox QAbstractItemView::item:selected {
-    background-color: #00f0b5;
-    color: #121418;
+    background-color: #E5C07B;
+    color: #12141D;
 }

@@ -15,37 +15,40 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QDialog {
-    background-color: #1e222b;
-    color: #ffffff;
+    background-color: #181B26;
+    color: #FFFFFF;
+    font-family: 'Segoe UI', sans-serif;
 }
 QLabel {
-    color: #ffffff;
+    color: #FFFFFF;
     font-family: 'Segoe UI', sans-serif;
 }
 QScrollArea {
-    border: 1px solid #282c34;
-    background-color: #181a1f;
+    border: 1px solid #2B2E3D;
+    background-color: #12141D;
     border-radius: 8px;
 }
 QPushButton#botonAceptar {
-    background-color: #00f0b5;
-    color: #1e222b;
+    background-color: #E5C07B;
+    color: #12141D;
     font-weight: bold;
+    border: none;
     border-radius: 6px;
-    padding: 8px 16px;
+    padding: 8px 18px;
 }
 QPushButton#botonAceptar:hover {
-    background-color: #00d6a2;
+    background-color: #D4AF37;
 }
 QPushButton#botonCancelar {
-    background-color: #3e4452;
-    color: #ffffff;
+    background-color: #2B2E3D;
+    color: #FFFFFF;
     font-weight: bold;
+    border: 1px solid #3A3F53;
     border-radius: 6px;
-    padding: 8px 16px;
+    padding: 8px 18px;
 }
 QPushButton#botonCancelar:hover {
-    background-color: #4b5263;
+    background-color: #3A3F53;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayoutMain">
@@ -110,7 +113,7 @@ QPushButton#botonCancelar:hover {
         </font>
        </property>
        <property name="styleSheet">
-        <string notr="true">color: #00f0b5;</string>
+        <string notr="true">color: #E5C07B; font-weight: bold; font-size: 13px;</string>
        </property>
        <property name="text">
         <string>Total: 0.00 €</string>

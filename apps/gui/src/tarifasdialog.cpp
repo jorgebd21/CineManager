@@ -27,18 +27,22 @@ TarifasDialog::TarifasDialog(const std::set<std::pair<int, int>>& butacas,
     QComboBox* comboTarifa = new QComboBox(filaWidget);
     comboTarifa->setStyleSheet(
         "QComboBox {"
-        "  background-color: #282c34;"
-        "  color: #ffffff;"
-        "  border: 1px solid #3e4452;"
-        "  border-radius: 4px;"
-        "  padding: 4px 8px;"
+        "  background-color: #1A1D28;"
+        "  color: #FFFFFF;"
+        "  border: 1px solid #2B2E3D;"
+        "  border-radius: 6px;"
+        "  padding: 5px 10px;"
         "  combobox-popup: 0;"
         "}"
+        "QComboBox:focus {"
+        "  border: 1px solid #61AFEF;"
+        "}"
         "QComboBox QAbstractItemView {"
-        "  background-color: #1e222b;"
-        "  color: #ffffff;"
-        "  selection-background-color: #00f0b5;"
-        "  selection-color: #1e222b;"
+        "  background-color: #1A1D28;"
+        "  color: #FFFFFF;"
+        "  border: 1px solid #2B2E3D;"
+        "  selection-background-color: #E5C07B;"
+        "  selection-color: #12141D;"
         "}");
 
     comboTarifa->addItem("Adulto - 7.50 €");

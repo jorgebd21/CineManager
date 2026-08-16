@@ -35,15 +35,16 @@ CineCardWidget::CineCardWidget(const Cine& cine, QWidget* parent)
   labelDireccion->setStyleSheet("color: #abb2bf; font-size: 11px;");
   layout->addWidget(labelDireccion);
 
-  QLabel* labelValoracion = new QLabel("⭐ 4.5  •  Premium", this);
+  QLabel* labelValoracion = new QLabel("★ 4.5  •  Premium", this);
   labelValoracion->setStyleSheet(
-      "color: #00f0b5; font-size: 11px; font-weight: bold;");
+      "color: #E5C07B; font-size: 11px; font-weight: bold;");
   layout->addWidget(labelValoracion);
 
-  QPushButton* boton = new QPushButton("SELECT", this);
+  QPushButton* boton = new QPushButton("Seleccionar Cine", this);
   boton->setStyleSheet(
-      "background-color: #00f0b5; color: #121418; font-weight: bold; padding: "
-      "6px; border-radius: 6px;");
+      "QPushButton { background-color: #E5C07B; color: #12141D; font-weight: bold; padding: "
+      "8px; border-radius: 6px; font-size: 12px; border: none; } "
+      "QPushButton:hover { background-color: #D4AF37; }");
   layout->addWidget(boton);
 
   connect(boton, &QPushButton::clicked, this, &CineCardWidget::alPulsarBoton);

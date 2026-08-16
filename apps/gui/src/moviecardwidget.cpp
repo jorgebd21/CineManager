@@ -40,10 +40,11 @@ MovieCardWidget::MovieCardWidget(const Pelicula& pelicula, QWidget* parent)
   labelInfo->setStyleSheet("color: #abb2bf; font-size: 10px;");
   layout->addWidget(labelInfo);
 
-  QPushButton* boton = new QPushButton("BOOK TICKETS", this);
+  QPushButton* boton = new QPushButton("Comprar Entradas", this);
   boton->setStyleSheet(
-      "background-color: #00f0b5; color: #121418; font-weight: bold; padding: "
-      "6px; border-radius: 6px; font-size: 11px;");
+      "QPushButton { background-color: #E5C07B; color: #12141D; font-weight: bold; padding: "
+      "8px; border-radius: 6px; font-size: 11px; border: none; } "
+      "QPushButton:hover { background-color: #D4AF37; }");
   layout->addWidget(boton);
 
   connect(boton, &QPushButton::clicked, this, &MovieCardWidget::alPulsarBoton);

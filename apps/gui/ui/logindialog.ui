@@ -51,6 +51,9 @@ QLineEdit {
     padding: 8px 12px;
     font-size: 13px;
 }
+QLineEdit::placeholder {
+    color: #5C6370;
+}
 QLineEdit:focus {
     border: 1px solid #61AFEF;
 }
@@ -58,12 +61,13 @@ QPushButton {
     background-color: #E5C07B;
     color: #12131C;
     font-weight: bold;
+    border: none;
     border-radius: 6px;
     padding: 10px;
     font-size: 14px;
 }
 QPushButton:hover {
-    background-color: #D19A66;
+    background-color: #D4AF37;
 }
 QPushButton#btnInvitado {
     background-color: transparent;
@@ -96,7 +100,7 @@ QPushButton#btnInvitado:hover {
    <item>
     <widget class="QLabel" name="lblHeaderTitle">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600; color:#e5c07b;&quot;&gt;🎬 CineManager&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#a0a5ba;&quot;&gt;Inicia sesión o regístrate para comprar tus entradas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:700; color:#e5c07b; letter-spacing:1px;&quot;&gt;CINEMANAGER&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#a0a5ba;&quot;&gt;Inicia sesión o regístrate para comprar tus entradas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>

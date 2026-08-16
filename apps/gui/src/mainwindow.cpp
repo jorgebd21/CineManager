@@ -136,11 +136,11 @@ void MainWindow::alPulsarBotonUsuario() {
 
 void MainWindow::actualizarBotonUsuario() {
   if (usuarioActual.esValido()) {
-    btnUsuario->setText(QString("👤 %1 (%2)")
+    btnUsuario->setText(QString("%1 (%2)")
                             .arg(QString::fromStdString(usuarioActual.getNombre()))
                             .arg(QString::fromStdString(usuarioActual.getDni())));
   } else {
-    btnUsuario->setText("👤 Iniciar Sesión");
+    btnUsuario->setText("Iniciar Sesión");
   }
 }
 
@@ -267,10 +267,7 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
           char keyBuf[20];
           std::strftime(keyBuf, sizeof(keyBuf), "%Y-%m-%d", &timeinfo);
           std::string key = keyBuf;
-
-          char labelBuf[50];
-          std::strftime(labelBuf, sizeof(labelBuf), "%A, %d de %B", &timeinfo);
-          std::string readable = labelBuf;
+          std::string readable = utils::formatearFechaEspanol(hora, false);
 
           sesionesPorDia[key].first = readable;
           sesionesPorDia[key].second.push_back(sesion);
@@ -304,17 +301,17 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
             botonSesion->setProperty("idSesion", sesion.getId());
             botonSesion->setStyleSheet(
                 "QPushButton {"
-                "  background-color: #1e222b;"
-                "  border: 1px solid #3e4452;"
+                "  background-color: #1E202D;"
+                "  border: 1px solid #2B2E3D;"
                 "  border-radius: 8px;"
-                "  color: #ffffff;"
+                "  color: #FFFFFF;"
                 "  font-weight: bold;"
                 "  font-size: 11px;"
                 "}"
                 "QPushButton:hover {"
-                "  background-color: #00f0b5;"
-                "  color: #121418;"
-                "  border: 1px solid #00f0b5;"
+                "  background-color: #E5C07B;"
+                "  color: #12141D;"
+                "  border: 1px solid #E5C07B;"
                 "}");
 
             connect(botonSesion, &QPushButton::clicked, this,
@@ -557,10 +554,8 @@ void MainWindow::alConfirmarCompra() {
         }
 
         std::time_t hora = sesion.getHoraInicio();
-        std::tm timeinfo = utils::safeLocalTime(hora);
-        char dateBuf[64];
-        std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", &timeinfo);
-        QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
+        QString fechaHoraStr =
+            QString::fromStdString(utils::formatearFechaEspanol(hora, true)).toUpper();
 
         QString clienteNombre = QString::fromStdString(
             usuarioActual.getNombre() + " " + usuarioActual.getApellidos());
@@ -592,7 +587,7 @@ void MainWindow::alConfirmarCompra() {
         QString detallesHTML =
             QString(
                 "<html><body>"
-                "<p style='font-size:11px; font-weight:bold; color:#00f0b5; "
+                "<p style='font-size:11px; font-weight:bold; color:#E5C07B; "
                 "margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
                 "<p style='font-size:16px; font-weight:bold; color:#ffffff; "
                 "margin:0;'>%1</p>"
@@ -614,7 +609,7 @@ void MainWindow::alConfirmarCompra() {
                 "</table>"
                 "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
                 "0;'>"
-                "<p style='font-size:14px; font-weight:bold; color:#00f0b5; "
+                "<p style='font-size:14px; font-weight:bold; color:#E5C07B; "
                 "margin:0;'>TOTAL COMPRA: %10</p>"
                 "</body></html>")
                 .arg(QString::fromStdString(peli.getTitulo()))
