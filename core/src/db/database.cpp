@@ -32,6 +32,9 @@ bool SqliteDatabase::abrirSQL() {
   if (rc != SQLITE_OK) {
     std::cerr << "No se pudo abrir la base de datos: " << sqlite3_errmsg(db)
               << std::endl;
+  } else {
+    sqlite3_exec(db, "PRAGMA foreign_keys = ON;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "PRAGMA journal_mode = WAL;", nullptr, nullptr, nullptr);
   }
   return rc == SQLITE_OK;
 }
