@@ -1,0 +1,89 @@
+#include <gtest/gtest.h>
+#include <cstdio>
+
+#include "db/database.hpp"
+#include "db/repositories/usuariorepository.hpp"
+#include "models/usuario.hpp"
+
+class UsuarioRepoTest : public ::testing::Test {
+ protected:
+  SqliteDatabase db;
+  UsuarioRepository repo{db};
+
+  void SetUp() override {
+    // Asegurar que la tabla usuarios existe limpia para el test
+    SqliteStatement stmt(db.getDb(),
+                         "CREATE TABLE IF NOT EXISTS usuarios ("
+                         "dni TEXT PRIMARY KEY, "
+                         "nombre TEXT NOT NULL, "
+                         "apellidos TEXT NOT NULL, "
+                         "email TEXT NOT NULL UNIQUE, "
+                         "password_hash TEXT NOT NULL, "
+                         "rol TEXT NOT NULL DEFAULT 'CLIENTE');");
+    stmt.step();
+
+    // Limpiar tabla antes de cada test
+    SqliteStatement clearStmt(db.getDb(), "DELETE FROM usuarios;");
+    clearStmt.step();
+  }
+};
+
+TEST_F(UsuarioRepoTest, EstadoValidoHelper) {
+  Usuario valido("12345678X", "Juan", "Pérez", "juan@email.com", "1234", "CLIENTE");
+  Usuario invalido;
+
+  EXPECT_TRUE(valido.esValido());
+  EXPECT_FALSE(invalido.esValido());
+}
+
+TEST_F(UsuarioRepoTest, CrearYObtenerUsuario) {
+  Usuario user("11111111A", "Ana", "López", "ana@email.com", "pass123", "CLIENTE");
+  
+  EXPECT_TRUE(repo.crear(user));
+
+  Usuario recuperado = repo.obtenerPorDni("11111111A");
+  EXPECT_TRUE(recuperado.esValido());
+  EXPECT_EQ(recuperado.getDni(), "11111111A");
+  EXPECT_EQ(recuperado.getNombre(), "Ana");
+  EXPECT_EQ(recuperado.getApellidos(), "López");
+  EXPECT_EQ(recuperado.getEmail(), "ana@email.com");
+  EXPECT_EQ(recuperado.getRol(), "CLIENTE");
+}
+
+TEST_F(UsuarioRepoTest, AutenticarCredenciales) {
+  Usuario user("22222222B", "Carlos", "Sánchez", "carlos@email.com", "mi_pass_secreta", "ADMIN");
+  ASSERT_TRUE(repo.crear(user));
+
+  // Autenticación correcta
+  Usuario authOk = repo.autenticar("22222222B", "mi_pass_secreta");
+  EXPECT_TRUE(authOk.esValido());
+  EXPECT_EQ(authOk.getNombre(), "Carlos");
+  EXPECT_EQ(authOk.getRol(), "ADMIN");
+
+  // Autenticación con contraseña errónea
+  Usuario authFailPass = repo.autenticar("22222222B", "password_incorrecta");
+  EXPECT_FALSE(authFailPass.esValido());
+
+  // Autenticación con DNI inexistente
+  Usuario authFailDni = repo.autenticar("99999999Z", "mi_pass_secreta");
+  EXPECT_FALSE(authFailDni.esValido());
+}
+
+TEST_F(UsuarioRepoTest, ActualizarYEliminarUsuario) {
+  Usuario user("33333333C", "Elena", "Martín", "elena@email.com", "1234", "CLIENTE");
+  ASSERT_TRUE(repo.crear(user));
+
+  // Modificar datos
+  user.setNombre("Elena María");
+  user.setEmail("elena.maria@email.com");
+  EXPECT_TRUE(repo.actualizar(user));
+
+  Usuario actualizado = repo.obtenerPorDni("33333333C");
+  EXPECT_EQ(actualizado.getNombre(), "Elena María");
+  EXPECT_EQ(actualizado.getEmail(), "elena.maria@email.com");
+
+  // Eliminar
+  EXPECT_TRUE(repo.eliminar("33333333C"));
+  Usuario eliminado = repo.obtenerPorDni("33333333C");
+  EXPECT_FALSE(eliminado.esValido());
+}
