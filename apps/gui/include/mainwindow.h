@@ -8,12 +8,14 @@
 #include <QScroller>
 #include <QScrollBar>
 #include <QVariant>
-#include <iomanip>
-#include <sstream>
 #include <set>
+#include <vector>
 
 #include "apiclient.h"
-#include "db/datamanager.hpp"
+#include "models/cine.hpp"
+#include "models/pelicula.hpp"
+#include "models/reserva.hpp"
+#include "models/sesion.hpp"
 #include "models/usuario.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -25,7 +27,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow {
   Q_OBJECT
  public:
-  MainWindow(QWidget* parent = nullptr);
+  explicit MainWindow(QWidget* parent = nullptr);
   ~MainWindow();
 
  private slots:
@@ -40,18 +42,22 @@ class MainWindow : public QMainWindow {
   void alPulsarBotonUsuario();
 
  private:
-  void cargarDatosDesdeApi();
+  void cargarCines();
   void actualizarBotonUsuario();
 
   Ui::MainWindow* ui;
   ApiClient* api;
-  DataManager db;
   Usuario usuarioActual;
   QPushButton* btnUsuario;
 
-  int idCineSeleccionado;
-  int idPeliculaSeleccionada;
-  int idSesionSeleccionada;
+  int idCineSeleccionado{-1};
+  int idPeliculaSeleccionada{-1};
+  int idSesionSeleccionada{-1};
+
+  QList<Cine> listaCines;
+  QList<Pelicula> listaPeliculas;
+  QList<Sesion> listaSesiones;
+
   std::set<std::pair<int, int>> butacasSeleccionadas;
 };
 

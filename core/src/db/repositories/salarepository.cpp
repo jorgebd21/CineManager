@@ -10,19 +10,19 @@ int SalaRepository::crear(const Sala& sala) {
   try {
     SqliteStatement stmt(db.getDb(),
                          "INSERT INTO salas (cine_id, numero_sala, filas, "
-                         "columnas) VALUES (?, ?, "
-                         "?, ?)");
+                         "columnas) VALUES (?, ?, ?, ?)");
     if (!stmt.bindInt(1, sala.getCineId()) ||
         !stmt.bindInt(2, sala.getNumeroSala()) ||
         !stmt.bindInt(3, sala.getFilas()) ||
         !stmt.bindInt(4, sala.getColumnas()))
-      return false;
+      return -1;
+
     if (stmt.step() != SQLITE_DONE) return -1;
 
-    return sqlite3_last_insert_rowid(db.getDb());
+    return static_cast<int>(sqlite3_last_insert_rowid(db.getDb()));
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return false;
+    std::cerr << "Error en SalaRepository::crear: " << e.what() << std::endl;
+    return -1;
   }
 }
 
@@ -38,7 +38,7 @@ Sala SalaRepository::obtenerPorId(int id) {
                   stmt.getColumnInt(2), stmt.getColumnInt(3));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en SalaRepository::obtenerPorId: " << e.what() << std::endl;
   }
   return Sala(-1, -1, -1, -1, -1);
 }
@@ -52,12 +52,12 @@ std::vector<Sala> SalaRepository::obtenerTodos() {
         "SELECT id, cine_id, numero_sala, filas, columnas FROM salas");
 
     while (stmt.step() == SQLITE_ROW) {
-      salas.push_back(Sala(stmt.getColumnInt(0), stmt.getColumnInt(1),
-                           stmt.getColumnInt(2), stmt.getColumnInt(3),
-                           stmt.getColumnInt(4)));
+      salas.emplace_back(stmt.getColumnInt(0), stmt.getColumnInt(1),
+                         stmt.getColumnInt(2), stmt.getColumnInt(3),
+                         stmt.getColumnInt(4));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en SalaRepository::obtenerTodos: " << e.what() << std::endl;
   }
 
   return salas;
@@ -74,12 +74,12 @@ std::vector<Sala> SalaRepository::obtenerSalasDeCine(int idCine) {
     if (!stmt.bindInt(1, idCine)) return salas;
 
     while (stmt.step() == SQLITE_ROW) {
-      salas.push_back(Sala(stmt.getColumnInt(0), stmt.getColumnInt(1),
-                           stmt.getColumnInt(2), stmt.getColumnInt(3),
-                           stmt.getColumnInt(4)));
+      salas.emplace_back(stmt.getColumnInt(0), stmt.getColumnInt(1),
+                         stmt.getColumnInt(2), stmt.getColumnInt(3),
+                         stmt.getColumnInt(4));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en SalaRepository::obtenerSalasDeCine: " << e.what() << std::endl;
   }
 
   return salas;
@@ -96,11 +96,9 @@ bool SalaRepository::actualizar(int id, const Sala& sala) {
         !stmt.bindInt(4, sala.getColumnas()) || !stmt.bindInt(5, id))
       return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en SalaRepository::actualizar: " << e.what() << std::endl;
   }
   return false;
 }
@@ -110,11 +108,9 @@ bool SalaRepository::eliminar(int id) {
     SqliteStatement stmt(db.getDb(), "DELETE FROM salas WHERE id = ?");
     if (!stmt.bindInt(1, id)) return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en SalaRepository::eliminar: " << e.what() << std::endl;
   }
   return false;
 }

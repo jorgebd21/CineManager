@@ -1,6 +1,7 @@
-#include "../include/mainwindow.h"
+#include "mainwindow.h"
 
 #include <QFile>
+#include <QMessageBox>
 #include <map>
 
 #include "cinecardwidget.h"
@@ -26,8 +27,7 @@ MainWindow::MainWindow(QWidget* parent)
   ui->listaCines->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
   ui->listaCines->verticalScrollBar()->setSingleStep(15);
   ui->listaPeliculas->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-  ui->listaPeliculas->setHorizontalScrollMode(
-      QAbstractItemView::ScrollPerPixel);
+  ui->listaPeliculas->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
   ui->listaPeliculas->verticalScrollBar()->setSingleStep(15);
   QScroller::grabGesture(ui->listaPeliculas, QScroller::LeftMouseButtonGesture);
 
@@ -42,27 +42,12 @@ MainWindow::MainWindow(QWidget* parent)
 
   idCineSeleccionado = -1;
   idPeliculaSeleccionada = -1;
-
-  std::vector<Cine> cines = db.obtenerCines();
-
-  for (const auto& cine : cines) {
-    QListWidgetItem* item = new QListWidgetItem(ui->listaCines);
-    CineCardWidget* tarjeta = new CineCardWidget(cine, this);
-
-    item->setSizeHint(tarjeta->sizeHint());
-
-    ui->listaCines->addItem(item);
-    ui->listaCines->setItemWidget(item, tarjeta);
-
-    connect(tarjeta, &CineCardWidget::cineSeleccionado, this,
-            &MainWindow::alSeleccionarCine);
-  }
+  idSesionSeleccionada = -1;
 
   // Conexiones de la interfaz
   connect(ui->botonInicio, &QPushButton::clicked, this,
           &MainWindow::alPulsarInicio);
 
-  // Conexiones de botones de navegación Atrás
   connect(ui->botonAtrasPeliculas, &QPushButton::clicked, this,
           [this]() { ui->stackedWidget->setCurrentIndex(0); });
   connect(ui->botonAtrasSesiones, &QPushButton::clicked, this,
@@ -72,14 +57,12 @@ MainWindow::MainWindow(QWidget* parent)
 
   connect(ui->inputBuscar, &QLineEdit::textChanged, this,
           &MainWindow::alFiltrarPeliculas);
-
   connect(ui->comboGenero, &QComboBox::currentTextChanged, this,
           &MainWindow::alFiltrarPeliculas);
-
   connect(ui->botonConfirmar, &QPushButton::clicked, this,
           &MainWindow::alConfirmarCompra);
 
-  // Crear botón de usuario en la interfaz
+  // Botón de usuario en la barra superior
   btnUsuario = new QPushButton(this);
   btnUsuario->setStyleSheet(
       "QPushButton { background-color: #1E202D; color: #E5C07B; font-weight: "
@@ -87,19 +70,44 @@ MainWindow::MainWindow(QWidget* parent)
       "} QPushButton:hover { background-color: #2B2E3D; color: #61AFEF; }");
   connect(btnUsuario, &QPushButton::clicked, this,
           &MainWindow::alPulsarBotonUsuario);
-
-  // Añadir btnUsuario al header superior de la ventana
   ui->horizontalLayoutHeader->addWidget(btnUsuario);
 
-  // Mostrar el LoginDialog nada más abrir la aplicación
-  LoginDialog loginInicial(db, api, this);
+  cargarCines();
+
+  // Mostrar el LoginDialog al inicio
+  LoginDialog loginInicial(api, this);
   loginInicial.exec();
   usuarioActual = loginInicial.getUsuarioObtenido();
   actualizarBotonUsuario();
 }
 
+MainWindow::~MainWindow() {
+  delete ui;
+}
+
+void MainWindow::cargarCines() {
+  api->obtenerCines(
+      [this](bool ok, QList<Cine> cines) {
+        if (!ok) return;
+        listaCines = cines;
+        ui->listaCines->clear();
+
+        for (const auto& cine : cines) {
+          QListWidgetItem* item = new QListWidgetItem(ui->listaCines);
+          CineCardWidget* tarjeta = new CineCardWidget(cine, this);
+          item->setSizeHint(tarjeta->sizeHint());
+          ui->listaCines->addItem(item);
+          ui->listaCines->setItemWidget(item, tarjeta);
+
+          connect(tarjeta, &CineCardWidget::cineSeleccionado, this,
+                  &MainWindow::alSeleccionarCine);
+        }
+      },
+      this);
+}
+
 void MainWindow::alPulsarBotonUsuario() {
-  LoginDialog loginDlg(db, api, this);
+  LoginDialog loginDlg(api, this);
   if (loginDlg.exec() == QDialog::Accepted) {
     usuarioActual = loginDlg.getUsuarioObtenido();
     actualizarBotonUsuario();
@@ -116,13 +124,9 @@ void MainWindow::actualizarBotonUsuario() {
   }
 }
 
-MainWindow::~MainWindow() { delete ui; }
-
 void MainWindow::alSeleccionarCine(int idCine) {
   idCineSeleccionado = idCine;
 
-  // Limpiar filtros al seleccionar un nuevo cine sin disparar señales
-  // intermedias
   ui->inputBuscar->blockSignals(true);
   ui->inputBuscar->clear();
   ui->inputBuscar->blockSignals(false);
@@ -132,38 +136,49 @@ void MainWindow::alSeleccionarCine(int idCine) {
   ui->labelNoResultados->hide();
   ui->listaPeliculas->show();
 
-  std::vector<Pelicula> peliculas = db.obtenerCartelera(idCineSeleccionado);
+  // Cargar películas asíncronamente desde la API
+  api->obtenerPeliculas(
+      [this](bool ok, QList<Pelicula> peliculas) {
+        if (!ok) return;
+        listaPeliculas = peliculas;
 
-  // Desvincular y destruir las tarjetas de películas de forma asíncrona para
-  // evitar use-after-free
-  for (int i = 0; i < ui->listaPeliculas->count(); ++i) {
-    QListWidgetItem* item = ui->listaPeliculas->item(i);
-    QWidget* widget = ui->listaPeliculas->itemWidget(item);
-    if (widget) {
-      ui->listaPeliculas->removeItemWidget(item);
-      widget->deleteLater();
-    }
-  }
-  ui->listaPeliculas->clear();
+        // Limpiar lista anterior
+        for (int i = 0; i < ui->listaPeliculas->count(); ++i) {
+          QListWidgetItem* item = ui->listaPeliculas->item(i);
+          QWidget* widget = ui->listaPeliculas->itemWidget(item);
+          if (widget) {
+            ui->listaPeliculas->removeItemWidget(item);
+            widget->deleteLater();
+          }
+        }
+        ui->listaPeliculas->clear();
 
-  for (const auto& pelicula : peliculas) {
-    QListWidgetItem* item = new QListWidgetItem(ui->listaPeliculas);
-    MovieCardWidget* tarjeta = new MovieCardWidget(pelicula, this);
-    item->setSizeHint(tarjeta->sizeHint());
-    ui->listaPeliculas->addItem(item);
-    ui->listaPeliculas->setItemWidget(item, tarjeta);
-    connect(tarjeta, &MovieCardWidget::PeliculaSeleccionada, this,
-            &MainWindow::alSeleccionarPelicula);
-  }
+        for (const auto& pelicula : peliculas) {
+          QListWidgetItem* item = new QListWidgetItem(ui->listaPeliculas);
+          MovieCardWidget* tarjeta = new MovieCardWidget(pelicula, this);
+          item->setSizeHint(tarjeta->sizeHint());
+          ui->listaPeliculas->addItem(item);
+          ui->listaPeliculas->setItemWidget(item, tarjeta);
+          connect(tarjeta, &MovieCardWidget::PeliculaSeleccionada, this,
+                  &MainWindow::alSeleccionarPelicula);
+        }
 
-  ui->stackedWidget->setCurrentIndex(1);
+        ui->stackedWidget->setCurrentIndex(1);
+      },
+      this);
 }
 
 void MainWindow::alSeleccionarPelicula(int idPelicula) {
   idPeliculaSeleccionada = idPelicula;
 
-  // A. Cargar datos e imagen de la película seleccionada a la izquierda
-  Pelicula pelicula = db.obtenerPelicula(idPeliculaSeleccionada);
+  Pelicula pelicula(-1, "", Genero::NONE, 0);
+  for (const auto& p : listaPeliculas) {
+    if (p.getId() == idPeliculaSeleccionada) {
+      pelicula = p;
+      break;
+    }
+  }
+
   QString rutaPoster = QString::fromStdString(
       "data/images/peliculas/" + std::to_string(pelicula.getId()) + ".jpg");
   if (!QFile::exists(rutaPoster)) {
@@ -180,127 +195,107 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
       QString::number(pelicula.getDuracion()) + " min";
   ui->labelSesionInfo->setText(infoStr);
 
-  // B. Cargar las sesiones agrupadas por día a la derecha
-  std::vector<Sesion> sesiones =
-      db.obtenerSesionesDePelicula(idCineSeleccionado, idPeliculaSeleccionada);
+  // Cargar sesiones asíncronamente desde la API
+  api->obtenerSesiones(
+      idCineSeleccionado,
+      [this, idPelicula](bool ok, QList<Sesion> sesiones) {
+        if (!ok) return;
+        listaSesiones = sesiones;
 
-  // Limpiar el layout anterior y widgets del scrollArea de forma segura usando
-  // deleteLater()
-  if (ui->scrollAreaWidgetContentsSesiones->layout() != nullptr) {
-    delete ui->scrollAreaWidgetContentsSesiones->layout();
-  }
-  const auto children =
-      ui->scrollAreaWidgetContentsSesiones->findChildren<QWidget*>();
-  for (QWidget* child : children) {
-    child->deleteLater();
-  }
+        if (ui->scrollAreaWidgetContentsSesiones->layout() != nullptr) {
+          delete ui->scrollAreaWidgetContentsSesiones->layout();
+        }
+        const auto children =
+            ui->scrollAreaWidgetContentsSesiones->findChildren<QWidget*>();
+        for (QWidget* child : children) {
+          child->deleteLater();
+        }
 
-  QVBoxLayout* scrollLayout =
-      new QVBoxLayout(ui->scrollAreaWidgetContentsSesiones);
-  scrollLayout->setAlignment(Qt::AlignTop);
-  scrollLayout->setSpacing(15);
-  scrollLayout->setContentsMargins(10, 10, 10, 10);
+        QVBoxLayout* scrollLayout =
+            new QVBoxLayout(ui->scrollAreaWidgetContentsSesiones);
+        scrollLayout->setAlignment(Qt::AlignTop);
+        scrollLayout->setSpacing(15);
+        scrollLayout->setContentsMargins(10, 10, 10, 10);
 
-  // Agrupar sesiones por día (YYYY-MM-DD)
-  std::map<std::string, std::pair<std::string, std::vector<Sesion>>>
-      sesionesPorDia;
-  for (const auto& sesion : sesiones) {
-    std::time_t hora = sesion.getHoraInicio();
-    std::tm* timeinfo = std::localtime(&hora);
+        std::map<std::string, std::pair<std::string, std::vector<Sesion>>>
+            sesionesPorDia;
+        for (const auto& sesion : sesiones) {
+          if (sesion.getPelicula().getId() != idPelicula &&
+              sesion.getPelicula().getId() != -1 && idPelicula != -1) {
+            // Filtrar sesiones de la película seleccionada si la película viene tipada
+            if (sesion.getPelicula().getId() != idPelicula) continue;
+          }
 
-    char keyBuf[20];
-    std::strftime(keyBuf, sizeof(keyBuf), "%Y-%m-%d", timeinfo);
-    std::string key = keyBuf;
+          std::time_t hora = sesion.getHoraInicio();
+          std::tm* timeinfo = std::localtime(&hora);
 
-    char labelBuf[50];
-    std::strftime(labelBuf, sizeof(labelBuf), "%A, %d de %B", timeinfo);
-    std::string readable = labelBuf;
+          char keyBuf[20];
+          std::strftime(keyBuf, sizeof(keyBuf), "%Y-%m-%d", timeinfo);
+          std::string key = keyBuf;
 
-    sesionesPorDia[key].first = readable;
-    sesionesPorDia[key].second.push_back(sesion);
-  }
+          char labelBuf[50];
+          std::strftime(labelBuf, sizeof(labelBuf), "%A, %d de %B", timeinfo);
+          std::string readable = labelBuf;
 
-  // Rellenar dinámicamente con etiquetas de día y botones horizontales de
-  // sesiones
-  for (const auto& par : sesionesPorDia) {
-    QLabel* labelDia =
-        new QLabel(QString::fromStdString(par.second.first).toUpper(),
-                   ui->scrollAreaWidgetContentsSesiones);
-    labelDia->setStyleSheet(
-        "font-weight: bold; font-size: 11px; color: #abb2bf; margin-top: "
-        "10px;");
-    scrollLayout->addWidget(labelDia);
+          sesionesPorDia[key].first = readable;
+          sesionesPorDia[key].second.push_back(sesion);
+        }
 
-    QHBoxLayout* layoutBotones = new QHBoxLayout();
-    layoutBotones->setAlignment(Qt::AlignLeft);
-    layoutBotones->setSpacing(10);
+        for (const auto& par : sesionesPorDia) {
+          QLabel* labelDia =
+              new QLabel(QString::fromStdString(par.second.first).toUpper(),
+                         ui->scrollAreaWidgetContentsSesiones);
+          labelDia->setStyleSheet(
+              "font-weight: bold; font-size: 11px; color: #abb2bf; margin-top: "
+              "10px;");
+          scrollLayout->addWidget(labelDia);
 
-    for (const auto& sesion : par.second.second) {
-      std::time_t hora = sesion.getHoraInicio();
-      std::tm* timeinfo = std::localtime(&hora);
-      char timeBuf[10];
-      std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", timeinfo);
+          QHBoxLayout* layoutBotones = new QHBoxLayout();
+          layoutBotones->setAlignment(Qt::AlignLeft);
+          layoutBotones->setSpacing(10);
 
-      Sala sala = db.obtenerSala(sesion.getIdSala());
-      int capacidadTotal = sala.getFilas() * sala.getColumnas();
-      std::vector<Reserva> reservas = db.obtenerReservasDeSesion(sesion.getId());
-      bool estaLlena =
-          (capacidadTotal > 0 &&
-           static_cast<int>(reservas.size()) >= capacidadTotal);
+          for (const auto& sesion : par.second.second) {
+            std::time_t hora = sesion.getHoraInicio();
+            std::tm* timeinfo = std::localtime(&hora);
+            char timeBuf[10];
+            std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", timeinfo);
 
-      QString textoBoton;
-      if (estaLlena) {
-        textoBoton = QString(timeBuf) + "\n(LLENA)";
-      } else {
-        textoBoton =
-            QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
-      }
+            QString textoBoton =
+                QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
 
-      QPushButton* botonSesion =
-          new QPushButton(textoBoton, ui->scrollAreaWidgetContentsSesiones);
-      botonSesion->setFixedSize(90, 50);
-      botonSesion->setProperty("idSesion", sesion.getId());
+            QPushButton* botonSesion =
+                new QPushButton(textoBoton, ui->scrollAreaWidgetContentsSesiones);
+            botonSesion->setFixedSize(90, 50);
+            botonSesion->setProperty("idSesion", sesion.getId());
+            botonSesion->setStyleSheet(
+                "QPushButton {"
+                "  background-color: #1e222b;"
+                "  border: 1px solid #3e4452;"
+                "  border-radius: 8px;"
+                "  color: #ffffff;"
+                "  font-weight: bold;"
+                "  font-size: 11px;"
+                "}"
+                "QPushButton:hover {"
+                "  background-color: #00f0b5;"
+                "  color: #121418;"
+                "  border: 1px solid #00f0b5;"
+                "}");
 
-      if (estaLlena) {
-        botonSesion->setEnabled(false);
-        botonSesion->setStyleSheet(
-            "QPushButton {"
-            "  background-color: #282c34;"
-            "  border: 1px solid #e06c75;"
-            "  border-radius: 8px;"
-            "  color: #e06c75;"
-            "  font-weight: bold;"
-            "  font-size: 11px;"
-            "}");
-      } else {
-        botonSesion->setStyleSheet(
-            "QPushButton {"
-            "  background-color: #1e222b;"
-            "  border: 1px solid #3e4452;"
-            "  border-radius: 8px;"
-            "  color: #ffffff;"
-            "  font-weight: bold;"
-            "  font-size: 11px;"
-            "}"
-            "QPushButton:hover {"
-            "  background-color: #00f0b5;"
-            "  color: #121418;"
-            "  border: 1px solid #00f0b5;"
-            "}");
-      }
+            connect(botonSesion, &QPushButton::clicked, this,
+                    &MainWindow::alPulsarBotonSesion);
+            layoutBotones->addWidget(botonSesion);
+          }
+          scrollLayout->addLayout(layoutBotones);
+        }
 
-      connect(botonSesion, &QPushButton::clicked, this,
-              &MainWindow::alPulsarBotonSesion);
-      layoutBotones->addWidget(botonSesion);
-    }
-    scrollLayout->addLayout(layoutBotones);
-  }
-
-  ui->stackedWidget->setCurrentIndex(2);
+        ui->stackedWidget->setCurrentIndex(2);
+      },
+      this);
 }
 
 void MainWindow::alPulsarBotonSesion() {
-  QPushButton* boton = qobject_cast<QPushButton*>(sender());
+  auto* boton = qobject_cast<QPushButton*>(sender());
   if (boton) {
     int idSesion = boton->property("idSesion").toInt();
     alSeleccionarSesionPorId(idSesion);
@@ -312,13 +307,6 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
   butacasSeleccionadas.clear();
   int precioTotal = 0;
 
-  Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
-  Sala sala = db.obtenerSala(sesion.getIdSala());
-  std::vector<Reserva> reservas =
-      db.obtenerReservasDeSesion(idSesionSeleccionada);
-
-  // Limpiar el layout anterior y butacas viejas de forma segura con
-  // deleteLater()
   if (ui->containerSala->layout() != nullptr) {
     delete ui->containerSala->layout();
   }
@@ -327,40 +315,16 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
     b->deleteLater();
   }
 
-  int filas = sala.getFilas();
-  int columnas = sala.getColumnas();
-  int totalButacas = filas * columnas;
+  // Dimensiones estándar de sala (5 filas x 7 columnas = 35 butacas)
+  int filas = 5;
+  int columnas = 7;
 
-  // En caso de que el aforo sea absurdo, mostramos aviso de límite
-  if (totalButacas > 500) {
-    QLabel* labelAviso = new QLabel(
-        "El aforo de esta sala supera el límite permitido de 500 butacas para "
-        "venta online.",
-        ui->containerSala);
-    labelAviso->setStyleSheet(
-        "color: #e74c3c; font-size: 14px; font-weight: bold;");
-    labelAviso->setAlignment(Qt::AlignCenter);
-    labelAviso->setWordWrap(true);
-
-    QVBoxLayout* avisoLayout = new QVBoxLayout(ui->containerSala);
-    avisoLayout->addWidget(labelAviso);
-
-    ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) +
-                                  "€");
-    ui->stackedWidget->setCurrentIndex(3);
-    return;
-  }
-
-  // Calcular tamaño dinámico de las butacas (contenedor de aprox 500x300)
   int sizeW = 500 / columnas;
   int sizeH = 300 / filas;
   int butacaSize = std::min(sizeW, sizeH);
-
-  // Acotar el tamaño para que no queden ni gigantes ni microscópicas
   butacaSize = std::clamp(butacaSize, 12, 35);
 
   QGridLayout* grid = new QGridLayout(ui->containerSala);
-  // Si la sala es pequeña, más espacio; si es densa, espacio muy fino
   grid->setSpacing(butacaSize > 20 ? 6 : 3);
   grid->setContentsMargins(0, 0, 0, 0);
 
@@ -370,40 +334,22 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
       boton->setFixedSize(butacaSize, butacaSize);
       boton->setObjectName("botonButaca");
       boton->setCheckable(true);
-      // Tooltip informativo sobre la fila y el asiento
       boton->setToolTip("Fila " + QString::number(f + 1) + ", Asiento " +
                         QString::number(c + 1));
-
       boton->setProperty("fila", f);
       boton->setProperty("columna", c);
-
-      bool ocupado = false;
-      for (const auto& r : reservas) {
-        if (r.getFila() == f && r.getColumna() == c) {
-          ocupado = true;
-          break;
-        }
-      }
-
-      if (ocupado) {
-        boton->setEnabled(false);
-      }
 
       connect(boton, &QPushButton::clicked, this, &MainWindow::alPulsarButaca);
       grid->addWidget(boton, f, c);
     }
   }
 
-  // Mostrar el precio de la sesión en la leyenda inferior de la sala (precio
-  // fijo para el MVP de la GUI)
-  ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) +
-                                "€");
-
+  ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) + "€");
   ui->stackedWidget->setCurrentIndex(3);
 }
 
 void MainWindow::alPulsarButaca() {
-  QPushButton* boton = qobject_cast<QPushButton*>(sender());
+  auto* boton = qobject_cast<QPushButton*>(sender());
   if (boton) {
     int fila = boton->property("fila").toInt();
     int columna = boton->property("columna").toInt();
@@ -416,7 +362,6 @@ void MainWindow::alPulsarButaca() {
     }
 
     double precioTotal = butacasSeleccionadas.size() * 7.50;
-
     ui->labelPrecioTotal->setText(
         "Total: " + QString::number(precioTotal, 'f', 2) + " €");
   }
@@ -426,7 +371,6 @@ void MainWindow::alPulsarInicio() {
   idCineSeleccionado = -1;
   idPeliculaSeleccionada = -1;
   idSesionSeleccionada = -1;
-
   ui->stackedWidget->setCurrentIndex(0);
 }
 
@@ -438,7 +382,7 @@ void MainWindow::alFiltrarPeliculas() {
   for (int i = 0; i < ui->listaPeliculas->count(); ++i) {
     QListWidgetItem* item = ui->listaPeliculas->item(i);
     QWidget* widget = ui->listaPeliculas->itemWidget(item);
-    MovieCardWidget* tarjeta = qobject_cast<MovieCardWidget*>(widget);
+    auto* tarjeta = qobject_cast<MovieCardWidget*>(widget);
 
     if (tarjeta) {
       bool coincideTexto =
@@ -455,7 +399,7 @@ void MainWindow::alFiltrarPeliculas() {
       }
     }
   }
-      if (visibles == 0) {
+  if (visibles == 0) {
     ui->labelNoResultados->show();
     ui->listaPeliculas->hide();
   } else {
@@ -467,11 +411,10 @@ void MainWindow::alFiltrarPeliculas() {
 void MainWindow::alConfirmarCompra() {
   if (butacasSeleccionadas.empty()) return;
 
-  // Gatekeeper: Si el usuario no ha iniciado sesión, exigir Login antes de continuar
   if (!usuarioActual.esValido()) {
-    LoginDialog loginDlg(db, api, this);
+    LoginDialog loginDlg(api, this);
     if (loginDlg.exec() != QDialog::Accepted || !loginDlg.estaLogueado()) {
-      return;  // No se completa la compra si permanece como invitado
+      return;
     }
     usuarioActual = loginDlg.getUsuarioObtenido();
     actualizarBotonUsuario();
@@ -485,103 +428,131 @@ void MainWindow::alConfirmarCompra() {
   auto tarifasElegidas = dialog.getTarifasSeleccionadas();
   float totalCompra = dialog.getPrecioTotal();
 
-  bool exitoTotal = true;
+  QList<Reserva> reservasParaCrear;
   for (const auto& t : tarifasElegidas) {
-    Reserva reserva(-1, idSesionSeleccionada, t.fila, t.columna, "COMPRADO",
-                    std::time(nullptr), t.tipo, t.precio);
-    if (db.crearReserva(reserva) == -1) {
-      exitoTotal = false;
-    }
+    reservasParaCrear.append(Reserva(-1, idSesionSeleccionada, t.fila, t.columna,
+                                     "COMPRADO", std::time(nullptr), t.tipo,
+                                     t.precio));
   }
 
-  if (exitoTotal) {
-    Cine cine = db.obtenerCine(idCineSeleccionado);
-    Pelicula peli = db.obtenerPelicula(idPeliculaSeleccionada);
-    Sesion sesion = db.obtenerSesion(idSesionSeleccionada);
+  // Realizar reserva atómica asíncrona a través de ApiClient
+  api->crearReservas(
+      idSesionSeleccionada, reservasParaCrear,
+      [this, tarifasElegidas, totalCompra](bool ok, QString errorMsg) {
+        if (!ok) {
+          QMessageBox::warning(this, "Error de Reserva", errorMsg);
+          return;
+        }
 
-    QString asientosStr;
-    for (const auto& t : tarifasElegidas) {
-      if (!asientosStr.isEmpty()) {
-        asientosStr += ", ";
-      }
-      asientosStr += QString("F%1-A%2 (%3)")
-                         .arg(t.fila + 1)
-                         .arg(t.columna + 1)
-                         .arg(QString::fromStdString(t.tipo));
-    }
+        Cine cine(1, "Cine Central", "Gran Vía");
+        for (const auto& c : listaCines) {
+          if (c.getId() == idCineSeleccionado) {
+            cine = c;
+            break;
+          }
+        }
 
-    std::time_t hora = sesion.getHoraInicio();
-    std::tm* timeinfo = std::localtime(&hora);
-    char dateBuf[64];
-    std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
-    QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
+        Pelicula peli(1, "Película", Genero::ACCION, 120);
+        for (const auto& p : listaPeliculas) {
+          if (p.getId() == idPeliculaSeleccionada) {
+            peli = p;
+            break;
+          }
+        }
 
-    QString clienteNombre = QString::fromStdString(usuarioActual.getNombre() + " " + usuarioActual.getApellidos());
-    QString clienteDni = QString::fromStdString(usuarioActual.getDni());
+        Sesion sesion(idSesionSeleccionada, peli, 1, std::time(nullptr));
+        for (const auto& s : listaSesiones) {
+          if (s.getId() == idSesionSeleccionada) {
+            sesion = s;
+            break;
+          }
+        }
 
-    QString qrPayload =
-        QString(
-            "CINEMANAGER TICKET\n"
-            "Cliente: %1 (%2)\n"
-            "Pelicula: %3\n"
-            "Cine: %4\n"
-            "Sala: Sala %5\n"
-            "Sesion: %6\n"
-            "Asientos: %7\n"
-            "Total: %8 €")
-            .arg(clienteNombre)
-            .arg(clienteDni)
-            .arg(QString::fromStdString(peli.getTitulo()))
-            .arg(QString::fromStdString(cine.getNombre()))
-            .arg(sesion.getIdSala())
-            .arg(fechaHoraStr)
-            .arg(asientosStr)
-            .arg(QString::number(totalCompra, 'f', 2));
+        QString asientosStr;
+        for (const auto& t : tarifasElegidas) {
+          if (!asientosStr.isEmpty()) {
+            asientosStr += ", ";
+          }
+          asientosStr += QString("F%1-A%2 (%3)")
+                             .arg(t.fila + 1)
+                             .arg(t.columna + 1)
+                             .arg(QString::fromStdString(t.tipo));
+        }
 
-    QPixmap qrPixmap = QrHelper::generarQR(qrPayload, 180);
-    ui->labelQR->setPixmap(qrPixmap);
-    ui->labelQR->setFixedSize(180, 180);
+        std::time_t hora = sesion.getHoraInicio();
+        std::tm* timeinfo = std::localtime(&hora);
+        char dateBuf[64];
+        std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
+        QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
 
-    QString detallesHTML =
-        QString(
-            "<html><body>"
-            "<p style='font-size:11px; font-weight:bold; color:#00f0b5; "
-            "margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
-            "<p style='font-size:16px; font-weight:bold; color:#ffffff; "
-            "margin:0;'>%1</p>"
-            "<p style='font-size:11px; color:#abb2bf; margin-top:2px;'>%2 • %3 "
-            "min</p>"
-            "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
-            "0;'>"
-            "<table cellspacing='4' style='color:#ffffff; font-size:11px; "
-            "font-family: sans-serif;'>"
-            "<tr><td style='color:#abb2bf; font-weight:bold; "
-            "width:75px;'>TITULAR:</td><td>%4 (%5)</td></tr>"
-            "<tr><td style='color:#abb2bf; font-weight:bold;'>CINE:</td><td>%6</td></tr>"
-            "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>SALA:</td><td>Sala %7</td></tr>"
-            "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>SESIÓN:</td><td>%8</td></tr>"
-            "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>ASIENTOS:</td><td>%9</td></tr>"
-            "</table>"
-            "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
-            "0;'>"
-            "<p style='font-size:14px; font-weight:bold; color:#00f0b5; "
-            "margin:0;'>TOTAL COMPRA: %10</p>"
-            "</body></html>")
-            .arg(QString::fromStdString(peli.getTitulo()))
-            .arg(QString::fromStdString(generoToString(peli.getGenero())))
-            .arg(peli.getDuracion())
-            .arg(clienteNombre)
-            .arg(clienteDni)
-            .arg(QString::fromStdString(cine.getNombre()))
-            .arg(sesion.getIdSala())
-            .arg(fechaHoraStr)
-            .arg(asientosStr)
-            .arg(QString::number(totalCompra, 'f', 2) + " €");
+        QString clienteNombre = QString::fromStdString(
+            usuarioActual.getNombre() + " " + usuarioActual.getApellidos());
+        QString clienteDni = QString::fromStdString(usuarioActual.getDni());
 
-    ui->labelTicketDetalles->setText(detallesHTML);
-    ui->stackedWidget->setCurrentIndex(4);
-  }
+        QString qrPayload =
+            QString(
+                "CINEMANAGER TICKET\n"
+                "Cliente: %1 (%2)\n"
+                "Pelicula: %3\n"
+                "Cine: %4\n"
+                "Sala: Sala %5\n"
+                "Sesion: %6\n"
+                "Asientos: %7\n"
+                "Total: %8 €")
+                .arg(clienteNombre)
+                .arg(clienteDni)
+                .arg(QString::fromStdString(peli.getTitulo()))
+                .arg(QString::fromStdString(cine.getNombre()))
+                .arg(sesion.getIdSala())
+                .arg(fechaHoraStr)
+                .arg(asientosStr)
+                .arg(QString::number(totalCompra, 'f', 2));
+
+        QPixmap qrPixmap = QrHelper::generarQR(qrPayload, 180);
+        ui->labelQR->setPixmap(qrPixmap);
+        ui->labelQR->setFixedSize(180, 180);
+
+        QString detallesHTML =
+            QString(
+                "<html><body>"
+                "<p style='font-size:11px; font-weight:bold; color:#00f0b5; "
+                "margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
+                "<p style='font-size:16px; font-weight:bold; color:#ffffff; "
+                "margin:0;'>%1</p>"
+                "<p style='font-size:11px; color:#abb2bf; margin-top:2px;'>%2 • %3 "
+                "min</p>"
+                "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
+                "0;'>"
+                "<table cellspacing='4' style='color:#ffffff; font-size:11px; "
+                "font-family: sans-serif;'>"
+                "<tr><td style='color:#abb2bf; font-weight:bold; "
+                "width:75px;'>TITULAR:</td><td>%4 (%5)</td></tr>"
+                "<tr><td style='color:#abb2bf; font-weight:bold;'>CINE:</td><td>%6</td></tr>"
+                "<tr><td style='color:#abb2bf; "
+                "font-weight:bold;'>SALA:</td><td>Sala %7</td></tr>"
+                "<tr><td style='color:#abb2bf; "
+                "font-weight:bold;'>SESIÓN:</td><td>%8</td></tr>"
+                "<tr><td style='color:#abb2bf; "
+                "font-weight:bold;'>ASIENTOS:</td><td>%9</td></tr>"
+                "</table>"
+                "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
+                "0;'>"
+                "<p style='font-size:14px; font-weight:bold; color:#00f0b5; "
+                "margin:0;'>TOTAL COMPRA: %10</p>"
+                "</body></html>")
+                .arg(QString::fromStdString(peli.getTitulo()))
+                .arg(QString::fromStdString(generoToString(peli.getGenero())))
+                .arg(peli.getDuracion())
+                .arg(clienteNombre)
+                .arg(clienteDni)
+                .arg(QString::fromStdString(cine.getNombre()))
+                .arg(sesion.getIdSala())
+                .arg(fechaHoraStr)
+                .arg(asientosStr)
+                .arg(QString::number(totalCompra, 'f', 2) + " €");
+
+        ui->labelTicketDetalles->setText(detallesHTML);
+        ui->stackedWidget->setCurrentIndex(4);
+      },
+      this);
 }

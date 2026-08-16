@@ -1,7 +1,8 @@
 #include "api_controller.hpp"
 
 #include <ctime>
-#include <sstream>
+#include <string>
+#include <vector>
 
 ApiController::ApiController(DataManager& dataManager) : db(dataManager) {}
 
@@ -11,7 +12,7 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
   ([]() {
     crow::json::wvalue res;
     res["status"] = "ok";
-    res["app"] = "CineManager REST API v2.0";
+    res["app"] = "CineManager REST API v2.0 (C++20 Hexagonal)";
     return crow::response(200, res);
   });
 
@@ -20,12 +21,13 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
   ([this]() {
     std::vector<Cine> cines = db.obtenerCines();
     std::vector<crow::json::wvalue> listaJson;
+    listaJson.reserve(cines.size());
     for (const auto& c : cines) {
       crow::json::wvalue item;
       item["id"] = c.getId();
       item["nombre"] = c.getNombre();
       item["direccion"] = c.getDireccion();
-      listaJson.push_back(item);
+      listaJson.push_back(std::move(item));
     }
     crow::json::wvalue res;
     res["cines"] = std::move(listaJson);
@@ -37,34 +39,39 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
   ([this]() {
     std::vector<Pelicula> peliculas = db.obtenerPeliculas();
     std::vector<crow::json::wvalue> listaJson;
+    listaJson.reserve(peliculas.size());
     for (const auto& p : peliculas) {
       crow::json::wvalue item;
       item["id"] = p.getId();
       item["titulo"] = p.getTitulo();
       item["genero"] = generoToString(p.getGenero());
       item["duracion"] = p.getDuracion();
-      listaJson.push_back(item);
+      listaJson.push_back(std::move(item));
     }
     crow::json::wvalue res;
     res["peliculas"] = std::move(listaJson);
     return crow::response(200, res);
   });
 
-  // 4. Obtener sesiones
+  // 4. Obtener sesiones enriquecidas (eliminando necesidad de N+1 peticiones en cliente)
   CROW_ROUTE(app, "/api/v1/sesiones")
   ([this](const crow::request& req) {
-    char* cineParam = req.url_params.get("cine_id");
+    const char* cineParam = req.url_params.get("cine_id");
     int idCine = cineParam ? std::atoi(cineParam) : 1;
 
     std::vector<Sesion> sesiones = db.obtenerSesionesDeCine(idCine);
     std::vector<crow::json::wvalue> listaJson;
+    listaJson.reserve(sesiones.size());
     for (const auto& s : sesiones) {
       crow::json::wvalue item;
       item["id"] = s.getId();
       item["pelicula_id"] = s.getPelicula().getId();
+      item["pelicula_titulo"] = s.getPelicula().getTitulo();
+      item["pelicula_genero"] = generoToString(s.getPelicula().getGenero());
+      item["pelicula_duracion"] = s.getPelicula().getDuracion();
       item["sala_id"] = s.getIdSala();
-      item["fecha_hora"] = s.getHoraInicio();
-      listaJson.push_back(item);
+      item["fecha_hora"] = static_cast<long long>(s.getHoraInicio());
+      listaJson.push_back(std::move(item));
     }
     crow::json::wvalue res;
     res["sesiones"] = std::move(listaJson);
@@ -120,9 +127,9 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     }
 
     Usuario nuevoUser(dni, std::string(reqJson["nombre"].s()),
-                       std::string(reqJson["apellidos"].s()),
-                       std::string(reqJson["email"].s()),
-                       std::string(reqJson["password"].s()), "CLIENTE");
+                      std::string(reqJson["apellidos"].s()),
+                      std::string(reqJson["email"].s()),
+                      std::string(reqJson["password"].s()), "CLIENTE");
 
     if (db.crearUsuario(nuevoUser)) {
       crow::json::wvalue res;
@@ -132,12 +139,12 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
       return crow::response(201, res);
     } else {
       crow::json::wvalue err;
-      err["error"] = "Error interno al registrar el usuario en la BD.";
+      err["error"] = "Error interno al registrar el usuario en la base de datos.";
       return crow::response(500, err);
     }
   });
 
-  // 7. Comprar entradas / Crear reservas
+  // 7. Comprar entradas / Crear reservas transaccionales atómicas
   CROW_ROUTE(app, "/api/v1/reservas").methods(crow::HTTPMethod::POST)
   ([this](const crow::request& req) {
     auto reqJson = crow::json::load(req.body);
@@ -148,30 +155,31 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     }
 
     int idSesion = reqJson["sesion_id"].i();
-    auto listaReservas = reqJson["reservas"];
+    const auto& listaReservas = reqJson["reservas"];
 
-    bool exitoTotal = true;
-    int creadas = 0;
+    std::vector<Reserva> reservasParaCrear;
+    const std::time_t ahora = std::time(nullptr);
 
     for (const auto& item : listaReservas) {
+      if (!item.has("fila") || !item.has("columna")) {
+        crow::json::wvalue err;
+        err["error"] = "Cada reserva debe contener fila y columna.";
+        return crow::response(400, err);
+      }
       int fila = item["fila"].i();
       int columna = item["columna"].i();
       std::string tipo = item.has("tipo") ? std::string(item["tipo"].s()) : "Adulto";
-      float precio = item.has("precio") ? (float)item["precio"].d() : 7.50f;
+      float precio = item.has("precio") ? static_cast<float>(item["precio"].d()) : 7.50f;
 
-      Reserva r(-1, idSesion, fila, columna, "COMPRADO", std::time(nullptr),
-                tipo, precio);
-      if (db.crearReserva(r) != -1) {
-        creadas++;
-      } else {
-        exitoTotal = false;
-      }
+      reservasParaCrear.emplace_back(-1, idSesion, fila, columna, "COMPRADO",
+                                    ahora, tipo, precio);
     }
 
-    if (exitoTotal && creadas > 0) {
+    // Ejecución transaccional atómica: o se reservan todas o no se reserva ninguna
+    if (db.crearReservasMultiples(idSesion, reservasParaCrear)) {
       crow::json::wvalue res;
       res["status"] = "exito";
-      res["reservas_creadas"] = creadas;
+      res["reservas_creadas"] = static_cast<int>(reservasParaCrear.size());
       return crow::response(201, res);
     } else {
       crow::json::wvalue err;

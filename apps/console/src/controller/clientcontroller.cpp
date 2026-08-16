@@ -2,11 +2,60 @@
 
 using namespace std;
 
+bool ClientController::iniciarSesion() {
+  cout << "========================================" << endl;
+  cout << "       ACCESO CLIENTE - CINEMANAGER     " << endl;
+  cout << "========================================" << endl;
+
+  constexpr int MAX_INTENTOS = 3;
+  for (int intento = 1; intento <= MAX_INTENTOS; ++intento) {
+    string dni = consola.pedirCadena("Introduzca su DNI: ");
+    string password = consola.pedirCadena("Introduzca su contraseña: ");
+
+    Usuario user = db.autenticarUsuario(dni, password);
+    if (user.esValido()) {
+      usuarioActual = user;
+      cout << "\n✅ Autenticación exitosa. ¡Bienvenido/a, "
+           << usuarioActual.getNombre() << " " << usuarioActual.getApellidos()
+           << "!\n"
+           << endl;
+      return true;
+    }
+
+    cerr << "\n❌ Credenciales incorrectas. Intento " << intento << " de "
+         << MAX_INTENTOS << ".\n"
+         << endl;
+  }
+  cerr << "Demasiados intentos fallidos. Cerrando aplicación." << endl;
+  return false;
+}
+
 void ClientController::ejecutar() {
+  if (!iniciarSesion()) {
+    return;
+  }
+
+  // Mostrar listado de cines disponibles antes de pedir selección
+  auto cines = db.obtenerCines();
+  if (cines.empty()) {
+    cerr << "No hay cines disponibles en el sistema." << endl;
+    return;
+  }
+  cout << endl;
+  cout << "========================================" << endl;
+  cout << "        CINES DISPONIBLES               " << endl;
+  cout << "========================================" << endl;
+  for (const auto& cine : cines) {
+    cout << "  [" << cine.getId() << "] " << cine.getNombre() << endl;
+    cout << "       " << cine.getDireccion() << endl;
+  }
+  cout << "========================================" << endl;
+  cout << endl;
+
   bool fin = false;
-  int cineId = consola.pedirEntero("Introduzca la id del cine que desee: ");
+  int cineId = consola.pedirEntero("Introduzca el ID del cine que desee: ");
   if (db.obtenerCine(cineId).getId() == -1) {
-    cerr << "Id de cine invalido" << endl;
+    cerr << "ID de cine invalido. Compruebe el listado anterior." << endl;
     return;
   }
   int id = -1;

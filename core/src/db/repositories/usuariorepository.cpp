@@ -2,12 +2,11 @@
 
 #include <iostream>
 
-UsuarioRepository::UsuarioRepository(SqliteDatabase& database)
-    : db(database) {}
+UsuarioRepository::UsuarioRepository(SqliteDatabase& database) : db(database) {}
 
 bool UsuarioRepository::crear(const Usuario& usuario) {
   try {
-    std::string sql =
+    const std::string sql =
         "INSERT INTO usuarios (dni, nombre, apellidos, email, password_hash, "
         "rol) VALUES (?, ?, ?, ?, ?, ?);";
     SqliteStatement stmt(db.getDb(), sql);
@@ -29,7 +28,7 @@ bool UsuarioRepository::crear(const Usuario& usuario) {
 
 Usuario UsuarioRepository::obtenerPorDni(const std::string& dni) {
   try {
-    std::string sql =
+    const std::string sql =
         "SELECT dni, nombre, apellidos, email, password_hash, rol FROM usuarios "
         "WHERE dni = ?;";
     SqliteStatement stmt(db.getDb(), sql);
@@ -44,13 +43,13 @@ Usuario UsuarioRepository::obtenerPorDni(const std::string& dni) {
     std::cerr << "Error en UsuarioRepository::obtenerPorDni: " << e.what()
               << std::endl;
   }
-  return Usuario(); // DNI vacío -> esValido() == false
+  return Usuario();
 }
 
 Usuario UsuarioRepository::autenticar(const std::string& dni,
                                       const std::string& password) {
   try {
-    std::string sql =
+    const std::string sql =
         "SELECT dni, nombre, apellidos, email, password_hash, rol FROM usuarios "
         "WHERE dni = ? AND password_hash = ?;";
     SqliteStatement stmt(db.getDb(), sql);
@@ -65,12 +64,12 @@ Usuario UsuarioRepository::autenticar(const std::string& dni,
     std::cerr << "Error en UsuarioRepository::autenticar: " << e.what()
               << std::endl;
   }
-  return Usuario(); // DNI vacío -> esValido() == false
+  return Usuario();
 }
 
 bool UsuarioRepository::actualizar(const Usuario& usuario) {
   try {
-    std::string sql =
+    const std::string sql =
         "UPDATE usuarios SET nombre = ?, apellidos = ?, email = ?, "
         "password_hash = ?, rol = ? WHERE dni = ?;";
     SqliteStatement stmt(db.getDb(), sql);
@@ -93,7 +92,7 @@ bool UsuarioRepository::actualizar(const Usuario& usuario) {
 
 bool UsuarioRepository::eliminar(const std::string& dni) {
   try {
-    std::string sql = "DELETE FROM usuarios WHERE dni = ?;";
+    const std::string sql = "DELETE FROM usuarios WHERE dni = ?;";
     SqliteStatement stmt(db.getDb(), sql);
     if (!stmt.bindText(1, dni)) return false;
 

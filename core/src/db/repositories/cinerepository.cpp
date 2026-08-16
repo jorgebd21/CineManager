@@ -14,9 +14,9 @@ int CineRepository::crear(const Cine& cine) {
 
     if (stmt.step() != SQLITE_DONE) return -1;
 
-    return sqlite3_last_insert_rowid(db.getDb());
+    return static_cast<int>(sqlite3_last_insert_rowid(db.getDb()));
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en CineRepository::crear: " << e.what() << std::endl;
     return -1;
   }
 }
@@ -31,25 +31,23 @@ Cine CineRepository::obtenerPorId(int id) {
       return Cine(id, stmt.getColumnText(0), stmt.getColumnText(1));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en CineRepository::obtenerPorId: " << e.what() << std::endl;
   }
   return Cine(-1, "", "");
 }
 
 std::vector<Cine> CineRepository::obtenerTodos() {
   std::vector<Cine> cines;
-
   try {
     SqliteStatement stmt(db.getDb(), "SELECT id, nombre, direccion FROM cines");
 
     while (stmt.step() == SQLITE_ROW) {
-      cines.push_back(Cine(stmt.getColumnInt(0), stmt.getColumnText(1),
-                           stmt.getColumnText(2)));
+      cines.emplace_back(stmt.getColumnInt(0), stmt.getColumnText(1),
+                         stmt.getColumnText(2));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en CineRepository::obtenerTodos: " << e.what() << std::endl;
   }
-
   return cines;
 }
 
@@ -61,11 +59,9 @@ bool CineRepository::actualizar(int id, const Cine& cine) {
         !stmt.bindText(2, cine.getDireccion()) || !stmt.bindInt(3, id))
       return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en CineRepository::actualizar: " << e.what() << std::endl;
   }
   return false;
 }
@@ -75,11 +71,9 @@ bool CineRepository::eliminar(int id) {
     SqliteStatement stmt(db.getDb(), "DELETE FROM cines WHERE id = ?");
     if (!stmt.bindInt(1, id)) return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en CineRepository::eliminar: " << e.what() << std::endl;
   }
   return false;
 }

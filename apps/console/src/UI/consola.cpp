@@ -76,12 +76,23 @@ void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
 }
 void Consola::mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
                             const Sesion& sesion) {
-  cout << "=== Ticket ===" << endl;
-  cout << "Compra realizada con éxito" << endl;
-  cout << "Película: " << pelicula.getId() << endl;
-  cout << "Sala: " << sesion.getId() << endl;
-  cout << "Asiento: " << reserva.getFila() + 1 << ", "
+  cout << endl;
+  cout << "==========================================" << endl;
+  cout << "            TICKET DE ENTRADA             " << endl;
+  cout << "==========================================" << endl;
+  cout << "  Película : " << pelicula.getTitulo() << endl;
+  cout << "  Duración : " << pelicula.getDuracion() << " min" << endl;
+  cout << "  Sala     : Sala " << sesion.getIdSala() << endl;
+  cout << "  Asiento  : Fila " << reserva.getFila() + 1 << ", Butaca "
        << reserva.getColumna() + 1 << endl;
+  std::time_t hora = sesion.getHoraInicio();
+  cout << "  Horario  : "
+       << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M") << endl;
+  cout << "  Estado   : " << reserva.getEstado() << endl;
+  cout << "==========================================" << endl;
+  cout << "  ¡Compra realizada con éxito! Disfrute de la función." << endl;
+  cout << "==========================================" << endl
+       << endl;
 }
 
 void Consola::mostrarMenuAdmin() {

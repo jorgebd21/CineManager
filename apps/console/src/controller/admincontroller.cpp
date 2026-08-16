@@ -2,7 +2,45 @@
 
 using namespace std;
 
+bool AdminController::iniciarSesion() {
+  cout << "========================================" << endl;
+  cout << "    ACCESO ADMINISTRADOR - CINEMANAGER  " << endl;
+  cout << "========================================" << endl;
+
+  constexpr int MAX_INTENTOS = 3;
+  for (int intento = 1; intento <= MAX_INTENTOS; ++intento) {
+    string dni = consola.pedirCadena("Introduzca su DNI de Administrador: ");
+    string password = consola.pedirCadena("Introduzca su contraseña: ");
+
+    Usuario user = db.autenticarUsuario(dni, password);
+    if (user.esValido()) {
+      if (user.getRolEnum() == Rol::ADMIN || user.getRol() == "ADMIN") {
+        usuarioActual = user;
+        cout << "\n✅ Acceso concedido al Panel de Administración.\n"
+             << "Bienvenido/a, " << usuarioActual.getNombre() << " "
+             << usuarioActual.getApellidos() << ".\n"
+             << endl;
+        return true;
+      } else {
+        cerr << "\n⛔ Acceso denegado: El usuario autenticado no posee rol de ADMINISTRADOR.\n"
+             << endl;
+        return false;
+      }
+    }
+
+    cerr << "\n❌ Credenciales incorrectas. Intento " << intento << " de "
+         << MAX_INTENTOS << ".\n"
+         << endl;
+  }
+  cerr << "Demasiados intentos fallidos. Cerrando aplicación." << endl;
+  return false;
+}
+
 void AdminController::ejecutar() {
+  if (!iniciarSesion()) {
+    return;
+  }
+
   bool fin = false;
   while (!fin) {
     consola.mostrarMenuAdmin();

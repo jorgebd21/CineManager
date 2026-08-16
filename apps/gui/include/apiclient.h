@@ -9,6 +9,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QObject>
+#include <QPointer>
+#include <QString>
 #include <QUrl>
 #include <functional>
 
@@ -26,19 +28,31 @@ class ApiClient : public QObject {
   QString baseUrl;
 
  public:
-  explicit ApiClient(QObject* parent = nullptr, const QString& baseUrl = "http://localhost:8080");
+  explicit ApiClient(QObject* parent = nullptr,
+                     const QString& baseUrl = "http://localhost:8080");
 
   void setBaseUrl(const QString& url);
-  QString getBaseUrl() const;
+  [[nodiscard]] QString getBaseUrl() const;
 
-  // Endpoints REST API
-  void healthCheck(std::function<void(bool)> callback);
-  void obtenerCines(std::function<void(bool, QList<Cine>)> callback);
-  void obtenerPeliculas(std::function<void(bool, QList<Pelicula>)> callback);
-  void obtenerSesiones(int idCine, std::function<void(bool, QList<Sesion>)> callback);
-  void autenticar(const QString& dni, const QString& password, std::function<void(bool, Usuario)> callback);
-  void registrar(const Usuario& usuario, const QString& password, std::function<void(bool, QString)> callback);
-  void crearReservas(int idSesion, const QList<Reserva>& reservas, std::function<void(bool, QString)> callback);
+  // Endpoints REST API Asíncronos con gestión segura de ciclo de vida
+  void healthCheck(std::function<void(bool)> callback,
+                   QObject* context = nullptr);
+  void obtenerCines(std::function<void(bool, QList<Cine>)> callback,
+                    QObject* context = nullptr);
+  void obtenerPeliculas(std::function<void(bool, QList<Pelicula>)> callback,
+                        QObject* context = nullptr);
+  void obtenerSesiones(int idCine,
+                       std::function<void(bool, QList<Sesion>)> callback,
+                       QObject* context = nullptr);
+  void autenticar(const QString& dni, const QString& password,
+                  std::function<void(bool, Usuario)> callback,
+                  QObject* context = nullptr);
+  void registrar(const Usuario& usuario, const QString& password,
+                 std::function<void(bool, QString)> callback,
+                 QObject* context = nullptr);
+  void crearReservas(int idSesion, const QList<Reserva>& reservas,
+                     std::function<void(bool, QString)> callback,
+                     QObject* context = nullptr);
 };
 
 #endif  // API_CLIENT_H

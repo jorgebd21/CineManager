@@ -15,13 +15,14 @@ int PeliculaRepository::crear(const Pelicula& pelicula) {
     if (!stmt.bindText(1, pelicula.getTitulo()) ||
         !stmt.bindText(2, generoToString(pelicula.getGenero())) ||
         !stmt.bindInt(3, pelicula.getDuracion()))
-      return false;
+      return -1;
+
     if (stmt.step() != SQLITE_DONE) return -1;
 
-    return sqlite3_last_insert_rowid(db.getDb());
+    return static_cast<int>(sqlite3_last_insert_rowid(db.getDb()));
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return false;
+    std::cerr << "Error en PeliculaRepository::crear: " << e.what() << std::endl;
+    return -1;
   }
 }
 
@@ -38,7 +39,7 @@ Pelicula PeliculaRepository::obtenerPorId(int id) {
                       stmt.getColumnInt(2));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::obtenerPorId: " << e.what() << std::endl;
   }
   return Pelicula(-1, "", Genero::NONE, 0);
 }
@@ -51,12 +52,12 @@ std::vector<Pelicula> PeliculaRepository::obtenerTodos() {
                          "SELECT id, titulo, genero, duracion FROM peliculas");
 
     while (stmt.step() == SQLITE_ROW) {
-      peliculas.push_back(Pelicula(stmt.getColumnInt(0), stmt.getColumnText(1),
-                                   stringToGenero(stmt.getColumnText(2)),
-                                   stmt.getColumnInt(3)));
+      peliculas.emplace_back(stmt.getColumnInt(0), stmt.getColumnText(1),
+                             stringToGenero(stmt.getColumnText(2)),
+                             stmt.getColumnInt(3));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::obtenerTodos: " << e.what() << std::endl;
   }
 
   return peliculas;
@@ -75,12 +76,12 @@ std::vector<Pelicula> PeliculaRepository::obtenerCartelera(int idCine) {
     if (!stmt.bindInt(1, idCine)) return peliculas;
 
     while (stmt.step() == SQLITE_ROW) {
-      peliculas.push_back(Pelicula(stmt.getColumnInt(0), stmt.getColumnText(1),
-                                   stringToGenero(stmt.getColumnText(2)),
-                                   stmt.getColumnInt(3)));
+      peliculas.emplace_back(stmt.getColumnInt(0), stmt.getColumnText(1),
+                             stringToGenero(stmt.getColumnText(2)),
+                             stmt.getColumnInt(3));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::obtenerCartelera: " << e.what() << std::endl;
   }
 
   return peliculas;
@@ -96,11 +97,9 @@ bool PeliculaRepository::actualizar(int id, const Pelicula& pelicula) {
         !stmt.bindInt(3, pelicula.getDuracion()) || !stmt.bindInt(4, id))
       return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::actualizar: " << e.what() << std::endl;
   }
   return false;
 }
@@ -110,11 +109,9 @@ bool PeliculaRepository::eliminar(int id) {
     SqliteStatement stmt(db.getDb(), "DELETE FROM peliculas WHERE id = ?");
     if (!stmt.bindInt(1, id)) return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::eliminar: " << e.what() << std::endl;
   }
   return false;
 }

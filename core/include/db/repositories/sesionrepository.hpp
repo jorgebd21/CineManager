@@ -6,20 +6,32 @@
 #include "db/database.hpp"
 #include "models/sesion.hpp"
 
-class SesionRepository {
+class ISesionRepository {
+ public:
+  virtual ~ISesionRepository() = default;
+  virtual int crear(const Sesion& sesion) = 0;
+  virtual Sesion obtenerPorId(int id) = 0;
+  virtual std::vector<Sesion> obtenerTodos() = 0;
+  virtual std::vector<Sesion> obtenerSesionesDeCine(int idCine) = 0;
+  virtual std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula) = 0;
+  virtual bool actualizar(int id, const Sesion& sesion) = 0;
+  virtual bool eliminar(int id) = 0;
+};
+
+class SesionRepository : public ISesionRepository {
  private:
   SqliteDatabase& db;
 
  public:
   explicit SesionRepository(SqliteDatabase& database);
 
-  int crear(const Sesion& sesion);
-  Sesion obtenerPorId(int id);
-  std::vector<Sesion> obtenerTodos();
-  std::vector<Sesion> obtenerSesionesDeCine(int idCine);
-  std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula);
-  bool actualizar(int id, const Sesion& sesion);
-  bool eliminar(int id);
+  int crear(const Sesion& sesion) override;
+  Sesion obtenerPorId(int id) override;
+  std::vector<Sesion> obtenerTodos() override;
+  std::vector<Sesion> obtenerSesionesDeCine(int idCine) override;
+  std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula) override;
+  bool actualizar(int id, const Sesion& sesion) override;
+  bool eliminar(int id) override;
 };
 
 #endif  // SESIONREPOSITORY_HPP

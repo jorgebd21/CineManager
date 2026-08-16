@@ -1,29 +1,39 @@
 #include "apiclient.h"
 
 ApiClient::ApiClient(QObject* parent, const QString& baseUrl)
-    : QObject(parent), manager(new QNetworkAccessManager(this)), baseUrl(baseUrl) {}
+    : QObject(parent),
+      manager(new QNetworkAccessManager(this)),
+      baseUrl(baseUrl) {}
 
 void ApiClient::setBaseUrl(const QString& url) { baseUrl = url; }
 QString ApiClient::getBaseUrl() const { return baseUrl; }
 
-void ApiClient::healthCheck(std::function<void(bool)> callback) {
+void ApiClient::healthCheck(std::function<void(bool)> callback,
+                            QObject* context) {
   QUrl url(baseUrl + "/api/v1/health");
   QNetworkRequest req(url);
 
   QNetworkReply* reply = manager->get(req);
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     bool ok = (reply->error() == QNetworkReply::NoError);
     callback(ok);
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
-void ApiClient::obtenerCines(std::function<void(bool, QList<Cine>)> callback) {
+void ApiClient::obtenerCines(std::function<void(bool, QList<Cine>)> callback,
+                             QObject* context) {
   QUrl url(baseUrl + "/api/v1/cines");
   QNetworkRequest req(url);
 
   QNetworkReply* reply = manager->get(req);
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     QList<Cine> lista;
     if (reply->error() != QNetworkReply::NoError) {
       callback(false, lista);
@@ -44,15 +54,22 @@ void ApiClient::obtenerCines(std::function<void(bool, QList<Cine>)> callback) {
     }
     callback(true, lista);
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
-void ApiClient::obtenerPeliculas(std::function<void(bool, QList<Pelicula>)> callback) {
+void ApiClient::obtenerPeliculas(
+    std::function<void(bool, QList<Pelicula>)> callback, QObject* context) {
   QUrl url(baseUrl + "/api/v1/peliculas");
   QNetworkRequest req(url);
 
   QNetworkReply* reply = manager->get(req);
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     QList<Pelicula> lista;
     if (reply->error() != QNetworkReply::NoError) {
       callback(false, lista);
@@ -74,18 +91,26 @@ void ApiClient::obtenerPeliculas(std::function<void(bool, QList<Pelicula>)> call
     }
     callback(true, lista);
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
-void ApiClient::obtenerSesiones(int idCine, std::function<void(bool, QList<Sesion>)> callback) {
+void ApiClient::obtenerSesiones(
+    int idCine, std::function<void(bool, QList<Sesion>)> callback,
+    QObject* context) {
   QUrl url(baseUrl + QString("/api/v1/sesiones?cine_id=%1").arg(idCine));
   QNetworkRequest req(url);
 
   QNetworkReply* reply = manager->get(req);
-  connect(reply, &QNetworkReply::finished, this, [this, reply, callback]() {
-    QList<Sesion> lista;
+  auto onFinished = [reply, callback]() {
+    QList<Sesion> listaSesiones;
     if (reply->error() != QNetworkReply::NoError) {
-      callback(false, lista);
+      callback(false, listaSesiones);
       reply->deleteLater();
       return;
     }
@@ -95,39 +120,33 @@ void ApiClient::obtenerSesiones(int idCine, std::function<void(bool, QList<Sesio
     QJsonObject obj = doc.object();
     QJsonArray arr = obj["sesiones"].toArray();
 
-    // Requerimos las películas para construir las sesiones
-    obtenerPeliculas([reply, callback, arr](bool okPel, QList<Pelicula> peliculas) {
-      QList<Sesion> listaSesiones;
-      if (!okPel) {
-        callback(false, listaSesiones);
-        reply->deleteLater();
-        return;
-      }
+    for (const QJsonValue& val : arr) {
+      QJsonObject sObj = val.toObject();
+      int pelId = sObj["pelicula_id"].toInt();
+      std::string titulo = sObj["pelicula_titulo"].toString().toStdString();
+      Genero genero = stringToGenero(sObj["pelicula_genero"].toString().toStdString());
+      int duracion = sObj["pelicula_duracion"].toInt();
 
-      for (const QJsonValue& val : arr) {
-        QJsonObject sObj = val.toObject();
-        int pelId = sObj["pelicula_id"].toInt();
+      Pelicula p(pelId, titulo, genero, duracion);
+      Sesion s(sObj["id"].toInt(), p, sObj["sala_id"].toInt(),
+               static_cast<std::time_t>(sObj["fecha_hora"].toVariant().toLongLong()));
+      listaSesiones.append(s);
+    }
 
-        Pelicula pelEncontrada(-1, "", Genero::DRAMA, 0);
-        for (const auto& p : peliculas) {
-          if (p.getId() == pelId) {
-            pelEncontrada = p;
-            break;
-          }
-        }
+    callback(true, listaSesiones);
+    reply->deleteLater();
+  };
 
-        Sesion s(sObj["id"].toInt(), pelEncontrada, sObj["sala_id"].toInt(),
-                 (std::time_t)sObj["fecha_hora"].toVariant().toLongLong());
-        listaSesiones.append(s);
-      }
-      callback(true, listaSesiones);
-      reply->deleteLater();
-    });
-  });
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
 void ApiClient::autenticar(const QString& dni, const QString& password,
-                           std::function<void(bool, Usuario)> callback) {
+                           std::function<void(bool, Usuario)> callback,
+                           QObject* context) {
   QUrl url(baseUrl + "/api/v1/auth/login");
   QNetworkRequest req(url);
   req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -139,7 +158,7 @@ void ApiClient::autenticar(const QString& dni, const QString& password,
   QByteArray data = QJsonDocument(payload).toJson();
   QNetworkReply* reply = manager->post(req, data);
 
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     if (reply->error() != QNetworkReply::NoError) {
       Usuario uInvalido;
       callback(false, uInvalido);
@@ -158,11 +177,18 @@ void ApiClient::autenticar(const QString& dni, const QString& password,
               obj["rol"].toString().toStdString());
     callback(true, u);
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
 void ApiClient::registrar(const Usuario& usuario, const QString& password,
-                          std::function<void(bool, QString)> callback) {
+                          std::function<void(bool, QString)> callback,
+                          QObject* context) {
   QUrl url(baseUrl + "/api/v1/auth/register");
   QNetworkRequest req(url);
   req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -177,7 +203,7 @@ void ApiClient::registrar(const Usuario& usuario, const QString& password,
   QByteArray data = QJsonDocument(payload).toJson();
   QNetworkReply* reply = manager->post(req, data);
 
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     if (reply->error() != QNetworkReply::NoError) {
       QByteArray body = reply->readAll();
       QJsonDocument doc = QJsonDocument::fromJson(body);
@@ -187,11 +213,18 @@ void ApiClient::registrar(const Usuario& usuario, const QString& password,
       callback(true, "Usuario registrado correctamente.");
     }
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }
 
 void ApiClient::crearReservas(int idSesion, const QList<Reserva>& reservas,
-                              std::function<void(bool, QString)> callback) {
+                              std::function<void(bool, QString)> callback,
+                              QObject* context) {
   QUrl url(baseUrl + "/api/v1/reservas");
   QNetworkRequest req(url);
   req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -213,7 +246,7 @@ void ApiClient::crearReservas(int idSesion, const QList<Reserva>& reservas,
   QByteArray data = QJsonDocument(payload).toJson();
   QNetworkReply* reply = manager->post(req, data);
 
-  connect(reply, &QNetworkReply::finished, this, [reply, callback]() {
+  auto onFinished = [reply, callback]() {
     if (reply->error() != QNetworkReply::NoError) {
       QByteArray body = reply->readAll();
       QJsonDocument doc = QJsonDocument::fromJson(body);
@@ -223,5 +256,11 @@ void ApiClient::crearReservas(int idSesion, const QList<Reserva>& reservas,
       callback(true, "Reserva realizada con éxito.");
     }
     reply->deleteLater();
-  });
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
 }

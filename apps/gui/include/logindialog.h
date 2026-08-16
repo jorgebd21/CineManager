@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include "apiclient.h"
-#include "db/datamanager.hpp"
 #include "models/usuario.hpp"
 
 namespace Ui {
@@ -14,11 +13,15 @@ class LoginDialog : public QDialog {
   Q_OBJECT
 
  public:
-  explicit LoginDialog(DataManager& db, ApiClient* api = nullptr, QWidget* parent = nullptr);
+  explicit LoginDialog(ApiClient* api, QWidget* parent = nullptr);
   ~LoginDialog();
 
-  Usuario getUsuarioObtenido() const { return usuarioObtenido; }
-  bool estaLogueado() const { return usuarioObtenido.esValido(); }
+  [[nodiscard]] const Usuario& getUsuarioObtenido() const noexcept {
+    return usuarioObtenido;
+  }
+  [[nodiscard]] bool estaLogueado() const noexcept {
+    return usuarioObtenido.esValido();
+  }
 
  private slots:
   void alPulsarIniciarSesion();
@@ -27,7 +30,6 @@ class LoginDialog : public QDialog {
 
  private:
   Ui::LoginDialog* ui;
-  DataManager& db;
   ApiClient* api;
   Usuario usuarioObtenido;
 };
