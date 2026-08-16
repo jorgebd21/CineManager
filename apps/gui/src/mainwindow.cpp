@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QMessageBox>
+#include <QStatusBar>
 #include <map>
 
 #include "cinecardwidget.h"
@@ -73,6 +74,13 @@ MainWindow::MainWindow(QWidget* parent)
           &MainWindow::alPulsarBotonUsuario);
   ui->horizontalLayoutHeader->addWidget(btnUsuario);
 
+  // Conectar señal de servidor desconectado para notificaciones
+  connect(api, &ApiClient::servidorDesconectado, this, [this](const QString& msg) {
+    if (statusBar()) {
+      statusBar()->showMessage("⚠️ " + msg, 10000);
+    }
+  });
+
   cargarCines();
 
   // Mostrar el LoginDialog al inicio
@@ -88,8 +96,19 @@ MainWindow::~MainWindow() {
 
 void MainWindow::cargarCines() {
   api->obtenerCines(
-      [this](bool ok, QList<Cine> cines) {
-        if (!ok) return;
+      [this](bool ok, QList<Cine> cines, const QString& errorMsg) {
+        if (!ok) {
+          QString detalle = errorMsg.isEmpty()
+                                ? "No se pudo conectar con el servidor de la API."
+                                : errorMsg;
+          QMessageBox::critical(
+              this, "Servidor de API No Disponible",
+              "⚠️ No se pudo establecer conexión con el servidor de CineManager (" +
+                  api->getBaseUrl() + ").\n\n" +
+                  detalle + "\n\n"
+                  "Por favor, verifique que el servicio de la API esté iniciado (vía Docker o CineManagerServer).");
+          return;
+        }
         listaCines = cines;
         ui->listaCines->clear();
 
@@ -140,8 +159,15 @@ void MainWindow::alSeleccionarCine(int idCine) {
   // Cargar películas asíncronamente desde la API (solo cartelera del cine seleccionado)
   api->obtenerPeliculas(
       idCineSeleccionado,
-      [this](bool ok, QList<Pelicula> peliculas) {
-        if (!ok) return;
+      [this](bool ok, QList<Pelicula> peliculas, const QString& errorMsg) {
+        if (!ok) {
+          QString detalle = errorMsg.isEmpty()
+                                ? "No se pudieron obtener las películas del servidor."
+                                : errorMsg;
+          QMessageBox::warning(this, "Servidor Inaccesible",
+                               "⚠️ " + detalle + "\nCompruebe que el servidor API esté en ejecución.");
+          return;
+        }
         listaPeliculas = peliculas;
 
         // Limpiar lista anterior
@@ -200,8 +226,15 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
   // Cargar sesiones asíncronamente desde la API
   api->obtenerSesiones(
       idCineSeleccionado,
-      [this, idPelicula](bool ok, QList<Sesion> sesiones) {
-        if (!ok) return;
+      [this, idPelicula](bool ok, QList<Sesion> sesiones, const QString& errorMsg) {
+        if (!ok) {
+          QString detalle = errorMsg.isEmpty()
+                                ? "No se pudieron obtener las sesiones del servidor."
+                                : errorMsg;
+          QMessageBox::warning(this, "Servidor Inaccesible",
+                               "⚠️ " + detalle + "\nCompruebe que el servidor API esté en ejecución.");
+          return;
+        }
         listaSesiones = sesiones;
 
         if (ui->scrollAreaWidgetContentsSesiones->layout() != nullptr) {

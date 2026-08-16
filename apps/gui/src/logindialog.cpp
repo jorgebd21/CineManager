@@ -30,12 +30,16 @@ void LoginDialog::alPulsarIniciarSesion() {
     ui->lblErrorLogin->setText("Conectando con el servidor...");
     api->autenticar(
         dni, pass,
-        [this](bool ok, Usuario user) {
+        [this](bool ok, Usuario user, QString errorMsg) {
           if (ok && user.esValido()) {
             usuarioObtenido = std::move(user);
             accept();
           } else {
-            ui->lblErrorLogin->setText("DNI o contraseña incorrectos.");
+            if (!errorMsg.isEmpty()) {
+              ui->lblErrorLogin->setText(errorMsg);
+            } else {
+              ui->lblErrorLogin->setText("DNI o contraseña incorrectos.");
+            }
           }
         },
         this);
