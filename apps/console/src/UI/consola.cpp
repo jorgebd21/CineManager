@@ -121,7 +121,7 @@ void Consola::mostrarSubmenuPeliculas() { subMenuAdmin("Peliculas"); }
 
 void Consola::mostrarSubmenuSalas() { subMenuAdmin("Salas"); }
 
-void Consola::mostrarSubmenuSesiones() { subMenuAdmin("Seciones"); }
+void Consola::mostrarSubmenuSesiones() { subMenuAdmin("Sesiones"); }
 
 int Consola::pedirEntero(std::string_view mensaje) {
   int lectura;

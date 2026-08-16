@@ -85,7 +85,7 @@ void AdminController::gestionarCines() {
   while (!fin) {
     consola.mostrarSubmenuCines();
     int opcion =
-        consola.pedirEntero("Seleccione la opcion que de desea realizar: ");
+        consola.pedirEntero("Seleccione la opcion que desea realizar: ");
     switch (opcion) {
       case 1:
         for (auto cine : db.obtenerCines()) {
@@ -102,7 +102,7 @@ void AdminController::gestionarCines() {
         if (db.crearCine(cine)) {
           cout << "Se ha creado exitosamente" << endl;
         } else {
-          cerr << "Fallo en la creacion, vuelvalo a intentar" << endl;
+          cerr << "Fallo en la creacion, intentelo de nuevo" << endl;
         }
         break;
       }
@@ -176,7 +176,7 @@ void AdminController::gestionarPeliculas() {
   while (!fin) {
     consola.mostrarSubmenuPeliculas();
     int opcion =
-        consola.pedirEntero("Seleccione la opcion que de desea realizar: ");
+        consola.pedirEntero("Seleccione la opcion que desea realizar: ");
     switch (opcion) {
       case 1:
         for (auto pelicula : db.obtenerPeliculas()) {
@@ -185,7 +185,7 @@ void AdminController::gestionarPeliculas() {
         break;
       case 2: {
         string titulo = consola.pedirCadena("Introduzca el titulo: ");
-        int duracion = consola.pedirEntero("Introduzca la duraccion: ");
+        int duracion = consola.pedirEntero("Introduzca la duracion: ");
         cout << "1-ACCION\n2-COMEDIA\n3-DRAMA\n4-TERROR\n5-CIENCIA_"
                 "FICCION\n6-ROMANCE\n7-DOCUMENTAL\n8-OTHER"
              << endl;
@@ -196,7 +196,7 @@ void AdminController::gestionarPeliculas() {
         if (db.crearPelicula(pelicula)) {
           cout << "Se ha creado exitosamente" << endl;
         } else {
-          cerr << "Fallo en la creacion, vuelvalo a intentar" << endl;
+          cerr << "Fallo en la creacion, intentelo de nuevo" << endl;
         }
         break;
       }
@@ -283,7 +283,7 @@ void AdminController::gestionarSalas() {
   while (!fin) {
     consola.mostrarSubmenuSalas();
     int opcion =
-        consola.pedirEntero("Seleccione la opcion que de desea realizar: ");
+        consola.pedirEntero("Seleccione la opcion que desea realizar: ");
     switch (opcion) {
       case 1:
         for (auto sala : db.obtenerSalas()) {
@@ -303,7 +303,7 @@ void AdminController::gestionarSalas() {
         if (db.crearSala(sala)) {
           cout << "Se ha creado exitosamente" << endl;
         } else {
-          cerr << "Fallo en la creacion, vuelvalo a intentar" << endl;
+          cerr << "Fallo en la creacion, intentelo de nuevo" << endl;
         }
         break;
       }
@@ -384,7 +384,7 @@ void AdminController::gestionarSesiones() {
   while (!fin) {
     consola.mostrarSubmenuSesiones();
     int opcion =
-        consola.pedirEntero("Seleccione la opcion que de desea realizar: ");
+        consola.pedirEntero("Seleccione la opcion que desea realizar: ");
     switch (opcion) {
       case 1:
         for (auto sesion : db.obtenerSesiones()) {
@@ -417,7 +417,7 @@ void AdminController::gestionarSesiones() {
         if (db.crearSesion(sesion)) {
           cout << "Se ha creado exitosamente" << endl;
         } else {
-          cerr << "Fallo en la creacion, vuelvalo a intentar" << endl;
+          cerr << "Fallo en la creacion, intentelo de nuevo" << endl;
         }
         break;
       }
