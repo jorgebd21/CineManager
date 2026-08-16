@@ -180,7 +180,12 @@ bool SqliteStatement::isColumnNull(int index) const {
 
 SqliteTransaction::SqliteTransaction(sqlite3* database) : db(database) {
   if (db != nullptr) {
-    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+    int rc = sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+    if (rc != SQLITE_OK) {
+      std::string err = sqlite3_errmsg(db);
+      db = nullptr;
+      throw std::runtime_error("Error al iniciar transaccion SQLite: " + err);
+    }
   }
 }
 
