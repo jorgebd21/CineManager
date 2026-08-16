@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  api = new ApiClient(this);
+
   ui->listaPeliculas->setViewMode(QListView::IconMode);
   ui->listaPeliculas->setResizeMode(QListView::Adjust);
   ui->listaPeliculas->setFlow(QListView::LeftToRight);
@@ -45,7 +47,6 @@ MainWindow::MainWindow(QWidget* parent)
 
   for (const auto& cine : cines) {
     QListWidgetItem* item = new QListWidgetItem(ui->listaCines);
-
     CineCardWidget* tarjeta = new CineCardWidget(cine, this);
 
     item->setSizeHint(tarjeta->sizeHint());
@@ -91,14 +92,14 @@ MainWindow::MainWindow(QWidget* parent)
   ui->horizontalLayoutHeader->addWidget(btnUsuario);
 
   // Mostrar el LoginDialog nada más abrir la aplicación
-  LoginDialog loginInicial(db, this);
+  LoginDialog loginInicial(db, api, this);
   loginInicial.exec();
   usuarioActual = loginInicial.getUsuarioObtenido();
   actualizarBotonUsuario();
 }
 
 void MainWindow::alPulsarBotonUsuario() {
-  LoginDialog loginDlg(db, this);
+  LoginDialog loginDlg(db, api, this);
   if (loginDlg.exec() == QDialog::Accepted) {
     usuarioActual = loginDlg.getUsuarioObtenido();
     actualizarBotonUsuario();
@@ -468,7 +469,7 @@ void MainWindow::alConfirmarCompra() {
 
   // Gatekeeper: Si el usuario no ha iniciado sesión, exigir Login antes de continuar
   if (!usuarioActual.esValido()) {
-    LoginDialog loginDlg(db, this);
+    LoginDialog loginDlg(db, api, this);
     if (loginDlg.exec() != QDialog::Accepted || !loginDlg.estaLogueado()) {
       return;  // No se completa la compra si permanece como invitado
     }

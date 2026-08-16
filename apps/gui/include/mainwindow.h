@@ -12,6 +12,7 @@
 #include <sstream>
 #include <set>
 
+#include "apiclient.h"
 #include "db/datamanager.hpp"
 #include "models/usuario.hpp"
 
@@ -39,9 +40,11 @@ class MainWindow : public QMainWindow {
   void alPulsarBotonUsuario();
 
  private:
+  void cargarDatosDesdeApi();
   void actualizarBotonUsuario();
 
   Ui::MainWindow* ui;
+  ApiClient* api;
   DataManager db;
   Usuario usuarioActual;
   QPushButton* btnUsuario;

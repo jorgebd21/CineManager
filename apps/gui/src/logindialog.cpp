@@ -2,8 +2,8 @@
 
 #include "ui_logindialog.h"
 
-LoginDialog::LoginDialog(DataManager& db, QWidget* parent)
-    : QDialog(parent), ui(new Ui::LoginDialog), db(db) {
+LoginDialog::LoginDialog(DataManager& db, ApiClient* api, QWidget* parent)
+    : QDialog(parent), ui(new Ui::LoginDialog), db(db), api(api) {
   ui->setupUi(this);
 
   connect(ui->btnIniciarSesion, &QPushButton::clicked, this,
@@ -18,50 +18,75 @@ LoginDialog::~LoginDialog() { delete ui; }
 
 void LoginDialog::alPulsarIniciarSesion() {
   ui->lblErrorLogin->clear();
-  std::string dni = ui->inputDniLogin->text().trimmed().toStdString();
-  std::string pass = ui->inputPasswordLogin->text().toStdString();
+  QString dni = ui->inputDniLogin->text().trimmed();
+  QString pass = ui->inputPasswordLogin->text();
 
-  if (dni.empty() || pass.empty()) {
+  if (dni.isEmpty() || pass.isEmpty()) {
     ui->lblErrorLogin->setText("Por favor, rellena todos los campos.");
     return;
   }
 
-  Usuario user = db.autenticarUsuario(dni, pass);
-  if (user.esValido()) {
-    usuarioObtenido = user;
-    accept();
+  if (api) {
+    ui->lblErrorLogin->setText("Conectando con el servidor...");
+    api->autenticar(dni, pass, [this](bool ok, Usuario user) {
+      if (ok && user.esValido()) {
+        usuarioObtenido = user;
+        accept();
+      } else {
+        ui->lblErrorLogin->setText("DNI o contraseña incorrectos.");
+      }
+    });
   } else {
-    ui->lblErrorLogin->setText("DNI o contraseña incorrectos.");
+    Usuario user = db.autenticarUsuario(dni.toStdString(), pass.toStdString());
+    if (user.esValido()) {
+      usuarioObtenido = user;
+      accept();
+    } else {
+      ui->lblErrorLogin->setText("DNI o contraseña incorrectos.");
+    }
   }
 }
 
 void LoginDialog::alPulsarRegistrar() {
   ui->lblErrorRegistro->clear();
-  std::string dni = ui->inputDniRegistro->text().trimmed().toStdString();
-  std::string nombre = ui->inputNombreRegistro->text().trimmed().toStdString();
-  std::string apellidos =
-      ui->inputApellidosRegistro->text().trimmed().toStdString();
-  std::string email = ui->inputEmailRegistro->text().trimmed().toStdString();
-  std::string pass = ui->inputPasswordRegistro->text().toStdString();
+  QString dni = ui->inputDniRegistro->text().trimmed();
+  QString nombre = ui->inputNombreRegistro->text().trimmed();
+  QString apellidos = ui->inputApellidosRegistro->text().trimmed();
+  QString email = ui->inputEmailRegistro->text().trimmed();
+  QString pass = ui->inputPasswordRegistro->text();
 
-  if (dni.empty() || nombre.empty() || apellidos.empty() || email.empty() ||
-      pass.empty()) {
+  if (dni.isEmpty() || nombre.isEmpty() || apellidos.isEmpty() || email.isEmpty() ||
+      pass.isEmpty()) {
     ui->lblErrorRegistro->setText("Por favor, completa todos los campos.");
     return;
   }
 
-  // Verificar si el DNI ya existe
-  if (db.obtenerUsuario(dni).esValido()) {
-    ui->lblErrorRegistro->setText("El DNI ya se encuentra registrado.");
-    return;
-  }
+  Usuario nuevoUser(dni.toStdString(), nombre.toStdString(),
+                     apellidos.toStdString(), email.toStdString(),
+                     pass.toStdString(), "CLIENTE");
 
-  Usuario nuevoUser(dni, nombre, apellidos, email, pass, "CLIENTE");
-  if (db.crearUsuario(nuevoUser)) {
-    usuarioObtenido = nuevoUser;
-    accept();
+  if (api) {
+    ui->lblErrorRegistro->setText("Registrando en el servidor...");
+    api->registrar(nuevoUser, pass, [this, nuevoUser](bool ok, QString msg) {
+      if (ok) {
+        usuarioObtenido = nuevoUser;
+        accept();
+      } else {
+        ui->lblErrorRegistro->setText(msg);
+      }
+    });
   } else {
-    ui->lblErrorRegistro->setText("Error al registrar el usuario en la BD.");
+    if (db.obtenerUsuario(dni.toStdString()).esValido()) {
+      ui->lblErrorRegistro->setText("El DNI ya se encuentra registrado.");
+      return;
+    }
+
+    if (db.crearUsuario(nuevoUser)) {
+      usuarioObtenido = nuevoUser;
+      accept();
+    } else {
+      ui->lblErrorRegistro->setText("Error al registrar el usuario en la BD.");
+    }
   }
 }
 
