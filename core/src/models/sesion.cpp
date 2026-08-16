@@ -4,9 +4,8 @@ Sesion::Sesion(int id, Pelicula pelicula, int idSala, std::time_t horaInicio)
     : id(id),
       pelicula(std::move(pelicula)),
       idSala(idSala),
-      horaInicio(horaInicio) {
-  horaFin = horaInicio + (this->pelicula.getDuracion() * 60);
-}
+      horaInicio(horaInicio),
+      horaFin(horaInicio + (this->pelicula.getDuracion() * 60)) {}
 
 int Sesion::getId() const noexcept { return id; }
 

@@ -4,10 +4,9 @@ Sala::Sala(int id, int cineId, int numeroSala, int filas, int columnas)
     : id(id),
       cineId(cineId),
       numeroSala(numeroSala),
+      capacidad(filas * columnas),
       filas(filas),
-      columnas(columnas) {
-  capacidad = filas * columnas;
-}
+      columnas(columnas) {}
 
 int Sala::getId() const noexcept { return id; }
 
