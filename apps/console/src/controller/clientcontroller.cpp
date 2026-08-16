@@ -154,7 +154,6 @@ bool ClientController::realizarCompra(int cineId, int reservaId) {
     return false;
   }
 
-  bool encontrado = false;
   Reserva reserva = db.obtenerReserva(reservaId);
 
   if (reserva.getId() == -1) {
@@ -162,11 +161,15 @@ bool ClientController::realizarCompra(int cineId, int reservaId) {
             "le ha expirado"
          << endl;
     return false;
-  } else {
-    reserva.setEstado("COMPRADO");
-    db.actualizarReserva(reserva.getId(), reserva);
-    Sesion sesion = db.obtenerSesion(reserva.getIdSesion());
-    consola.mostrarTicket(reserva, sesion.getPelicula(), sesion);
-    return true;
   }
+
+  reserva.setEstado("COMPRADO");
+  if (!db.actualizarReserva(reserva.getId(), reserva)) {
+    cerr << "Error al confirmar la compra en la base de datos." << endl;
+    return false;
+  }
+
+  Sesion sesion = db.obtenerSesion(reserva.getIdSesion());
+  consola.mostrarTicket(reserva, sesion.getPelicula(), sesion);
+  return true;
 }
