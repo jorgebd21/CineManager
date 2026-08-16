@@ -9,6 +9,7 @@
 
 #include "models/pelicula.hpp"
 #include "models/sala.hpp"
+#include "utils/time_utils.hpp"
 
 using namespace std;
 
@@ -59,8 +60,8 @@ void Consola::mostrarSesion(const Sesion& sesion) {
   cout << "ID: " << sesion.getId() << endl;
   cout << "Pelicula: " << sesion.getPelicula().getTitulo() << endl;
   cout << "Sala: " << sesion.getIdSala() << endl;
-  std::time_t hora = sesion.getHoraInicio();
-  cout << "Hora: " << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M:%S")
+  std::tm tm_local = utils::safeLocalTime(sesion.getHoraInicio());
+  cout << "Hora: " << std::put_time(&tm_local, "%Y-%m-%d %H:%M:%S")
        << endl;
 }
 void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
@@ -85,9 +86,9 @@ void Consola::mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
   cout << "  Sala     : Sala " << sesion.getIdSala() << endl;
   cout << "  Asiento  : Fila " << reserva.getFila() + 1 << ", Butaca "
        << reserva.getColumna() + 1 << endl;
-  std::time_t hora = sesion.getHoraInicio();
+  std::tm tm_local = utils::safeLocalTime(sesion.getHoraInicio());
   cout << "  Horario  : "
-       << std::put_time(std::localtime(&hora), "%Y-%m-%d %H:%M") << endl;
+       << std::put_time(&tm_local, "%Y-%m-%d %H:%M") << endl;
   cout << "  Estado   : " << reserva.getEstado() << endl;
   cout << "==========================================" << endl;
   cout << "  ¡Compra realizada con éxito! Disfrute de la función." << endl;

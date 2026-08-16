@@ -10,6 +10,7 @@
 #include "qrhelper.h"
 #include "tarifasdialog.h"
 #include "ui_mainwindow.h"
+#include "utils/time_utils.hpp"
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -228,14 +229,14 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
           }
 
           std::time_t hora = sesion.getHoraInicio();
-          std::tm* timeinfo = std::localtime(&hora);
+          std::tm timeinfo = utils::safeLocalTime(hora);
 
           char keyBuf[20];
-          std::strftime(keyBuf, sizeof(keyBuf), "%Y-%m-%d", timeinfo);
+          std::strftime(keyBuf, sizeof(keyBuf), "%Y-%m-%d", &timeinfo);
           std::string key = keyBuf;
 
           char labelBuf[50];
-          std::strftime(labelBuf, sizeof(labelBuf), "%A, %d de %B", timeinfo);
+          std::strftime(labelBuf, sizeof(labelBuf), "%A, %d de %B", &timeinfo);
           std::string readable = labelBuf;
 
           sesionesPorDia[key].first = readable;
@@ -257,9 +258,9 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
 
           for (const auto& sesion : par.second.second) {
             std::time_t hora = sesion.getHoraInicio();
-            std::tm* timeinfo = std::localtime(&hora);
+            std::tm timeinfo = utils::safeLocalTime(hora);
             char timeBuf[10];
-            std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", timeinfo);
+            std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", &timeinfo);
 
             QString textoBoton =
                 QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
@@ -481,9 +482,9 @@ void MainWindow::alConfirmarCompra() {
         }
 
         std::time_t hora = sesion.getHoraInicio();
-        std::tm* timeinfo = std::localtime(&hora);
+        std::tm timeinfo = utils::safeLocalTime(hora);
         char dateBuf[64];
-        std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
+        std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", &timeinfo);
         QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
 
         QString clienteNombre = QString::fromStdString(
