@@ -24,9 +24,9 @@ gantt
     Fase 6 · Generador Código QR Real    :done, f6c, 2026-08-01, 2026-08-15
     Fase 6 · Bloqueo de Salas Llenas      :done, f6d, 2026-08-10, 2026-08-15
     Fase 6 · Auth (Login/Registro DNI)    :done, f6e, 2026-08-15, 2026-08-16
+    Testing · Suite GoogleTest            :done, f_test, 2026-08-16, 2026-08-16
 
     section ⏳ Planificado
-    Testing · Suite GoogleTest            :f_test, 2026-09-01, 2026-09-20
     Fase 7a · REST API (Crow/Drogon)      :f7a,    2026-09-20, 2026-10-15
 ```
 

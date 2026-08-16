@@ -35,9 +35,9 @@ Actualmente nos encontramos refinando la **Fase 6 (Interfaz Gráfica Nativa Qt6)
   - [x] **Tarifas y Precios Dinámicos (`TarifasDialog`)**: Selección de tarifas (Adulto, Niño, Jubilado, Estudiante) con cálculo automático en base de datos.
   - [x] **Generación de Código QR Real (`qrcodegen` / `QrHelper`)**: Firma digital de la compra codificada en estándar ISO/IEC 18004 escaneable por móvil.
   - [x] **Gestión y Bloqueo de Salas Llenas (`(LLENA)`)**: Detección en tiempo real de pases agotados y bloqueo visual de botones.
-  - [x] Generación e impresión de Ticket de Entrada HTML agrupado con desglose de tarifas por asiento.
+  - [x] **Sistema de Autenticación de Usuarios (`LoginDialog` / DNI)**: Registro, login con DNI, modo invitado y pasarela de pago protegida (*Checkout Gatekeeper*).
+  - [x] Generación e impresión de Ticket de Entrada HTML agrupado con desglose de tarifas por asiento y titularidad de la entrada en QR.
 - [ ] **Fase 7: Arquitectura Distribuida & API**
-  - [ ] Autenticación de Usuarios (Login/Registro con DNI).
   - [ ] Transformación del Core en un servidor HTTP REST (Crow/Drogon) / gRPC.
 
 ## 🛠️ Instrucciones de Compilación y Ejecución
