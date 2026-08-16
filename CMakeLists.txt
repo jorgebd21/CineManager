@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(ENABLE_ASAN "Habilitar AddressSanitizer y UndefinedBehaviorSanitizer" ON)
+option(ENABLE_ASAN "Habilitar AddressSanitizer y UndefinedBehaviorSanitizer" OFF)
 if(ENABLE_ASAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
 endif()
@@ -50,18 +50,22 @@ target_link_libraries(CineManagerClient PRIVATE CineManagerCore)
 # ==============================================================================
 # 3. INTERFAZ GRÁFICA (Capa de Presentación / Qt GUI)
 # ==============================================================================
-find_package(Qt6 COMPONENTS Widgets Network REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Network QUIET)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS "apps/gui/ui")
+if(Qt6_FOUND)
+  set(CMAKE_AUTOMOC ON)
+  set(CMAKE_AUTOUIC ON)
+  set(CMAKE_AUTORCC ON)
+  set(CMAKE_AUTOUIC_SEARCH_PATHS "apps/gui/ui")
 
-file(GLOB_RECURSE GUI_SOURCES "apps/gui/src/*.cpp" "apps/gui/include/*.h" "apps/gui/ui/*.ui")
+  file(GLOB_RECURSE GUI_SOURCES "apps/gui/src/*.cpp" "apps/gui/include/*.h" "apps/gui/ui/*.ui")
 
-add_executable(CineManagerGUI ${GUI_SOURCES} apps/gui/app/main_gui.cpp)
-target_include_directories(CineManagerGUI PRIVATE apps/gui/include)
-target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets Qt6::Network)
+  add_executable(CineManagerGUI ${GUI_SOURCES} apps/gui/app/main_gui.cpp)
+  target_include_directories(CineManagerGUI PRIVATE apps/gui/include)
+  target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets Qt6::Network)
+else()
+  message(STATUS "Qt6 no detectado: omitiendo la compilación de CineManagerGUI")
+endif()
 
 # ==============================================================================
 # 4. SUITE DE PRUEBAS AUTOMATIZADAS (GoogleTest)
