@@ -19,7 +19,7 @@ WORKDIR /app
 COPY . .
 
 RUN cmake -B build -S . -DCMAKE_BUILD_TYPE=Release && \
-    cmake --build build --target CineManagerServer CineManagerTests
+    cmake --build build --target CineManagerServer CineManager CineManagerClient CineManagerTests
 
 # Verificación automatizada de pruebas unitarias durante el proceso de build
 RUN ./build/bin/CineManagerTests
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY --from=builder /app/build/bin/CineManagerServer /app/bin/CineManagerServer
+COPY --from=builder /app/build/bin/ /app/bin/
 COPY --from=builder /app/data /app/data
 
 EXPOSE 8080
