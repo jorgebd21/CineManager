@@ -42,6 +42,7 @@ graph TB
             SR["SalaRepository"]
             SER["SesionRepository"]
             RR["ReservaRepository"]
+            UR["UsuarioRepository"]
         end
 
         subgraph "Utilidades Core"
@@ -54,6 +55,7 @@ graph TB
             M3["Sala"]
             M4["Sesion"]
             M5["Reserva (+ tipo, precio)"]
+            M6["Usuario (+ dni PK, email, rol)"]
         end
 
         subgraph "Capa de Infraestructura DB"
@@ -106,6 +108,14 @@ El diálogo emergente modal `TarifasDialog` intercepta el botón **"Confirmar Co
 
 - Al seleccionar una película, `MainWindow` consulta en SQLite la capacidad de la sala (`filas * columnas`) y las reservas de la sesión.
 - Si una sesión alcanza el 100% de ocupación, su botón de selección se deshabilita inmediatamente (`setEnabled(false)`), cambia su etiqueta a `18:30 \n (LLENA)` y adopta un tema visual rojo/gris de advertencia (`#e06c75`).
+
+### 6.9 Sistema de Autenticación de Usuarios (`LoginDialog` & Checkout Gatekeeper)
+
+- **Identificador Único (DNI):** El DNI (`std::string`) actúa como Clave Primaria en la tabla `usuarios` de SQLite.
+- **Diálogo Modal `LoginDialog`:** Se despliega al arrancar la aplicación y ofrece pestañas de **Iniciar Sesión**, **Registrarse** y un botón **"Continuar como invitado ➔"**.
+- **Perfil en Header:** Muestra un botón dinámico `[ 👤 Hola, Juan (12345678X) ]` o `[ 👤 Iniciar Sesión ]` en la barra superior.
+- **Pasarela de Pago Protegida (*Checkout Gatekeeper*):** Al pulsar "Confirmar Compra", si el usuario navega en modo invitado, el sistema intercepta el flujo bloqueando el pago y exigiendo login/registro válido.
+- **Titularidad en Ticket y QR:** La identidad del comprador se estampa en la ficha HTML del ticket y se incluye de forma inmutable en el payload del Código QR.
 
 ---
 

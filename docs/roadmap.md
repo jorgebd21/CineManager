@@ -23,9 +23,7 @@ gantt
     Fase 6 · Precios dinámicos (Tarifas)  :done, f6b, 2026-07-19, 2026-08-01
     Fase 6 · Generador Código QR Real    :done, f6c, 2026-08-01, 2026-08-15
     Fase 6 · Bloqueo de Salas Llenas      :done, f6d, 2026-08-10, 2026-08-15
-
-    section 🚧 En Desarrollo / Siguiente Hito
-    Fase 6 · Auth (Login/Registro DNI)    :active, f6e, 2026-08-15, 2026-09-01
+    Fase 6 · Auth (Login/Registro DNI)    :done, f6e, 2026-08-15, 2026-08-16
 
     section ⏳ Planificado
     Testing · Suite GoogleTest            :f_test, 2026-09-01, 2026-09-20
@@ -61,7 +59,7 @@ gantt
 - [x] **Precio dinámico real y Tarifas** (`TarifasDialog` + guardado SQLite)
 - [x] **Generación real de QR** (Librería Nayuki C++20 + `QrHelper` Qt)
 - [x] Confirmación de compra con ticket HTML y desglose por entrada
-- [ ] 🔴 **Autenticación de usuario** (Login/registro pospuesto al final del proyecto)
+- [x] **Autenticación de usuario** (Login/Registro por DNI, modo invitado y Checkout Gatekeeper)
 
 ---
 
