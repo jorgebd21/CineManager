@@ -42,7 +42,7 @@ class DataManager {
   UsuarioRepository usuarioRepo;
 
   std::mutex cvMutex;
-  std::condition_variable_any cvCleaner;
+  std::condition_variable cvCleaner;
   std::jthread cleanerThread;
 
   void iniciarLimpiezaLoop(std::stop_token stoken);
@@ -50,6 +50,8 @@ class DataManager {
  public:
   explicit DataManager(const std::string& customDbPath = "");
   ~DataManager();
+
+  void detenerDemonioLimpieza();
 
   // Non-copyable, non-movable facade
   DataManager(const DataManager&) = delete;

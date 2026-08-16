@@ -17,6 +17,10 @@ DataManager::DataManager(const std::string& customDbPath)
 }
 
 DataManager::~DataManager() {
+  detenerDemonioLimpieza();
+}
+
+void DataManager::detenerDemonioLimpieza() {
   if (cleanerThread.joinable()) {
     cleanerThread.request_stop();
     cvCleaner.notify_all();
