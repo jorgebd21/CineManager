@@ -143,3 +143,24 @@ bool DataManager::eliminarReserva(int id) {
   }
   return false;
 }
+
+bool DataManager::crearUsuario(const Usuario& usuario) {
+  return usuarioRepo.crear(usuario);
+}
+
+Usuario DataManager::obtenerUsuario(const std::string& dni) {
+  return usuarioRepo.obtenerPorDni(dni);
+}
+
+Usuario DataManager::autenticarUsuario(const std::string& dni,
+                                      const std::string& password) {
+  return usuarioRepo.autenticar(dni, password);
+}
+
+bool DataManager::actualizarUsuario(const Usuario& usuario) {
+  return usuarioRepo.actualizar(usuario);
+}
+
+bool DataManager::eliminarUsuario(const std::string& dni) {
+  return usuarioRepo.eliminar(dni);
+}

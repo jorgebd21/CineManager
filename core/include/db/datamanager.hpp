@@ -17,11 +17,13 @@
 #include "db/repositories/reservarepository.hpp"
 #include "db/repositories/salarepository.hpp"
 #include "db/repositories/sesionrepository.hpp"
+#include "db/repositories/usuariorepository.hpp"
 #include "models/cine.hpp"
 #include "models/pelicula.hpp"
 #include "models/reserva.hpp"
 #include "models/sala.hpp"
 #include "models/sesion.hpp"
+#include "models/usuario.hpp"
 class DataManager {
  private:
   static constexpr int TIEMPO_EXPIRACION_SEGUNDOS = 300;
@@ -41,6 +43,7 @@ class DataManager {
   SalaRepository salaRepo;
   SesionRepository sesionRepo;
   ReservaRepository reservaRepo;
+  UsuarioRepository usuarioRepo;
 
  public:
   DataManager()
@@ -49,7 +52,8 @@ class DataManager {
         peliculaRepo(db),
         salaRepo(db),
         sesionRepo(db),
-        reservaRepo(db) {
+        reservaRepo(db),
+        usuarioRepo(db) {
     cleanerThread = std::thread(&DataManager::iniciarLimpiezaLoop, this);
   };
   ~DataManager();
@@ -92,6 +96,12 @@ class DataManager {
   bool eliminarPelicula(int id);
   bool eliminarSesion(int id);
   bool eliminarReserva(int id);
+
+  bool crearUsuario(const Usuario& usuario);
+  Usuario obtenerUsuario(const std::string& dni);
+  Usuario autenticarUsuario(const std::string& dni, const std::string& password);
+  bool actualizarUsuario(const Usuario& usuario);
+  bool eliminarUsuario(const std::string& dni);
 };
 
 #endif  // DATAMANAGER_HPP

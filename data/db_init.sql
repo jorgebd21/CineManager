@@ -6,9 +6,21 @@ DROP TABLE IF EXISTS sesiones;
 DROP TABLE IF EXISTS salas;
 DROP TABLE IF EXISTS peliculas;
 DROP TABLE IF EXISTS cines;
+DROP TABLE IF EXISTS usuarios;
+
 -- ==========================================
 -- 1. Creación de la Estructura de Tablas
 -- ==========================================
+-- Tabla de Usuarios
+CREATE TABLE usuarios (
+    dni TEXT PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    apellidos TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    rol TEXT NOT NULL DEFAULT 'CLIENTE' CHECK (rol IN ('CLIENTE', 'ADMIN'))
+);
+
 -- Tabla de Cines
 CREATE TABLE cines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,3 +170,9 @@ VALUES -- Cine 1 (Sala 1 y 2)
     -- The Conjuring en Sala 3
     (11, 8, 4, datetime('now', '-2 hours'), 6.50);
 -- La La Land en Sala 4 (CADUCADA, hace 2h)
+
+-- Insertar Usuarios de prueba (Semilla)
+INSERT INTO usuarios (dni, nombre, apellidos, email, password_hash, rol)
+VALUES 
+    ('12345678X', 'Juan', 'Pérez Gómez', 'juan.perez@email.com', '1234', 'CLIENTE'),
+    ('87654321Y', 'Admin', 'CineManager', 'admin@cinemanager.com', 'admin123', 'ADMIN');
