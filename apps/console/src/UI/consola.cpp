@@ -64,7 +64,7 @@ void Consola::mostrarSesion(const Sesion& sesion) {
   cout << "Hora: " << std::put_time(&tm_local, "%Y-%m-%d %H:%M:%S")
        << endl;
 }
-void Consola::mostrarReporte(int totales, int ocupados, std::string titulo) {
+void Consola::mostrarReporte(int totales, int ocupados, std::string_view titulo) {
   cout << endl << "=== Reporte de Ocupación " << titulo << " ===" << endl;
   cout << "Entradas Vendidas: " << ocupados << " / " << totales << endl;
   if (totales > 0) {
@@ -107,7 +107,7 @@ void Consola::mostrarMenuAdmin() {
   cout << "=========================" << endl;
 }
 
-void subMenuAdmin(string nombre) {
+void subMenuAdmin(std::string_view nombre) {
   cout << "=== Menu Gestion " << nombre << " ===" << endl;
   cout << "1. Listar" << endl;
   cout << "2. Añadir" << endl;
@@ -125,7 +125,7 @@ void Consola::mostrarSubmenuSalas() { subMenuAdmin("Salas"); }
 
 void Consola::mostrarSubmenuSesiones() { subMenuAdmin("Seciones"); }
 
-int Consola::pedirEntero(const std::string& mensaje) {
+int Consola::pedirEntero(std::string_view mensaje) {
   int lectura;
   cout << mensaje << endl;
   while (true) {
@@ -140,7 +140,7 @@ int Consola::pedirEntero(const std::string& mensaje) {
   }
 }
 
-std::string Consola::pedirCadena(const std::string& mensaje) {
+std::string Consola::pedirCadena(std::string_view mensaje) {
   std::string lectura;
   std::cout << mensaje;
   std::getline(std::cin, lectura);

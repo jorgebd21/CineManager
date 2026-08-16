@@ -1,6 +1,7 @@
 #ifndef CONSOLA_HPP
 #define CONSOLA_HPP
 
+#include <string_view>
 #include <vector>
 
 #include "models/cine.hpp"
@@ -16,7 +17,7 @@ class Consola {
   void mostrarPelicula(const Pelicula& pelicula);
   void mostrarCine(const Cine& cine);
   void mostrarSesion(const Sesion& sesion);
-  void mostrarReporte(int totales, int ocupados, std::string titulo = "");
+  void mostrarReporte(int totales, int ocupados, std::string_view titulo = "");
   void mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
                      const Sesion& sesion);
 
@@ -26,8 +27,8 @@ class Consola {
   void mostrarSubmenuSalas();
   void mostrarSubmenuSesiones();
 
-  int pedirEntero(const std::string& mensaje);
-  std::string pedirCadena(const std::string& mensaje);
+  int pedirEntero(std::string_view mensaje);
+  std::string pedirCadena(std::string_view mensaje);
 };
 
 #endif
