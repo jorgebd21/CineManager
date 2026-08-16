@@ -39,6 +39,7 @@ set(CORE_SOURCES
     core/src/db/repositories/reservarepository.cpp
     core/src/db/repositories/usuariorepository.cpp
     core/src/utils/qrcodegen.cpp
+    core/src/utils/security.cpp
 )
 
 # Filtramos posibles archivos que existan solo como header
