@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <cstdio>
 
 #include "db/database.hpp"
 #include "db/repositories/usuariorepository.hpp"
@@ -11,7 +10,6 @@ class UsuarioRepoTest : public ::testing::Test {
   UsuarioRepository repo{db};
 
   void SetUp() override {
-    // Asegurar que la tabla usuarios existe limpia para el test
     SqliteStatement stmt(db.getDb(),
                          "CREATE TABLE IF NOT EXISTS usuarios ("
                          "dni TEXT PRIMARY KEY, "
@@ -38,7 +36,6 @@ TEST_F(UsuarioRepoTest, EstadoValidoHelper) {
 
 TEST_F(UsuarioRepoTest, CrearYObtenerUsuario) {
   Usuario user("11111111A", "Ana", "López", "ana@email.com", "pass123", "CLIENTE");
-  
   EXPECT_TRUE(repo.crear(user));
 
   Usuario recuperado = repo.obtenerPorDni("11111111A");
@@ -69,8 +66,21 @@ TEST_F(UsuarioRepoTest, AutenticarCredenciales) {
   EXPECT_FALSE(authFailDni.esValido());
 }
 
+TEST_F(UsuarioRepoTest, RestriccionesDeClavePrimariaYEmailUnico) {
+  Usuario user1("33333333C", "Laura", "Gómez", "laura@email.com", "pass1", "CLIENTE");
+  EXPECT_TRUE(repo.crear(user1));
+
+  // Duplicación de DNI (Primary Key)
+  Usuario userDniDuplicado("33333333C", "Otra", "Persona", "otra@email.com", "pass2", "CLIENTE");
+  EXPECT_FALSE(repo.crear(userDniDuplicado)) << "No debe permitir duplicar DNI.";
+
+  // Duplicación de Email (UNIQUE constraint)
+  Usuario userEmailDuplicado("44444444D", "Tercero", "Persona", "laura@email.com", "pass3", "CLIENTE");
+  EXPECT_FALSE(repo.crear(userEmailDuplicado)) << "No debe permitir duplicar email.";
+}
+
 TEST_F(UsuarioRepoTest, ActualizarYEliminarUsuario) {
-  Usuario user("33333333C", "Elena", "Martín", "elena@email.com", "1234", "CLIENTE");
+  Usuario user("55555555E", "Elena", "Martín", "elena@email.com", "1234", "CLIENTE");
   ASSERT_TRUE(repo.crear(user));
 
   // Modificar datos
@@ -78,12 +88,23 @@ TEST_F(UsuarioRepoTest, ActualizarYEliminarUsuario) {
   user.setEmail("elena.maria@email.com");
   EXPECT_TRUE(repo.actualizar(user));
 
-  Usuario actualizado = repo.obtenerPorDni("33333333C");
+  Usuario actualizado = repo.obtenerPorDni("55555555E");
   EXPECT_EQ(actualizado.getNombre(), "Elena María");
   EXPECT_EQ(actualizado.getEmail(), "elena.maria@email.com");
 
   // Eliminar
-  EXPECT_TRUE(repo.eliminar("33333333C"));
-  Usuario eliminado = repo.obtenerPorDni("33333333C");
+  EXPECT_TRUE(repo.eliminar("55555555E"));
+  Usuario eliminado = repo.obtenerPorDni("55555555E");
   EXPECT_FALSE(eliminado.esValido());
+}
+
+TEST_F(UsuarioRepoTest, SoporteCaracteresEspecialesYUTF8) {
+  Usuario user("66666666F", "Íñigo", "Núñez de la Peña", "inigo.nunez@ñandú.es", "p@$$w0rd!#%&/", "CLIENTE");
+  EXPECT_TRUE(repo.crear(user));
+
+  Usuario rec = repo.obtenerPorDni("66666666F");
+  EXPECT_TRUE(rec.esValido());
+  EXPECT_EQ(rec.getNombre(), "Íñigo");
+  EXPECT_EQ(rec.getApellidos(), "Núñez de la Peña");
+  EXPECT_EQ(rec.getEmail(), "inigo.nunez@ñandú.es");
 }

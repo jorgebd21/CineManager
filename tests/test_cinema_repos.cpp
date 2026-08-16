@@ -16,31 +16,27 @@ class CinemaReposTest : public ::testing::Test {
 
   void SetUp() override {
     // Inicializar esquema de tablas en la base de datos
-    SqliteStatement s1(db.getDb(),
-                       "CREATE TABLE IF NOT EXISTS cines ("
-                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                       "nombre TEXT NOT NULL, direccion TEXT);");
-    s1.step();
+    SqliteStatement(db.getDb(),
+                    "CREATE TABLE IF NOT EXISTS cines ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "nombre TEXT NOT NULL, direccion TEXT);").step();
 
-    SqliteStatement s2(db.getDb(),
-                       "CREATE TABLE IF NOT EXISTS peliculas ("
-                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                       "titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);");
-    s2.step();
+    SqliteStatement(db.getDb(),
+                    "CREATE TABLE IF NOT EXISTS peliculas ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);").step();
 
-    SqliteStatement s3(db.getDb(),
-                       "CREATE TABLE IF NOT EXISTS salas ("
-                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                       "cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, "
-                       "filas INTEGER NOT NULL, columnas INTEGER NOT NULL);");
-    s3.step();
+    SqliteStatement(db.getDb(),
+                    "CREATE TABLE IF NOT EXISTS salas ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, "
+                    "filas INTEGER NOT NULL, columnas INTEGER NOT NULL);").step();
 
-    SqliteStatement s4(db.getDb(),
-                       "CREATE TABLE IF NOT EXISTS sesiones ("
-                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                       "pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, "
-                       "fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);");
-    s4.step();
+    SqliteStatement(db.getDb(),
+                    "CREATE TABLE IF NOT EXISTS sesiones ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, "
+                    "fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);").step();
 
     // Limpiar tablas
     SqliteStatement(db.getDb(), "DELETE FROM sesiones;").step();
@@ -82,8 +78,39 @@ TEST_F(CinemaReposTest, PeliculaCRUD) {
   EXPECT_EQ(obtenida.getGenero(), Genero::CIENCIA_FICCION);
   EXPECT_EQ(obtenida.getDuracion(), 148);
 
+  obtenida.setTitulo("Inception (Extended)");
+  obtenida.setDuracion(155);
+  EXPECT_TRUE(peliculaRepo.actualizar(id, obtenida));
+
   auto todas = peliculaRepo.obtenerTodos();
   EXPECT_EQ(todas.size(), 1u);
+  EXPECT_EQ(todas[0].getTitulo(), "Inception (Extended)");
+  EXPECT_EQ(todas[0].getDuracion(), 155);
+}
+
+TEST_F(CinemaReposTest, SalaCRUD) {
+  int idCine = cineRepo.crear(Cine(-1, "Cine Centro", "Calle Gran Vía"));
+  Sala sala(-1, idCine, 1, 8, 10);
+  int idSala = salaRepo.crear(sala);
+  EXPECT_GT(idSala, 0);
+
+  Sala obtenida = salaRepo.obtenerPorId(idSala);
+  EXPECT_TRUE(obtenida.esValido());
+  EXPECT_EQ(obtenida.getCineId(), idCine);
+  EXPECT_EQ(obtenida.getNumeroSala(), 1);
+  EXPECT_EQ(obtenida.getFilas(), 8);
+  EXPECT_EQ(obtenida.getColumnas(), 10);
+  EXPECT_EQ(obtenida.getCapacidad(), 80);
+
+  obtenida.setFilas(10);
+  EXPECT_TRUE(salaRepo.actualizar(idSala, obtenida));
+  EXPECT_EQ(salaRepo.obtenerPorId(idSala).getCapacidad(), 100);
+
+  auto salasCine = salaRepo.obtenerSalasDeCine(idCine);
+  EXPECT_EQ(salasCine.size(), 1u);
+
+  EXPECT_TRUE(salaRepo.eliminar(idSala));
+  EXPECT_FALSE(salaRepo.obtenerPorId(idSala).esValido());
 }
 
 TEST_F(CinemaReposTest, SesionJoinRelacionalSinNMasUno) {
@@ -105,4 +132,11 @@ TEST_F(CinemaReposTest, SesionJoinRelacionalSinNMasUno) {
   EXPECT_EQ(obtenida.getPelicula().getTitulo(), "Interstellar");
   EXPECT_EQ(obtenida.getPelicula().getGenero(), Genero::CIENCIA_FICCION);
   EXPECT_EQ(obtenida.getPelicula().getDuracion(), 169);
+}
+
+TEST_F(CinemaReposTest, EntidadesInexistentesDevuelvenInvalido) {
+  EXPECT_FALSE(cineRepo.obtenerPorId(99999).esValido());
+  EXPECT_FALSE(peliculaRepo.obtenerPorId(99999).esValido());
+  EXPECT_FALSE(salaRepo.obtenerPorId(99999).esValido());
+  EXPECT_FALSE(sesionRepo.obtenerPorId(99999).esValido());
 }
