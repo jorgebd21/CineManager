@@ -16,36 +16,36 @@ class ConcurrencyTest : public ::testing::Test {
 
   void SetUp() override {
     SqliteDatabase db{dbPath};
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS cines ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, direccion TEXT);").step();
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS peliculas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);").step();
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS salas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, filas INTEGER NOT NULL, columnas INTEGER NOT NULL);").step();
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS sesiones ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);").step();
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS reservas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, sesion_id INTEGER NOT NULL, fila INTEGER NOT NULL, columna INTEGER NOT NULL, estado TEXT NOT NULL DEFAULT 'PENDIENTE', timestamp_creacion INTEGER NOT NULL DEFAULT 0, tipo TEXT, precio REAL, UNIQUE(sesion_id, fila, columna));").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS cines ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, direccion TEXT);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS peliculas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS salas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, filas INTEGER NOT NULL, columnas INTEGER NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS sesiones ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS reservas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, sesion_id INTEGER NOT NULL, fila INTEGER NOT NULL, columna INTEGER NOT NULL, estado TEXT NOT NULL DEFAULT 'PENDIENTE', timestamp_creacion INTEGER NOT NULL DEFAULT 0, tipo TEXT, precio REAL, UNIQUE(sesion_id, fila, columna));").step();
 
     // Limpiar tablas
-    SqliteStatement(db.getDb(), "DELETE FROM reservas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM sesiones;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM salas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM cines;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM reservas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM sesiones;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM salas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM cines;").step();
 
     // Insertar datos padre para pruebas concurrentes
-    SqliteStatement(db.getDb(), "INSERT INTO cines (id, nombre) VALUES (1, 'Cine Concurrencia');").step();
-    SqliteStatement(db.getDb(), "INSERT INTO peliculas (id, titulo, genero, duracion) VALUES (1, 'Concurrency Movie', 'ACCION', 120);").step();
-    SqliteStatement(db.getDb(), "INSERT INTO salas (id, cine_id, numero_sala, filas, columnas) VALUES (1, 1, 1, 10, 10);").step();
-    SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (10, 1, 1, datetime('now', '+1 hour'), 7.5);").step();
-    SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (20, 1, 1, datetime('now', '+2 hours'), 7.5);").step();
-    SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (30, 1, 1, datetime('now', '+3 hours'), 8.0);").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO cines (id, nombre) VALUES (1, 'Cine Concurrencia');").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO peliculas (id, titulo, genero, duracion) VALUES (1, 'Concurrency Movie', 'ACCION', 120);").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO salas (id, cine_id, numero_sala, filas, columnas) VALUES (1, 1, 1, 10, 10);").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (10, 1, 1, datetime('now', '+1 hour'), 7.5);").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (20, 1, 1, datetime('now', '+2 hours'), 7.5);").step();
+    (void)SqliteStatement(db.getDb(), "INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES (30, 1, 1, datetime('now', '+3 hours'), 8.0);").step();
   }
 };
 

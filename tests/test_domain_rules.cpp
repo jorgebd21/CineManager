@@ -25,38 +25,38 @@ class DomainRulesTest : public ::testing::Test {
   ReservaRepository reservaRepo{db};
 
   void SetUp() override {
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS usuarios ("
-                    "dni TEXT PRIMARY KEY, "
-                    "nombre TEXT NOT NULL, "
-                    "apellidos TEXT NOT NULL, "
-                    "email TEXT NOT NULL UNIQUE, "
-                    "password_hash TEXT NOT NULL, "
-                    "rol TEXT NOT NULL DEFAULT 'CLIENTE');").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS usuarios ("
+                          "dni TEXT PRIMARY KEY, "
+                          "nombre TEXT NOT NULL, "
+                          "apellidos TEXT NOT NULL, "
+                          "email TEXT NOT NULL UNIQUE, "
+                          "password_hash TEXT NOT NULL, "
+                          "rol TEXT NOT NULL DEFAULT 'CLIENTE');").step();
 
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS peliculas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "titulo TEXT NOT NULL, "
-                    "genero TEXT NOT NULL, "
-                    "duracion INTEGER NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS peliculas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "titulo TEXT NOT NULL, "
+                          "genero TEXT NOT NULL, "
+                          "duracion INTEGER NOT NULL);").step();
 
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS reservas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "sesion_id INTEGER NOT NULL, "
-                    "fila INTEGER NOT NULL, "
-                    "columna INTEGER NOT NULL, "
-                    "estado TEXT NOT NULL DEFAULT 'PENDIENTE', "
-                    "timestamp_creacion INTEGER NOT NULL DEFAULT 0, "
-                    "tipo TEXT, "
-                    "precio REAL, "
-                    "UNIQUE(sesion_id, fila, columna));").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS reservas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "sesion_id INTEGER NOT NULL, "
+                          "fila INTEGER NOT NULL, "
+                          "columna INTEGER NOT NULL, "
+                          "estado TEXT NOT NULL DEFAULT 'PENDIENTE', "
+                          "timestamp_creacion INTEGER NOT NULL DEFAULT 0, "
+                          "tipo TEXT, "
+                          "precio REAL, "
+                          "UNIQUE(sesion_id, fila, columna));").step();
 
     // Limpiar tablas
-    SqliteStatement(db.getDb(), "DELETE FROM reservas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM usuarios;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM reservas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM usuarios;").step();
   }
 };
 

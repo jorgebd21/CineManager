@@ -18,11 +18,11 @@ class UsuarioRepoTest : public ::testing::Test {
                          "email TEXT NOT NULL UNIQUE, "
                          "password_hash TEXT NOT NULL, "
                          "rol TEXT NOT NULL DEFAULT 'CLIENTE');");
-    stmt.step();
+    (void)stmt.step();
 
     // Limpiar tabla antes de cada test
     SqliteStatement clearStmt(db.getDb(), "DELETE FROM usuarios;");
-    clearStmt.step();
+    (void)clearStmt.step();
   }
 };
 

@@ -16,33 +16,33 @@ class CinemaReposTest : public ::testing::Test {
 
   void SetUp() override {
     // Inicializar esquema de tablas en la base de datos
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS cines ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "nombre TEXT NOT NULL, direccion TEXT);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS cines ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "nombre TEXT NOT NULL, direccion TEXT);").step();
 
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS peliculas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS peliculas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "titulo TEXT NOT NULL, genero TEXT NOT NULL, duracion INTEGER NOT NULL);").step();
 
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS salas ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, "
-                    "filas INTEGER NOT NULL, columnas INTEGER NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS salas ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "cine_id INTEGER NOT NULL, numero_sala INTEGER NOT NULL, "
+                          "filas INTEGER NOT NULL, columnas INTEGER NOT NULL);").step();
 
-    SqliteStatement(db.getDb(),
-                    "CREATE TABLE IF NOT EXISTS sesiones ("
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                    "pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, "
-                    "fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);").step();
+    (void)SqliteStatement(db.getDb(),
+                          "CREATE TABLE IF NOT EXISTS sesiones ("
+                          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "pelicula_id INTEGER NOT NULL, sala_id INTEGER NOT NULL, "
+                          "fecha_hora TEXT NOT NULL, precio_entrada REAL NOT NULL);").step();
 
     // Limpiar tablas
-    SqliteStatement(db.getDb(), "DELETE FROM sesiones;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM salas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
-    SqliteStatement(db.getDb(), "DELETE FROM cines;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM sesiones;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM salas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM peliculas;").step();
+    (void)SqliteStatement(db.getDb(), "DELETE FROM cines;").step();
   }
 };
 
