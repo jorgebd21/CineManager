@@ -80,6 +80,52 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     return crow::response(200, res);
   });
 
+  // 4b. Obtener reservas de una sesión
+  CROW_ROUTE(app, "/api/v1/sesiones/<int>/reservas")
+  ([this](int idSesion) {
+    if (!db.obtenerSesion(idSesion).esValido()) {
+      crow::json::wvalue err;
+      err["error"] = "Sesion no encontrada.";
+      return crow::response(404, err);
+    }
+    std::vector<Reserva> reservas = db.obtenerReservasDeSesion(idSesion);
+    std::vector<crow::json::wvalue> listaJson;
+    listaJson.reserve(reservas.size());
+    for (const auto& r : reservas) {
+      crow::json::wvalue item;
+      item["id"] = r.getId();
+      item["id_sesion"] = r.getIdSesion();
+      item["fila"] = r.getFila();
+      item["columna"] = r.getColumna();
+      item["estado"] = r.getEstado();
+      item["tipo"] = r.getTipo();
+      item["precio"] = r.getPrecio();
+      listaJson.push_back(std::move(item));
+    }
+    crow::json::wvalue res;
+    res["reservas"] = std::move(listaJson);
+    return crow::response(200, res);
+  });
+
+  // 4c. Obtener detalles de una sala
+  CROW_ROUTE(app, "/api/v1/salas/<int>")
+  ([this](int idSala) {
+    Sala s = db.obtenerSala(idSala);
+    if (!s.esValido()) {
+      crow::json::wvalue err;
+      err["error"] = "Sala no encontrada.";
+      return crow::response(404, err);
+    }
+    crow::json::wvalue res;
+    res["id"] = s.getId();
+    res["id_cine"] = s.getCineId();
+    res["numero_sala"] = s.getNumeroSala();
+    res["filas"] = s.getFilas();
+    res["columnas"] = s.getColumnas();
+    res["capacidad"] = s.getCapacidad();
+    return crow::response(200, res);
+  });
+
   // 5. Iniciar sesión / Login por DNI
   CROW_ROUTE(app, "/api/v1/auth/login").methods(crow::HTTPMethod::POST)
   ([this](const crow::request& req) {

@@ -307,7 +307,6 @@ void MainWindow::alPulsarBotonSesion() {
 void MainWindow::alSeleccionarSesionPorId(int idSession) {
   idSesionSeleccionada = idSession;
   butacasSeleccionadas.clear();
-  int precioTotal = 0;
 
   if (ui->containerSala->layout() != nullptr) {
     delete ui->containerSala->layout();
@@ -317,37 +316,80 @@ void MainWindow::alSeleccionarSesionPorId(int idSession) {
     b->deleteLater();
   }
 
-  // Dimensiones estándar de sala (5 filas x 7 columnas = 35 butacas)
-  int filas = 5;
-  int columnas = 7;
-
-  int sizeW = 500 / columnas;
-  int sizeH = 300 / filas;
-  int butacaSize = std::min(sizeW, sizeH);
-  butacaSize = std::clamp(butacaSize, 12, 35);
-
-  QGridLayout* grid = new QGridLayout(ui->containerSala);
-  grid->setSpacing(butacaSize > 20 ? 6 : 3);
-  grid->setContentsMargins(0, 0, 0, 0);
-
-  for (int f = 0; f < filas; ++f) {
-    for (int c = 0; c < columnas; ++c) {
-      QPushButton* boton = new QPushButton(ui->containerSala);
-      boton->setFixedSize(butacaSize, butacaSize);
-      boton->setObjectName("botonButaca");
-      boton->setCheckable(true);
-      boton->setToolTip("Fila " + QString::number(f + 1) + ", Asiento " +
-                        QString::number(c + 1));
-      boton->setProperty("fila", f);
-      boton->setProperty("columna", c);
-
-      connect(boton, &QPushButton::clicked, this, &MainWindow::alPulsarButaca);
-      grid->addWidget(boton, f, c);
+  int idSala = 1;
+  for (const auto& s : listaSesiones) {
+    if (s.getId() == idSession) {
+      idSala = s.getIdSala();
+      break;
     }
   }
 
-  ui->labelPrecioTotal->setText("Precio: " + QString::number(precioTotal) + "€");
-  ui->stackedWidget->setCurrentIndex(3);
+  api->obtenerSala(
+      idSala,
+      [this, idSession](bool okSala, Sala sala) {
+        int filas = okSala && sala.getFilas() > 0 ? sala.getFilas() : 5;
+        int columnas = okSala && sala.getColumnas() > 0 ? sala.getColumnas() : 7;
+
+        api->obtenerReservasDeSesion(
+            idSession,
+            [this, filas, columnas](bool okRes, QList<Reserva> reservas) {
+              std::set<std::pair<int, int>> ocupadas;
+              if (okRes) {
+                for (const auto& r : reservas) {
+                  if (r.getEstado() == "COMPRADO" || r.getEstado() == "PENDIENTE") {
+                    ocupadas.insert({r.getFila(), r.getColumna()});
+                  }
+                }
+              }
+
+              if (ui->containerSala->layout() != nullptr) {
+                delete ui->containerSala->layout();
+              }
+              const auto prevButacas = ui->containerSala->findChildren<QWidget*>();
+              for (QWidget* b : prevButacas) {
+                b->deleteLater();
+              }
+
+              int sizeW = 500 / columnas;
+              int sizeH = 300 / filas;
+              int butacaSize = std::min(sizeW, sizeH);
+              butacaSize = std::clamp(butacaSize, 12, 35);
+
+              QGridLayout* grid = new QGridLayout(ui->containerSala);
+              grid->setSpacing(butacaSize > 20 ? 6 : 3);
+              grid->setContentsMargins(0, 0, 0, 0);
+
+              for (int f = 0; f < filas; ++f) {
+                for (int c = 0; c < columnas; ++c) {
+                  QPushButton* boton = new QPushButton(ui->containerSala);
+                  boton->setFixedSize(butacaSize, butacaSize);
+                  boton->setObjectName("botonButaca");
+
+                  bool estaOcupada = (ocupadas.find({f, c}) != ocupadas.end());
+                  if (estaOcupada) {
+                    boton->setEnabled(false);
+                    boton->setStyleSheet(
+                        "background-color: #E06C75; color: #1E202D; border: none; font-weight: bold; border-radius: 4px;");
+                    boton->setToolTip("Fila " + QString::number(f + 1) + ", Asiento " +
+                                      QString::number(c + 1) + " (Ocupado)");
+                  } else {
+                    boton->setCheckable(true);
+                    boton->setToolTip("Fila " + QString::number(f + 1) + ", Asiento " +
+                                      QString::number(c + 1));
+                    boton->setProperty("fila", f);
+                    boton->setProperty("columna", c);
+                    connect(boton, &QPushButton::clicked, this, &MainWindow::alPulsarButaca);
+                  }
+                  grid->addWidget(boton, f, c);
+                }
+              }
+
+              ui->labelPrecioTotal->setText("Precio: 0.00 €");
+              ui->stackedWidget->setCurrentIndex(3);
+            },
+            this);
+      },
+      this);
 }
 
 void MainWindow::alPulsarButaca() {

@@ -153,6 +153,80 @@ void ApiClient::obtenerSesiones(
   }
 }
 
+void ApiClient::obtenerReservasDeSesion(
+    int idSesion, std::function<void(bool, QList<Reserva>)> callback,
+    QObject* context) {
+  QUrl url(baseUrl + QString("/api/v1/sesiones/%1/reservas").arg(idSesion));
+  QNetworkRequest req(url);
+
+  QNetworkReply* reply = manager->get(req);
+  auto onFinished = [reply, callback]() {
+    QList<Reserva> listaReservas;
+    if (reply->error() != QNetworkReply::NoError) {
+      callback(false, listaReservas);
+      reply->deleteLater();
+      return;
+    }
+
+    QByteArray body = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(body);
+    QJsonObject obj = doc.object();
+    QJsonArray arr = obj["reservas"].toArray();
+
+    for (const QJsonValue& val : arr) {
+      QJsonObject rObj = val.toObject();
+      Reserva r(rObj["id"].toInt(), rObj["id_sesion"].toInt(),
+                rObj["fila"].toInt(), rObj["columna"].toInt(),
+                rObj["estado"].toString().toStdString(), 0,
+                rObj["tipo"].toString().toStdString(),
+                static_cast<float>(rObj["precio"].toDouble()));
+      listaReservas.append(r);
+    }
+
+    callback(true, listaReservas);
+    reply->deleteLater();
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
+}
+
+void ApiClient::obtenerSala(int idSala,
+                            std::function<void(bool, Sala)> callback,
+                            QObject* context) {
+  QUrl url(baseUrl + QString("/api/v1/salas/%1").arg(idSala));
+  QNetworkRequest req(url);
+
+  QNetworkReply* reply = manager->get(req);
+  auto onFinished = [reply, callback]() {
+    if (reply->error() != QNetworkReply::NoError) {
+      callback(false, Sala());
+      reply->deleteLater();
+      return;
+    }
+
+    QByteArray body = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(body);
+    QJsonObject obj = doc.object();
+
+    Sala s(obj["id"].toInt(), obj["id_cine"].toInt(),
+           obj["numero_sala"].toInt(), obj["filas"].toInt(),
+           obj["columnas"].toInt());
+
+    callback(true, s);
+    reply->deleteLater();
+  };
+
+  if (context != nullptr) {
+    connect(reply, &QNetworkReply::finished, context, onFinished);
+  } else {
+    connect(reply, &QNetworkReply::finished, this, onFinished);
+  }
+}
+
 void ApiClient::autenticar(const QString& dni, const QString& password,
                            std::function<void(bool, Usuario)> callback,
                            QObject* context) {

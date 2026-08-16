@@ -17,6 +17,7 @@
 #include "models/cine.hpp"
 #include "models/pelicula.hpp"
 #include "models/reserva.hpp"
+#include "models/sala.hpp"
 #include "models/sesion.hpp"
 #include "models/usuario.hpp"
 
@@ -47,6 +48,11 @@ class ApiClient : public QObject {
   void obtenerSesiones(int idCine,
                        std::function<void(bool, QList<Sesion>)> callback,
                        QObject* context = nullptr);
+  void obtenerReservasDeSesion(
+      int idSesion, std::function<void(bool, QList<Reserva>)> callback,
+      QObject* context = nullptr);
+  void obtenerSala(int idSala, std::function<void(bool, Sala)> callback,
+                   QObject* context = nullptr);
   void autenticar(const QString& dni, const QString& password,
                   std::function<void(bool, Usuario)> callback,
                   QObject* context = nullptr);
