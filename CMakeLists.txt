@@ -23,7 +23,6 @@ find_package(Threads REQUIRED)
 # 1. LIBRERÍA CORE (Capa de Dominio, Datos y Concurrencia C++20)
 # ==============================================================================
 set(CORE_SOURCES
-    core/src/models/asiento.cpp
     core/src/models/cine.cpp
     core/src/models/pelicula.cpp
     core/src/models/sala.cpp
