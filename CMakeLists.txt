@@ -19,6 +19,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 find_package(SQLite3 REQUIRED)
 find_package(Threads REQUIRED)
 
+if(TARGET SQLite::SQLite3 AND NOT TARGET SQLite3::SQLite3)
+    add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+elseif(TARGET SQLite3::SQLite3 AND NOT TARGET SQLite::SQLite3)
+    add_library(SQLite::SQLite3 ALIAS SQLite3::SQLite3)
+endif()
+
 # ==============================================================================
 # 1. LIBRERÍA CORE (Capa de Dominio, Datos y Concurrencia C++20)
 # ==============================================================================
@@ -54,7 +60,7 @@ target_include_directories(CineManagerCore PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/core/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(CineManagerCore PUBLIC SQLite::SQLite3 Threads::Threads)
+target_link_libraries(CineManagerCore PUBLIC SQLite3::SQLite3 Threads::Threads)
 
 # ==============================================================================
 # 2. ADAPTADORES DE ENTRADA (Capa de Presentación / Consola CLI)
