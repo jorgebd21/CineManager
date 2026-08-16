@@ -1,43 +1,50 @@
-# CineManager — Documentación Técnica de Desarrollo
+# CineManager v2.0 — Documentación Técnica y Manual de Arquitectura
 
-> **Versión del documento:** 2.2 · **Fecha:** Agosto 2026  
-> **Proyecto:** CineManager v2.0 · **Lenguaje:** C++20 · **Build:** CMake + Ninja / GCC / Clang
+> **Versión del documento:** 2.3 · **Fecha:** Agosto 2026  
+> **Estado:** Versión de Producción Consolidada  
+> **Autor:** Jorge Beneyto · **Lenguaje:** C++20 · **Frameworks:** Qt6, Crow C++, SQLite3, GoogleTest  
 
 ---
 
-## Tabla de Contenidos
+## 📑 Tabla de Contenidos
 
-1. [Visión General de la Arquitectura](#1-visión-general-de-la-arquitectura)
-2. [Capa de Dominio — Core Library](#2-capa-de-dominio--core-library)
-3. [Capa de Persistencia — Repositorios y SQLite](#3-capa-de-persistencia--repositorios-y-sqlite)
-4. [Fachada de Datos y Concurrencia — DataManager](#4-fachada-de-datos-y-concurrencia--datamanager)
-5. [Capa de Microservicio Web — Backend REST API (Crow C++)](#5-capa-de-microservicio-web--backend-rest-api-crow-c)
+1. [Visión General y Patrones de Diseño](#1-visión-general-y-patrones-de-diseño)
+2. [Capa de Dominio — Modelos Puros C++20](#2-capa-de-dominio--modelos-puros-c20)
+3. [Capa de Persistencia — SQLite RAII y Repositorios](#3-capa-de-persistencia--sqlite-raii-y-repositorios)
+4. [Fachada Transaccional y Modelo de Concurrencia](#4-fachada-transaccional-y-modelo-de-concurrencia)
+   - 4.1 [Exclusión Mutua de Grano Fino (Fine-Grained Locking)](#41-exclusión-mutua-de-grano-fino-fine-grained-locking)
+   - 4.2 [Hilo Demonio de Expiración Automática](#42-hilo-demonio-de-expiración-automática)
+   - 4.3 [Diagrama de Secuencia: Reserva Concurrente Atómica](#43-diagrama-de-secuencia-reserva-concurrente-atómica)
+5. [Capa de Backend Web — Microservicio REST API (Crow C++)](#5-capa-de-backend-web--microservicio-rest-api-crow-c)
+   - 5.1 [Especificación de Endpoints y Payloads JSON](#51-especificación-de-endpoints-y-payloads-json)
+   - 5.2 [Manejo de Errores y Códigos HTTP](#52-manejo-de-errores-y-códigos-http)
 6. [Capa de Presentación — Cliente Gráfico Asíncrono (Qt6)](#6-capa-de-presentación--cliente-gráfico-asíncrono-qt6)
-7. [Infraestructura de Producción y CI/CD](#7-infraestructura-de-producción-y-cicd)
-8. [Suite de Pruebas Automatizadas (GoogleTest)](#8-suite-de-pruebas-automatizadas-googletest)
-9. [Deuda Técnica Identificada y Resuelta](#9-deuda-técnica-identificada-y-resuelta)
+   - 6.1 [Cliente de Red Asíncrono (ApiClient)](#61-cliente-de-red-asíncrono-apiclient)
+   - 6.2 [Pasarela de Autenticación y Checkout Gatekeeper](#62-pasarela-de-autenticación-y-checkout-gatekeeper)
+   - 6.3 [Generación Vectorial de Código QR (Nayuki Engine)](#63-generación-vectorial-de-código-qr-nayuki-engine)
+7. [Suite de Pruebas Automatizadas (GoogleTest)](#7-suite-de-pruebas-automatizadas-googletest)
+8. [Infraestructura de Despliegue y CI/CD](#8-infraestructura-de-despliegue-y-cicd)
+9. [Registro de Versiones y Changelog de Estabilización](#9-registro-de-versiones-y-changelog-de-estabilización)
 
 ---
 
-## 1. Visión General de la Arquitectura
+## 1. Visión General y Patrones de Diseño
 
-CineManager implementa un patrón estricto de **Arquitectura Hexagonal (Ports & Adapters)** y **Repository Pattern**. El núcleo de la lógica de negocio y persistencia (`CineManagerCore`) reside en una **librería estática independiente** (`libCineManagerCore.a`), desacoplada de cualquier framework de red o UI.
-
-### 1.1 Diagrama de Arquitectura Global
+CineManager v2.0 implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** combinada con el **Patrón Repositorio (Repository Pattern)** y el **Patrón Fachada (Facade Pattern)**. La lógica central del negocio y los mecanismos de acceso a datos se encuentran completamente aislados en la librería estática `libCineManagerCore.a`, garantizando que ninguna regla de negocio dependa de la interfaz gráfica (Qt6), del protocolo de red (Crow REST API) ni de la consola de administración.
 
 ```mermaid
 graph TB
-    subgraph "Adaptadores de Entrada (Clients & Delivery)"
+    subgraph "Adaptadores Primarios / Driving (Entrada)"
         GUI["🖥️ CineManagerGUI<br/>(Qt6 Widgets + ApiClient)<br/>apps/gui/"]
         SERVER["⚡ CineManagerServer<br/>(Crow REST API Controller)<br/>apps/server/"]
         CLI_A["⌨️ CineManager<br/>(Consola Admin)<br/>apps/console/"]
         CLI_C["⌨️ CineManagerClient<br/>(Consola Cliente)<br/>apps/console/"]
     end
 
-    subgraph "Core Library — CineManagerCore.a"
-        DM["🔧 DataManager<br/>(Facade & Concurrency Control)<br/>datamanager.hpp"]
+    subgraph "Núcleo de Negocio — libCineManagerCore.a"
+        DM["🔧 DataManager (Facade & Concurrency Gateway)<br/>core/include/db/datamanager.hpp"]
 
-        subgraph "Repositorios (Capa de Acceso a Datos)"
+        subgraph "Capa de Repositorios (Ports & Persistence Adapters)"
             CR["CineRepository"]
             PR["PeliculaRepository"]
             SR["SalaRepository"]
@@ -46,11 +53,11 @@ graph TB
             UR["UsuarioRepository"]
         end
 
-        subgraph "Utilidades Core"
-            QR["qrcodegen<br/>(Nayuki QR Engine C++20)"]
+        subgraph "Utilidades del Núcleo"
+            QR["qrcodegen<br/>(Motor QR Nayuki C++20 ISO/IEC 18004)"]
         end
 
-        subgraph "Modelos de Dominio"
+        subgraph "Entidades de Dominio Puro"
             M1["Cine"]
             M2["Pelicula (+ Genero enum)"]
             M3["Sala"]
@@ -59,14 +66,15 @@ graph TB
             M6["Usuario (+ dni PK, email, rol)"]
         end
 
-        subgraph "Capa de Infraestructura DB"
+        subgraph "Capa de Infraestructura DB (RAII)"
             DB["SqliteDatabase (RAII, WAL, Foreign Keys)"]
-            STMT["SqliteStatement"]
+            STMT["SqliteStatement (Prepared Statements)"]
+            TX["SqliteTransaction (Atomic Rollback/Commit)"]
         end
     end
 
-    subgraph "Persistencia"
-        SQLITE[("🗄️ SQLite3 Database<br/>cine.db (WAL Mode)")]
+    subgraph "Adaptador Secundario / Driven (Persistencia)"
+        SQLITE[("🗄️ SQLite3 Relational Engine<br/>cine.db (WAL Mode + Pragmas)")]
     end
 
     GUI -->|HTTP REST / JSON| SERVER
@@ -78,101 +86,433 @@ graph TB
     DM --> CR & PR & SR & SER & RR & UR
     CR & PR & SR & SER & RR & UR --> DB
     CR & PR & SR & SER & RR & UR --> M1 & M2 & M3 & M4 & M5 & M6
-    DB --> STMT
-    STMT --> SQLITE
+    DB --> STMT & TX
+    STMT & TX --> SQLITE
 ```
 
 ---
 
-## 2. Capa de Dominio — Core Library
+## 2. Capa de Dominio — Modelos Puros C++20
 
-La capa de dominio agrupa los modelos puros de negocio en `core/include/models/`:
-- **`Usuario`**: Identificado por su `DNI` (Clave Primaria), `nombre`, `email`, `password` y `rol`. Ofrece el método de ayuda `esValido()`.
-- **`Pelicula`**: Encapsula identificador, título, género tipado mediante el enum fuertemente tipado `Genero` y duración en minutos.
-- **`Cine` & `Sala`**: Modelan la estructura de multicines y aforos rectangulares (`filas * columnas`).
-- **`Sesion`**: Vincula un cine, sala, película, fecha y hora de proyección.
-- **`Reserva`**: Asigna una butaca (`fila`, `columna`) a una sesión para un titular (`usuario_dni`), registrando el `tipo_tarifa` y `precio` dinámico.
+Los modelos de dominio residen en `core/include/models/` y representan el estado del negocio sin acoplamientos externos:
 
----
-
-## 3. Capa de Persistencia — Repositorios y SQLite
-
-Cada entidad cuenta con su respectiva clase repositorio (`CineRepository`, `PeliculaRepository`, `SalaRepository`, `SesionRepository`, `ReservaRepository`, `UsuarioRepository`) que implementa operaciones CRUD transaccionales.
-
-- **`SqliteDatabase`**: Gestión RAII de la conexión SQLite con activación obligatoria de:
-  - `PRAGMA foreign_keys = ON;`: Garantiza integridad referencial entre entidades relacionadas.
-  - `PRAGMA journal_mode = WAL;`: Habilita Write-Ahead Logging para lecturas y escrituras concurrentes de alta velocidad.
-- **`SqliteStatement`**: Wrapper RAII sobre `sqlite3_stmt` con enlace tipado de parámetros (`bindInt`, `bindFloat`, `bindText`) y lectura segura de columnas (`getColumnInt`, `getColumnFloat`, `getColumnText`).
-
----
-
-## 4. Fachada de Datos y Concurrencia — DataManager
-
-`DataManager` actúa como fachada única centralizada (Patrón Facade) y orquestador de concurrencia:
-- **Exclusión Mutua Fina**: Mapa concurrente de punteros `std::mutex` indexados por `idSesion`. Garantiza que dos compras simultáneas en distintas sesiones no se bloqueen entre sí.
-- **Hilo Demonio de Expiración**: `std::thread` con `std::condition_variable` que cada 5 segundos analiza y libera reservas que hayan superado el tiempo de expiración (`TIEMPO_EXPIRACION_SEGUNDOS`).
+- **`Usuario`** (`models/usuario.hpp`):
+  - Clave primaria: `dni` (formato DNI/NIE validado).
+  - Atributos: `nombre`, `apellidos`, `email`, `password_hash`, `rol` (`CLIENTE` o `ADMIN`).
+  - Métodos: `esValido()`, validadores de campos obligatorios.
+- **`Pelicula`** (`models/pelicula.hpp`):
+  - Atributos: `id`, `titulo`, `genero` (Enum fuertemente tipado: `ACCION`, `DRAMA`, `COMEDIA`, `CIENCIA_FICCION`, `TERROR`), `duracion` (minutos).
+  - Métodos auxiliares: `generoToString()` y `stringToGenero()`.
+- **`Cine`** y **`Sala`** (`models/cine.hpp`, `models/sala.hpp`):
+  - `Cine`: Modelado de complejos físicos (`id`, `nombre`, `direccion`).
+  - `Sala`: Configuración geométrica de butacas (`cine_id`, `numero_sala`, `filas`, `columnas`, capacidad total `filas * columnas`).
+- **`Sesion`** (`models/sesion.hpp`):
+  - Atributos: `id`, `pelicula` (`Pelicula`), `idSala`, `horaInicio` (`std::time_t`), `precioEntrada` (`float`).
+- **`Reserva`** (`models/reserva.hpp`):
+  - Atributos: `id`, `idSesion`, `fila`, `columna`, `estado` (`PENDIENTE`, `COMPRADO`, `EXPIRADO`), `timestampCreacion` (`std::time_t`), `tipo` (`Adulto`, `Niño`, `Jubilado`, `Estudiante`), `precio` (`float`).
+- **`Asiento`** (`models/asiento.hpp`):
+  - Value object liviano que encapsula la tupla de coordenadas `(fila, columna)`.
 
 ---
 
-## 5. Capa de Microservicio Web — Backend REST API (Crow C++)
+## 3. Capa de Persistencia — SQLite RAII y Repositorios
 
-El servidor web `CineManagerServer` está implementado con **Crow C++20** (`apps/server/`) y expone los siguientes endpoints JSON en el puerto `8080`:
+El motor de persistencia encapsula la biblioteca nativa SQLite3 en clases seguras bajo el paradigma **RAII (Resource Acquisition Is Initialization)** (`core/include/db/`):
 
-- `GET /api/v1/health`: Estado y versión de la API.
-- `GET /api/v1/cines`: Catálogo de cines registrados.
-- `GET /api/v1/peliculas`: Cartelera global o filtrada por `cine_id`.
-- `GET /api/v1/sesiones`: Pases disponibles filtrados por `cine_id` y `pelicula_id`.
-- `POST /api/v1/auth/login`: Autenticación con DNI y contraseña.
-- `POST /api/v1/auth/register`: Registro seguro de nuevos usuarios.
-- `POST /api/v1/reservas`: Bloqueo y creación atómica de reservas de asientos con tarifas asociadas.
+### 3.1 Clases de Infraestructura
+- **`SqliteDatabase`**: Administra la conexión a `data/cine.db`.
+  - Configuración automática en tiempo de conexión:
+    - `PRAGMA foreign_keys = ON;`: Valida integridad referencial estricta en cascada (`ON DELETE CASCADE`).
+    - `PRAGMA journal_mode = WAL;`: Habilita Write-Ahead Logging para permitir lecturas y escrituras simultáneas sin bloqueo de base de datos.
+    - `PRAGMA busy_timeout = 5000;`: Evita errores inmediatos `SQLITE_BUSY` ante colisiones de escritura.
+  - Resolución inteligente de rutas: Algoritmo multi-fallback que localiza `cine.db` tanto en ejecuciones locales (`build/bin/`), relativas (`data/`), dentro de contenedores (`/app/data/`) o mediante enlaces simbólicos `/proc/self/exe`.
+- **`SqliteStatement`**: Envoltorio RAII de `sqlite3_stmt` que garantiza la liberación de cursores (`sqlite3_finalize`) y provee enlaces fuertemente tipados (`bindInt`, `bindInt64`, `bindFloat`, `bindText`).
+- **`SqliteTransaction`**: Gestor de transacciones atómicas con *Auto-Rollback* en destructor si no se ejecuta `commit()` explícito.
+
+### 3.2 Repositorios
+Cada entidad dispone de su repositorio especializado (`CineRepository`, `PeliculaRepository`, `SalaRepository`, `SesionRepository`, `ReservaRepository`, `UsuarioRepository`) que implementa operaciones CRUD mapeando resultados SQL directamente a objetos del dominio.
+
+---
+
+## 4. Fachada Transaccional y Modelo de Concurrencia
+
+La clase `DataManager` (`core/include/db/datamanager.hpp`) actúa como punto de entrada unificado y orquestador de concurrencia.
+
+### 4.1 Exclusión Mutua de Grano Fino (Fine-Grained Locking)
+
+Para maximizar el rendimiento en entornos multihilo (como el servidor web Crow), `DataManager` evita bloqueos globales en las reservas:
+
+- **Estructura de Bloqueo**: Mantiene un mapa `std::unordered_map<int, std::shared_ptr<std::mutex>> sessionMutexes` protegido por `mapMutex`.
+- **Aislamiento por Sesión**: Dos usuarios comprando entradas para sesiones distintas (ej. Sesión 1 y Sesión 2) se ejecutan de forma completamente paralela sin competir por el mismo mutex.
+- **Inserción Atómica de Lotes (`crearReservasMultiples`)**:
+  ```cpp
+  bool DataManager::crearReservasMultiples(int idSesion, const std::vector<Reserva>& reservas) {
+    auto sesionMtx = obtenerMutexSesion(idSesion);
+    std::lock_guard<std::mutex> lockSesion(*sesionMtx); // Exclusión mutua de la sesión
+    std::lock_guard<std::mutex> lockDb(db.getMutex());   // Exclusión mutua de la base de datos
+
+    return reservaRepo.crearMultiples(reservas);         // Transacción SQLite con Commit/Rollback
+  }
+  ```
+  La restricción relacional `UNIQUE(sesion_id, fila, columna)` en SQLite garantiza que si dos hilos intentan reservar la misma butaca simultáneamente, uno de ellos aborta y su transacción efectúa un rollback inmediato sin efectos colaterales.
+
+### 4.2 Hilo Demonio de Expiración Automática
+
+`DataManager` inicializa un hilo demonio supervisor basado en `std::jthread` (C++20) y `std::condition_variable_any`:
+- **Intervalo de Sondeo**: Cada 5 segundos despierta para consultar reservas en estado `PENDIENTE`.
+- **Regla de Negocio**: Si `(ahora - timestampCreacion) >= 300 segundos (5 minutos)`, el hilo adquiere el mutex de la sesión correspondiente y elimina la reserva, liberando el asiento.
+- **Parada Limpia (Graceful Stop)**: Al destruirse `DataManager`, el `std::stop_token` solicita la detención del hilo y `cvCleaner.notify_all()` lo despierta de inmediato para un apagado sin retardos.
+
+### 4.3 Diagrama de Secuencia: Reserva Concurrente Atómica
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ClienteA as 👤 Cliente A (Hilo 1)
+    actor ClienteB as 👤 Cliente B (Hilo 2)
+    participant Server as ⚡ CineManagerServer (Crow)
+    participant DM as 🔧 DataManager
+    participant MutexS as 🔒 Mutex Sesión #10
+    participant Repo as 📦 ReservaRepository
+    participant DB as 🗄️ SQLite3 (cine.db)
+
+    ClienteA->>Server: POST /api/v1/reservas (Sesión 10, Asiento F2-C3)
+    ClienteB->>Server: POST /api/v1/reservas (Sesión 10, Asiento F2-C3)
+    
+    par Hilo 1 adquiere el bloqueo
+        Server->>DM: crearReservasMultiples(idSesion=10, [F2-C3])
+        DM->>MutexS: lock_guard(sessionMutex[10]) -> Adquirido ✅
+        DM->>Repo: crearMultiples([F2-C3])
+        Repo->>DB: BEGIN TRANSACTION;
+        Repo->>DB: INSERT INTO reservas (sesion_id=10, fila=2, columna=3)
+        DB-->>Repo: SQLITE_DONE (Exitoso)
+        Repo->>DB: COMMIT;
+        Repo-->>DM: true
+        DM->>MutexS: unlock
+        DM-->>Server: HTTP 201 Created {"status": "exito"}
+        Server-->>ClienteA: 201 Created (Entrada Confirmada)
+    and Hilo 2 espera el bloqueo
+        Server->>DM: crearReservasMultiples(idSesion=10, [F2-C3])
+        DM->>MutexS: lock_guard(sessionMutex[10]) -> Esperando... ⏳
+        Note over DM,MutexS: Hilo 2 bloqueado hasta que Hilo 1 libera Mutex
+        MutexS-->>DM: Mutex Adquirido ✅
+        DM->>Repo: crearMultiples([F2-C3])
+        Repo->>DB: BEGIN TRANSACTION;
+        Repo->>DB: INSERT INTO reservas (sesion_id=10, fila=2, columna=3)
+        DB-->>Repo: SQLITE_CONSTRAINT_UNIQUE (Fallo: Asiento ya ocupado)
+        Repo->>DB: ROLLBACK;
+        Repo-->>DM: false
+        DM->>MutexS: unlock
+        DM-->>Server: HTTP 409 Conflict {"error": "Butacas ocupadas"}
+        Server-->>ClienteB: 409 Conflict (Asiento no disponible)
+    end
+```
+
+---
+
+## 5. Capa de Backend Web — Microservicio REST API (Crow C++)
+
+El microservicio `CineManagerServer` (`apps/server/`) expone un servidor HTTP asíncrono en el puerto `8080` implementado sobre el framework **Crow C++20**:
+
+### 5.1 Especificación de Endpoints y Payloads JSON
+
+#### `GET /api/v1/health`
+- **Descripción**: Chequeo de salud del servicio y metadatos de versión.
+- **Respuesta `200 OK`**:
+  ```json
+  {
+    "status": "ok",
+    "app": "CineManager REST API v2.0 (C++20 Hexagonal)"
+  }
+  ```
+
+---
+
+#### `GET /api/v1/cines`
+- **Descripción**: Listado completo de complejos de cine registrados.
+- **Respuesta `200 OK`**:
+  ```json
+  {
+    "cines": [
+      {
+        "id": 1,
+        "nombre": "Cine Central Metrópolis",
+        "direccion": "Av. de la Constitución 45"
+      },
+      {
+        "id": 2,
+        "nombre": "Cine Capitol Premium",
+        "direccion": "Gran Vía 12, Planta 3"
+      }
+    ]
+  }
+  ```
+
+---
+
+#### `GET /api/v1/peliculas`
+- **Descripción**: Catálogo de películas en cartelera con metadatos de género y duración.
+- **Respuesta `200 OK`**:
+  ```json
+  {
+    "peliculas": [
+      {
+        "id": 1,
+        "titulo": "Inception",
+        "genero": "CIENCIA_FICCION",
+        "duracion": 148
+      },
+      {
+        "id": 2,
+        "titulo": "El Padrino",
+        "genero": "DRAMA",
+        "duracion": 175
+      }
+    ]
+  }
+  ```
+
+---
+
+#### `GET /api/v1/sesiones`
+- **Query Parameters**:
+  - `cine_id` (opcional, entero, por defecto `1`): Filtra los pases correspondientes al cine.
+- **Descripción**: Retorna sesiones enriquecidas con información agregada de la película asociada, eliminando el problema de consultas $N+1$ en el cliente.
+- **Respuesta `200 OK`**:
+  ```json
+  {
+    "sesiones": [
+      {
+        "id": 1,
+        "pelicula_id": 1,
+        "pelicula_titulo": "Inception",
+        "pelicula_genero": "CIENCIA_FICCION",
+        "pelicula_duracion": 148,
+        "sala_id": 1,
+        "fecha_hora": 1700000000
+      }
+    ]
+  }
+  ```
+
+---
+
+#### `POST /api/v1/auth/login`
+- **Descripción**: Autenticación de usuarios mediante DNI y contraseña.
+- **Payload Request**:
+  ```json
+  {
+    "dni": "12345678A",
+    "password": "miPasswordSegura"
+  }
+  ```
+- **Respuesta `200 OK`**:
+  ```json
+  {
+    "dni": "12345678A",
+    "nombre": "Juan",
+    "apellidos": "Pérez García",
+    "email": "juan.perez@example.com",
+    "rol": "CLIENTE"
+  }
+  ```
+- **Respuesta `401 Unauthorized`**:
+  ```json
+  {
+    "error": "DNI o contraseña incorrectos."
+  }
+  ```
+
+---
+
+#### `POST /api/v1/auth/register`
+- **Descripción**: Registro de nuevos clientes en el sistema.
+- **Payload Request**:
+  ```json
+  {
+    "dni": "87654321B",
+    "nombre": "Ana",
+    "apellidos": "Gómez Ruiz",
+    "email": "ana.gomez@example.com",
+    "password": "Password2026!"
+  }
+  ```
+- **Respuesta `201 Created`**:
+  ```json
+  {
+    "dni": "87654321B",
+    "nombre": "Ana",
+    "email": "ana.gomez@example.com"
+  }
+  ```
+- **Respuesta `409 Conflict`**:
+  ```json
+  {
+    "error": "El DNI ya se encuentra registrado."
+  }
+  ```
+
+---
+
+#### `POST /api/v1/reservas`
+- **Descripción**: Creación transaccional y atómica de un conjunto de reservas con tarifas dinámicas asociadas.
+- **Payload Request**:
+  ```json
+  {
+    "sesion_id": 1,
+    "reservas": [
+      {
+        "fila": 3,
+        "columna": 4,
+        "tipo": "Adulto",
+        "precio": 7.50
+      },
+      {
+        "fila": 3,
+        "columna": 5,
+        "tipo": "Niño",
+        "precio": 5.00
+      }
+    ]
+  }
+  ```
+- **Respuesta `201 Created`**:
+  ```json
+  {
+    "status": "exito",
+    "reservas_creadas": 2
+  }
+  ```
+- **Respuesta `409 Conflict`**:
+  ```json
+  {
+    "error": "No se pudieron realizar las reservas (butacas ocupadas o sesión inválida)."
+  }
+  ```
+
+### 5.2 Manejo de Errores y Códigos HTTP
+
+El microservicio utiliza respuestas JSON consistentes bajo los siguientes códigos de estado:
+- `200 OK`: Consulta exitosa o autenticación validada.
+- `201 Created`: Recurso creado con éxito (Usuario registrado, reservas consolidadas).
+- `400 Bad Request`: Payload JSON malformado o campos obligatorios ausentes.
+- `401 Unauthorized`: Credenciales de acceso incorrectas.
+- `409 Conflict`: Conflicto de recursos (DNI duplicado o colisión de butacas ocupadas).
+- `500 Internal Server Error`: Fallo interno no recuperable en base de datos.
 
 ---
 
 ## 6. Capa de Presentación — Cliente Gráfico Asíncrono (Qt6)
 
-La interfaz gráfica nativa `CineManagerGUI` implementa un cliente HTTP asíncrono (`ApiClient`) basado en `QNetworkAccessManager`:
-- **`ApiClient`**: Emite peticiones HTTP no bloqueantes mediante callbacks `std::function` y `QJsonDocument`.
-- **`TarifasDialog`**: Ventana modal que calcula y desglosa precios por butaca (Adulto: 7.50€, Niño: 5.00€, Jubilado: 5.50€, Estudiante: 5.50€).
-- **`QrHelper` & `qrcodegen`**: Generación vectorial de código QR bajo estándar ISO/IEC 18004 con firma digital del ticket.
-- **Control de Aforo y Detección de Salas Llenas**: Conmutación dinámica a estado `(LLENA)` e inhabilitación del pase.
-- **`LoginDialog` & Pasarela Protegida**: Control de sesión por DNI y barrera de autenticación antes de confirmar el pago.
+La interfaz de usuario `CineManagerGUI` (`apps/gui/`) ofrece una experiencia interactiva fluida y totalmente asíncrona:
+
+### 6.1 Cliente de Red Asíncrono (`ApiClient`)
+La clase `ApiClient` (`apps/gui/include/apiclient.h`) encapsula `QNetworkAccessManager` y `QJsonDocument`. Todas las peticiones al servidor REST API se ejecutan en segundo plano, notificando a los controladores de la GUI mediante lambdas y callbacks `std::function`:
+
+```cpp
+void ApiClient::crearReservas(int sesionId, const QList<ReservaData>& reservas,
+                              std::function<void(bool ok, QString mensaje)> callback);
+```
+
+### 6.2 Pasarela de Autenticación y Checkout Gatekeeper
+
+El diálogo `LoginDialog` actúa como barrera de seguridad (*Gatekeeper*) antes de finalizar cualquier compra:
+1. Permite iniciar sesión con DNI y contraseña o registrarse directamente.
+2. Ofrece la opción de **Continuar como Invitado**, asignando una sesión temporal para agilizar la compra sin fricción.
+3. El botón superior en la barra de navegación conmuta su estado mostrando el nombre del usuario autenticado o la opción de iniciar sesión.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario as 👤 Usuario
+    participant GUI as 🖥️ MainWindow (Qt6)
+    participant Modal as 🪟 LoginDialog
+    participant API as 🌐 ApiClient
+    participant Server as ⚡ CineManagerServer
+
+    Usuario->>GUI: Pulsa "Confirmar Compra"
+    alt Usuario ya autenticado
+        GUI->>GUI: Abre directamente TarifasDialog
+    else Sesión no iniciada
+        GUI->>Modal: exec() (Apertura Modal)
+        alt Opción A: Login DNI
+            Usuario->>Modal: Introduce DNI y Password
+            Modal->>API: login(dni, pass)
+            API->>Server: POST /api/v1/auth/login
+            Server-->>API: 200 OK (Usuario)
+            API-->>Modal: Callback(ok=true)
+            Modal-->>GUI: QDialog::Accepted (Usuario Autenticado)
+        else Opción B: Continuar como Invitado
+            Usuario->>Modal: Pulsa "Continuar como Invitado"
+            Modal-->>GUI: QDialog::Accepted (Usuario Invitado)
+        end
+        GUI->>GUI: Abre TarifasDialog y procede al pago
+    end
+```
+
+### 6.3 Generación Vectorial de Código QR (Nayuki Engine)
+
+Para garantizar la máxima nitidez y fiabilidad al escanear los tickets impresos o en pantalla:
+- Se integra la biblioteca C++20 **Nayuki QR Code Generator** (`core/include/utils/qrcodegen.hpp`).
+- La clase `QrHelper` (`apps/gui/src/qrhelper.cpp`) genera una matriz con nivel de corrección de error `MEDIUM` y añade una zona de silencio (*quiet zone*) de 4 módulos (estándar ISO/IEC 18004).
+- La imagen se escala hacia el `QLabel` utilizando `Qt::FastTransformation` (interpolación por vecino más próximo), eliminando cualquier difuminado o degradado en los bordes de los módulos QR.
 
 ---
 
-## 7. Infraestructura de Producción y CI/CD
+## 7. Suite de Pruebas Automatizadas (GoogleTest)
 
-- **`Dockerfile` Multietapa**:
-  - `builder`: Compilación en Ubuntu 22.04 con GCC 11, CMake y ejecución automática de tests GoogleTest.
-  - `runner`: Imagen ligera mínima con `libsqlite3-0` y el binario `CineManagerServer`.
-- **`docker-compose.yml`**: Servicio `cinemanager-api` en puerto `8080:8080` con volumen persistente en `./data`.
-- **`.github/workflows/ci.yml`**: Integración continua automatizada en GitHub Actions ejecutando `ctest` en cada push.
+Ubicada en `tests/`, la suite automatizada cubre el 100% de los casos críticos del dominio y la persistencia:
 
----
+| Archivo de Test | Casos de Prueba Verificados |
+| :--- | :--- |
+| **`test_usuario_repo.cpp`** | Inserción CRUD de usuarios, hashing de contraseñas, autenticación positiva/negativa y validación del método `esValido()`. |
+| **`test_reserva_repo.cpp`** | Inserción de reservas con tarifas dinámicas, consulta por sesión y verificación de la restricción `UNIQUE (sesion_id, fila, columna)`. |
+| **`test_cinema_repos.cpp`** | Gestión de cines, salas y sesiones, validación de cascadas y consultas de cartelera. |
+| **`test_concurrency.cpp`** | Simulación de 10 hilos simultáneos compitiendo por la misma butaca (sólo 1 gana) y pruebas de rollback transaccional ante lotes con conflicto parcial. |
 
-## 8. Suite de Pruebas Automatizadas (GoogleTest)
-
-Ubicada en `tests/`:
-- **`test_usuario_repo.cpp`**: Pruebas de CRUD, autenticación con contraseña y validación de helper `esValido()`.
-- **`test_reserva_repo.cpp`**: Pruebas de inserción de reservas con tarifas dinámicas y validación de restricción `UNIQUE (sesion_id, fila, columna)`.
-
-Ejecución de la suite:
+### Ejecución de Pruebas
 ```bash
+# Compilar y ejecutar mediante CTest con salida detallada en caso de fallo
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target CineManagerTests
 ctest --test-dir build --output-on-failure
 ```
 
 ---
 
-## 9. Deuda Técnica Identificada y Resuelta
+## 8. Infraestructura de Despliegue y CI/CD
 
-| # | Componente | Descripción | Estado |
-|---|-----------|-------------|:---:|
-| DT-01 | `database.cpp` | Heurístico multi-fallback de resolución de ruta de `cine.db` | ✅ **RESUELTO** |
-| DT-02 | `database.cpp` | Activación de `PRAGMA foreign_keys = ON;` | ✅ **RESUELTO** |
-| DT-03 | `database.cpp` | Activación de `PRAGMA journal_mode = WAL;` | ✅ **RESUELTO** |
-| DT-04 | `mainwindow.cpp` | Implementación de `TarifasDialog` y columna `precio` en BD | ✅ **RESUELTO** |
-| DT-05 | `main_gui.cpp` | Resolución robusta de `style.qss` con fallback | ✅ **RESUELTO** |
-| DT-06 | `sesionrepository.cpp` | Optimización de consultas de sesiones | ✅ **RESUELTO** |
-| DT-07 | `cinecardwidget.cpp` | Enriquecimiento de tarjetas de cines y cartelera | ✅ **RESUELTO** |
-| DT-08 | `mainwindow.cpp` | Generación de Código QR dinámico con motor Nayuki QR | ✅ **RESUELTO** |
-| DT-09 | `tests/` | Creación de suite completa de pruebas GoogleTest + CI/CD | ✅ **RESUELTO** |
+### 8.1 Dockerfile Multietapa Optimizado
+- **Etapa `builder`**: Entorno Ubuntu 22.04 completo con GCC 11, CMake y Ninja. Compila `CineManagerCore`, `CineManagerServer` y ejecuta la suite completa de tests unitarios antes de permitir la generación de la imagen final.
+- **Etapa `runner`**: Imagen de producción ultraligera que únicamente contiene las dependencias mínimas de ejecución (`libsqlite3-0`, `ca-certificates`) y el binario estático del servidor.
 
+### 8.2 Orquestación con Docker Compose
+El archivo `docker-compose.yml` mapea el puerto `8080:8080`, configura un volumen local persistente en `./data` para `cine.db` y añade un chequeo de salud continuo (`healthcheck`) contra `/api/v1/health`.
+
+### 8.3 Pipeline de Integración Continua (GitHub Actions)
+Definido en `.github/workflows/ci.yml`, el flujo de CI se dispara en cada `push` o `pull_request` a las ramas principales, garantizando que el código compile sin advertencias y pase el 100% de los tests en un entorno limpio.
+
+---
+
+## 9. Registro de Versiones y Changelog de Estabilización
+
+Historial consolidado de hitos y resolución de deuda técnica completados durante el ciclo de vida de la versión 2.0:
+
+| Identificador | Componente | Descripción de la Mejora / Refactorización | Hito de Cierre |
+| :---: | :--- | :--- | :---: |
+| **DT-01** | `database.cpp` | Implementación de resolución de rutas multi-fallback (`/proc/self/exe` y rutas relativas). | ✅ **v2.0-Final** |
+| **DT-02** | `database.cpp` | Activación estricta de integridad referencial con `PRAGMA foreign_keys = ON;`. | ✅ **v2.0-Final** |
+| **DT-03** | `database.cpp` | Habilitación de concurrencia de alto rendimiento mediante `PRAGMA journal_mode = WAL;`. | ✅ **v2.0-Final** |
+| **DT-04** | `mainwindow.cpp` | Diálogo modal `TarifasDialog`, desglose de tarifas dinámicas y persistencia en BD. | ✅ **v2.0-Final** |
+| **DT-05** | `main_gui.cpp` | Resolución robusta de `style.qss` con fallback en tiempo de ejecución. | ✅ **v2.0-Final** |
+| **DT-06** | `sesionrepository.cpp` | Optimización de consultas de sesiones y cartelera enriquecida. | ✅ **v2.0-Final** |
+| **DT-07** | `cinecardwidget.cpp` | Enriquecimiento visual de tarjetas de cine, cartelera interactiva y filtrado. | ✅ **v2.0-Final** |
+| **DT-08** | `qrhelper.cpp` | Sustitución de mock estático por generación matemática de QR vectorial Nayuki C++20. | ✅ **v2.0-Final** |
+| **DT-09** | `tests/` | Suite automatizada de pruebas GoogleTest e integración en pipeline CI/CD. | ✅ **v2.0-Final** |
+| **DT-10** | `datamanager.cpp` | Eliminación de condiciones TOCTOU en `eliminarReserva()` y transacciones seguras. | ✅ **v2.0-Final** |
+
+---
+
+<div align="center">
+  <sub>CineManager v2.0 · Documentación Técnica de Referencia · 2026</sub>
+</div>

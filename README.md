@@ -1,23 +1,122 @@
 # 🎬 CineManager v2.0
 
-![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg?style=flat&logo=c%2B%2B)
-![Crow C++](https://img.shields.io/badge/Crow-REST%20API-8A2BE2?style=flat)
-![Qt6](https://img.shields.io/badge/Qt-6.x%20Widgets%20%26%20Network-41CD52?style=flat&logo=qt)
-![SQLite3](https://img.shields.io/badge/SQLite-3%20(WAL%20%2B%20FK)-003B57?style=flat&logo=sqlite)
-![Docker](https://img.shields.io/badge/Docker-Multi--stage%20%7C%20Compose-2496ED?style=flat&logo=docker)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions)
-![GoogleTest](https://img.shields.io/badge/Tests-GoogleTest%20(100%25%20Passed)-brightgreen.svg?style=flat)
-![Architecture](https://img.shields.io/badge/Architecture-Hexagonal%20%7C%20Repository-success.svg)
+<div align="center">
 
-> 🚀 **Estado del proyecto:** **Versión 2.0 de Producción** — Arquitectura desacoplada en C++20 con backend REST API multihilo, cliente gráfico nativo Qt6 asíncrono, persistencia transaccional SQLite con WAL/FK, suite de pruebas automatizadas GoogleTest y despliegue orquestado en Docker & CI/CD.
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg?style=flat&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/20)
+[![Qt6](https://img.shields.io/badge/Qt-6.x%20Widgets%20%26%20Network-41CD52?style=flat&logo=qt)](https://www.qt.io/)
+[![Crow C++](https://img.shields.io/badge/Crow-REST%20API-8A2BE2?style=flat)](https://crowcpp.org/)
+[![SQLite3](https://img.shields.io/badge/SQLite-3%20(WAL%20%2B%20FK)-003B57?style=flat&logo=sqlite)](https://www.sqlite.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.20%2B-064F8C?style=flat&logo=cmake)](https://cmake.org/)
+[![GoogleTest](https://img.shields.io/badge/Tests-GoogleTest%20(100%25%20Passing)-brightgreen.svg?style=flat&logo=google)](https://github.com/google/googletest)
+[![Docker](https://img.shields.io/badge/Docker-Multi--stage%20%7C%20Compose-2496ED?style=flat&logo=docker)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions)](https://github.com/features/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)
+
+<p align="center">
+  <strong>Sistema Transaccional Distribuido de Alto Rendimiento para Gestión de Salas y Venta de Entradas Cinematográficas</strong>
+</p>
+
+<p align="center">
+  <a href="#-visión-general">Visión General</a> •
+  <a href="#-showcase-visual">Showcase Visual</a> •
+  <a href="#-características-principales">Características</a> •
+  <a href="#-arquitectura-del-sistema">Arquitectura</a> •
+  <a href="#-catálogo-de-endpoints-rest-api">REST API</a> •
+  <a href="#-guía-rápida-de-despliegue">Quickstart</a> •
+  <a href="#-documentación-técnica">Documentación</a>
+</p>
+
+</div>
 
 ---
 
-## 📌 Descripción General
+## 📌 Visión General
 
-**CineManager** es un sistema transaccional integral de gestión, visualización de cartelera y venta de entradas de cine. Diseñado bajo los más estrictos estándares de ingeniería de software comercial, el proyecto aplica los patrones de **Arquitectura Hexagonal (Ports & Adapters)** y **Repository Pattern**.
+**CineManager v2.0** es una solución integral y desacoplada de taquilla y gestión de multicines diseñada bajo estándares profesionales de ingeniería de software en **C++20**. El sistema combina un núcleo de dominio transaccional compilado como librería estática independiente (`libCineManagerCore.a`), un microservicio backend RESTful asíncrono impulsado por **Crow C++**, y una aplicación de escritorio moderna desarrollada con **Qt6 (Widgets & Network)**.
 
-El núcleo del dominio y la persistencia reside en una librería estática compilada de forma independiente (`CineManagerCore.a`), la cual alimenta tanto a un **microservicio web REST API asíncrono** (`CineManagerServer`) como a una **aplicación de escritorio nativa Qt6** (`CineManagerGUI`), interfaces de consola y suites de pruebas automatizadas.
+El motor transaccional aborda problemas complejos de concurrencia y contención en la reserva de butacas mediante un esquema de **exclusión mutua fina (*fine-grained locking*)** por identificador de sesión, transacciones ACID en **SQLite3 con modo Write-Ahead Logging (WAL)** y un hilo demonio supervisor con mecanismos de *timeout* y liberación automática de bloqueos temporales.
+
+---
+
+## 📸 Showcase Visual
+
+Explore las interfaces principales del cliente gráfico de escritorio (**CineManagerGUI**) desarrolladas con Qt6 y estilizadas con una hoja de estilo moderna en tema oscuro (`style.qss`):
+
+<div align="center">
+
+### 🎬 1. Selección de Cartelera y Mapa Interactivo de Butacas
+*Visualización de salas con matriz de butacas dinámica, detección automática de salas llenas `(LLENA)` y selección múltiple con `std::set`.*
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ [docs/assets/screenshots/01_seleccion_cine_cartelera.png]                             │
+│                                                                                        │
+│                   [ Vista de Cartelera y Mapa de Sala de CineManager ]                 │
+│                                                                                        │
+│ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐  ┌─────────────────────────────┐ │
+│ │  Cine Central │ │ Cine Capitol  │ │  Cine Yelmo   │  │ [1] [2] [3] [4] [5] [6] [7] │ │
+│ │  Metrópolis   │ │    Premium    │ │  Plaza Mayor  │  │ [8] [9] [X] [X] [S] [S] [X] │ │
+│ └───────────────┘ └───────────────┘ └───────────────┘  └─────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/01_seleccion_cine_cartelera.png`](docs/assets/README.md)  
+> 🎞️ *Coloque la animación GIF en:* [`docs/assets/gifs/booking_flow_demo.gif`](docs/assets/README.md)
+
+---
+
+### 🎟️ 2. Diálogo Modal de Tarifas Dinámicas y Ticket con Código QR
+*Cálculo en tiempo real de tarifas (Adulto, Niño, Jubilado, Estudiante) y emisión de ticket digital con código QR generado vectorialmente bajo estándar ISO/IEC 18004.*
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ [docs/assets/screenshots/02_modal_tarifas_ticket_qr.png]                              │
+│                                                                                        │
+│  ┌────────────────────────────────────────┐   ┌─────────────────────────────────────┐  │
+│  │ 🎟️ Desglose de Tarifas por Butaca      │   │ 🎫 Ticket Oficial de Entrada        │  │
+│  │ - Butaca Fila 4, Col 5: Adulto (7.50€) │   │ ▄▄▄▄▄▄▄ ▄   ▄▄▄▄▄▄▄                 │  │
+│  │ - Butaca Fila 4, Col 6: Niño   (5.00€) │   │ █ ▄▄▄ █ ▀█▄ █ ▄▄▄ █  Cine: Central  │  │
+│  │ Total Compra: 12.50€                   │   │ █ ███ █ ▄▀█ █ ███ █  Sala: 1        │  │
+│  │ [ Confirmar Pago y Generar Entrada ]   │   │ ▀▀▀▀▀▀▀ ▀ ▀ ▀▀▀▀▀▀▀  Pelicula: Dune │  │
+│  └────────────────────────────────────────┘   └─────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/02_modal_tarifas_ticket_qr.png`](docs/assets/README.md)
+
+---
+
+### 🔐 3. Pasarela de Autenticación DNI y Modo Invitado (*Checkout Gatekeeper*)
+*Mecanismo de control de acceso por DNI/Contraseña que protege la pasarela de compra, permitiendo registro rápido o continuidad como invitado.*
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ [docs/assets/screenshots/03_login_autenticacion_dni.png]                              │
+│                                                                                        │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ 🔐 Iniciar Sesión en CineManager                                                 │  │
+│  │ DNI: [ 12345678Z           ]   Contraseña: [ **********        ]                 │  │
+│  │ [ Iniciar Sesión ]  [ Registrar Nuevo Usuario ]  [ Continuar como Invitado ]     │  │
+│  └──────────────────────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/03_login_autenticacion_dni.png`](docs/assets/README.md)  
+> 🎞️ *Coloque la animación GIF en:* [`docs/assets/gifs/auth_gatekeeper_demo.gif`](docs/assets/README.md)
+
+</div>
+
+---
+
+## 🚀 Características Principales
+
+| Módulo | Descripción Técnica |
+| :--- | :--- |
+| **Arquitectura Hexagonal** | Separación estricta entre el núcleo de negocio (`libCineManagerCore.a`), adaptadores de entrada (GUI Qt6, REST API Crow, CLI) y adaptadores de infraestructura (SQLite3). |
+| **Control Fino de Concurrencia** | Bloqueo granular mediante `std::unordered_map<int, std::shared_ptr<std::mutex>>` por sesión, evitando cuellos de botella globales en compras concurrentes. |
+| **Transacciones ACID & WAL** | Persistencia sobre SQLite3 con `PRAGMA foreign_keys = ON;` y `PRAGMA journal_mode = WAL;`, garantizando atomicidad mediante `SqliteTransaction` (commit/rollback). |
+| **Backend REST API Asíncrono** | Microservicio web C++20 con Crow Framework en puerto `8080`, serialización JSON nativa y catálogo formal OpenAPI 3.0. |
+| **Cliente Gráfico Qt6 Reactivo** | Interfaz de usuario desacoplada que consume el backend de forma asíncrona mediante `QNetworkAccessManager` y callbacks `std::function`. |
+| **Generación Vectorial de QR** | Integración del motor matemático C++20 *Nayuki QR Code Generator* (ISO/IEC 18004) con renderizado libre de artefactos o difuminado mediante interpolación *Nearest-Neighbor*. |
+| **Suite GoogleTest & CI/CD** | 100% de cobertura en pruebas de integración, autenticación, restricciones de unicidad y estrés de concurrencia bajo GitHub Actions. |
+| **Contenerización Docker** | `Dockerfile` multietapa optimizado con imagen final mínima y orquestación reproducible en un comando mediante `docker-compose.yml`. |
 
 ---
 
@@ -25,21 +124,18 @@ El núcleo del dominio y la persistencia reside en una librería estática compi
 
 ```mermaid
 graph TB
-    subgraph "Clientes y Puntos de Acceso"
-        GUI["🖥️ CineManagerGUI (Qt6 Client)<br/>ApiClient (QNetworkAccessManager)"]
-        CLI_A["⌨️ CineManager (Admin Console)"]
-        CLI_C["⌨️ CineManagerClient (Client Console)"]
-        CURL["🌐 Clientes HTTP / Curl / Web"]
-    end
-
-    subgraph "Microservicio Backend"
+    subgraph "Adaptadores de Entrada (Delivery & Clients)"
+        GUI["🖥️ CineManagerGUI (Qt6 Widgets)<br/>ApiClient (QNetworkAccessManager)"]
         SERVER["⚡ CineManagerServer (Crow C++20)<br/>REST API Controller (:8080)"]
+        CLI_A["⌨️ CineManager (Admin CLI)"]
+        CLI_C["⌨️ CineManagerClient (Client CLI)"]
+        CURL["🌐 Clientes HTTP Externos / Web SPA"]
     end
 
-    subgraph "Core Library (CineManagerCore.a)"
-        DM["🔧 DataManager (Facade & Concurrency Control)<br/>std::mutex por sesión & hilo limpiador"]
+    subgraph "Core Library (libCineManagerCore.a)"
+        DM["🔧 DataManager (Facade & Concurrency Control)<br/>std::mutex granular por idSesion & Hilo Demonio Limpiador"]
         
-        subgraph "Capa de Repositorios"
+        subgraph "Capa de Repositorios (Repository Pattern)"
             CR["CineRepository"]
             PR["PeliculaRepository"]
             SR["SalaRepository"]
@@ -48,7 +144,7 @@ graph TB
             UR["UsuarioRepository"]
         end
 
-        subgraph "Modelos de Dominio"
+        subgraph "Modelos de Dominio Puro"
             M1["Cine"]
             M2["Pelicula (Genero Enum)"]
             M3["Sala"]
@@ -57,18 +153,19 @@ graph TB
             M6["Usuario (DNI PK, Auth)"]
         end
 
-        subgraph "Infraestructura DB"
-            DB["SqliteDatabase (RAII, WAL, Foreign Keys)"]
-            STMT["SqliteStatement"]
+        subgraph "Capa de Infraestructura DB (RAII)"
+            DB["SqliteDatabase (RAII, WAL, FK ON, Busy Timeout)"]
+            STMT["SqliteStatement (Prepared Statements)"]
+            TX["SqliteTransaction (Commit / Rollback)"]
         end
 
-        subgraph "Utilidades"
-            QR["qrcodegen (Nayuki QR ISO/IEC 18004)"]
+        subgraph "Motor de Utilidades"
+            QR["qrcodegen (Nayuki QR C++20 ISO/IEC 18004)"]
         end
     end
 
-    subgraph "Persistencia"
-        SQLITE[("🗄️ SQLite3 Database<br/>cine.db (WAL Mode)")]
+    subgraph "Almacenamiento Persistente"
+        SQLITE[("🗄️ SQLite3 Database<br/>cine.db (WAL Mode + Strict Foreign Keys)")]
     end
 
     GUI -->|HTTP REST / JSON| SERVER
@@ -76,110 +173,104 @@ graph TB
     SERVER --> DM
     CLI_A --> DM
     CLI_C --> DM
+    GUI -.-> QR
 
     DM --> CR & PR & SR & SER & RR & UR
     CR & PR & SR & SER & RR & UR --> DB
     CR & PR & SR & SER & RR & UR --> M1 & M2 & M3 & M4 & M5 & M6
-    DB --> STMT
-    STMT --> SQLITE
+    DB --> STMT & TX
+    STMT & TX --> SQLITE
 ```
 
 ---
 
-## 🗺️ Roadmap de Características Implementadas
+## 🧰 Pila Tecnológica
 
-- [x] **Fase 1: Motor Básico (POO)**: Dominio de entidades en memoria y validaciones de negocio.
-- [x] **Fase 2: Persistencia I/O**: Lectura y serialización de estado en formato plano CSV.
-- [x] **Fase 3: Base de Datos Relacional**: Integración de SQLite3 bajo el patrón Repository con soporte transaccional.
-- [x] **Fase 4: Concurrencia y Multihilo**: Exclusión mutua *fine-grained* (`std::mutex` por sesión) y *thread* demonio para expiración de reservas pendientes.
-- [x] **Fase 5: Core Library (Arquitectura Hexagonal)**: Desacoplamiento total del dominio en `libCineManagerCore.a`.
-- [x] **Fase 6: Interfaz Gráfica Nativa (Qt6)**:
-  - [x] Front-end moderno en tema oscuro con tarjetas interactivas (`CineCardWidget`, `MovieCardWidget`).
-  - [x] Buscador y filtrado dinámico de películas por texto y género en tiempo real.
-  - [x] Mapa de butacas interactivo con selección múltiple mediante `std::set`.
-  - [x] **Tarifas Dinámicas (`TarifasDialog`)**: Adulto, Niño, Jubilado, Estudiante.
-  - [x] **Generador de QR Real (`qrcodegen` / `QrHelper`)**: Firma digital de la entrada en estándar ISO/IEC 18004.
-  - [x] **Gestión de Aforos**: Detección de salas llenas `(LLENA)` y bloqueo preventivo de reservas.
-  - [x] **Autenticación (`LoginDialog` / DNI)**: Registro, login con DNI y pasarela de pago protegida (*Checkout Gatekeeper*).
-- [x] **Testing: Suite GoogleTest**: Pruebas unitarias y de integración automatizadas con 100% de tests aprobados.
-- [x] **Fase 7a: Servidor HTTP REST API (`Crow Framework`)**:
-  - [x] Microservicio multihilo en puerto `8080` (`CineManagerServer`).
-  - [x] Endpoints JSON: `/api/v1/health`, `/api/v1/cines`, `/api/v1/peliculas`, `/api/v1/sesiones`, `/api/v1/auth/login`, `/api/v1/auth/register`, `/api/v1/reservas`.
-- [x] **Fase 7b: Cliente HTTP REST API Qt6 (`ApiClient`)**:
-  - [x] Cliente asíncrono con `QNetworkAccessManager` y `Qt6::Network` integrado en la GUI.
-- [x] **Fase 8: Despliegue en Docker, Docker Compose y CI/CD**:
-  - [x] `Dockerfile` multietapa optimizado para producción.
-  - [x] Orquestación con `docker-compose.yml` y volúmenes persistentes en `./data`.
-  - [x] Pipeline de Integración Continua con GitHub Actions (`.github/workflows/ci.yml`).
-- [x] **Fase 9: Saneamiento de Base de Datos SQLite**:
-  - [x] Integridad referencial estricta con `PRAGMA foreign_keys = ON;`.
-  - [x] Concurrencia de alto rendimiento con `PRAGMA journal_mode = WAL;`.
+| Componente | Tecnología / Librería | Versión | Rol en el Proyecto |
+| :--- | :--- | :---: | :--- |
+| **Lenguaje Core** | C++ Standard | `C++20` | Lenguaje de programación base con semántica de movimiento, `std::jthread` y `std::string_view`. |
+| **Motor Gráfico** | Qt Framework | `6.x` | Capa de presentación de escritorio (`QtWidgets`, `QtGui`, `QNetwork`). |
+| **Framework Web** | Crow C++ | `1.x` | Microservicio REST API asíncrono y enrutador HTTP de alto rendimiento. |
+| **Motor de Red** | Asio C++ | `1.30+` | I/O asíncrono *standalone* sin dependencias pesadas de Boost. |
+| **Base de Datos** | SQLite3 | `3.x` | Motor relacional embebido con Journal WAL y claves foráneas activas. |
+| **Generador QR** | Nayuki QR Engine | `C++20` | Generación algorítmica de matrices QR bajo norma ISO/IEC 18004. |
+| **Testing** | GoogleTest / CTest | `1.14.0` | Framework de pruebas unitarias, aserciones y tests de estrés concurrente. |
+| **Sistema de Build** | CMake + Ninja | `3.20+` | Configuración modular y compilación paralela multiplataforma. |
+| **Contenedores** | Docker & Compose | `3.8` | Construcción multietapa y despliegue orquestado con volúmenes locales. |
 
 ---
 
 ## 📡 Catálogo de Endpoints REST API
 
-> 📄 **Especificación OpenAPI 3.0**: Consulta la definición formal completa de la API en [`docs/openapi.yaml`](docs/openapi.yaml) (compatible con Swagger UI, Postman e Insomnia).
+> 📄 **Definición Formal OpenAPI 3.0**: La especificación interactiva completa está documentada en [`docs/openapi.yaml`](docs/openapi.yaml).
 
-| Método | Endpoint | Descripción | Body (JSON) |
-| :---: | :--- | :--- | :--- |
-| `GET` | `/api/v1/health` | Estado del servidor y versión | - |
-| `GET` | `/api/v1/cines` | Listado completo de cines | - |
-| `GET` | `/api/v1/peliculas` | Cartelera global o filtrada (`?cine_id=1`) | - |
-| `GET` | `/api/v1/sesiones` | Sesiones disponibles (`?cine_id=1&pelicula_id=2`) | - |
-| `POST` | `/api/v1/auth/login` | Autenticación con DNI y contraseña | `{"dni": "...", "password": "..."}` |
-| `POST` | `/api/v1/auth/register` | Registro de nuevo usuario | `{"dni": "...", "nombre": "...", "email": "...", "password": "..."}` |
-| `POST` | `/api/v1/reservas` | Creación de reservas transaccionales | `{"sesion_id": 1, "usuario_dni": "...", "asientos": [{"fila": 1, "columna": 2, "tipo_tarifa": "Adulto", "precio": 7.50}]}` |
-
----
-
-## 🛠️ Instrucciones de Compilación y Ejecución
-
-### Requisitos Previos
-* **Compilador C++20:** GCC 11+, Clang 12+ o MSVC.
-* **CMake:** Versión 3.16 o superior con Make / Ninja.
-* **Librerías de Desarrollo:** `libsqlite3-dev`, `qt6-base-dev` (opcional si solo compilas el servidor).
-* **Docker & Docker Compose:** (Opcional, para ejecución contenerizada).
+| Método | Endpoint | Descripción | Payload Request (JSON) | Código Exitoso |
+| :---: | :--- | :--- | :--- | :---: |
+| `GET` | `/api/v1/health` | Estado del microservicio y versión de compilación | *Ninguno* | `200 OK` |
+| `GET` | `/api/v1/cines` | Listado completo de complejos de cine registrados | *Ninguno* | `200 OK` |
+| `GET` | `/api/v1/peliculas` | Cartelera global o filtrada por complejo (`?cine_id=1`) | *Ninguno* | `200 OK` |
+| `GET` | `/api/v1/sesiones` | Sesiones enriquecidas filtradas (`?cine_id=1&pelicula_id=2`) | *Ninguno* | `200 OK` |
+| `POST` | `/api/v1/auth/login` | Validación de credenciales de usuario por DNI | `{"dni": "...", "password": "..."}` | `200 OK` |
+| `POST` | `/api/v1/auth/register` | Registro de nuevos usuarios con rol `CLIENTE` | `{"dni": "...", "nombre": "...", ...}` | `201 Created` |
+| `POST` | `/api/v1/reservas` | Creación atómica transaccional de reservas de butacas | `{"sesion_id": 1, "reservas": [...]}` | `201 Created` |
 
 ---
 
-### Opción 1: Ejecución con Docker Compose (Servidor REST API)
+## ⚡ Guía Rápida de Despliegue (Quickstart)
 
-Es la forma más rápida y recomendada de levantar el backend de producción:
+### 📋 Requisitos Previos del Sistema
+- **Compilador C++:** GCC 11+, Clang 13+ o MSVC 2022 con soporte completo de C++20.
+- **Herramientas de Construcción:** CMake 3.20+ y Ninja / Make.
+- **Dependencias del Sistema (Debian/Ubuntu):**
+  ```bash
+  sudo apt-get update && sudo apt-get install -y \
+      build-essential cmake ninja-build libsqlite3-dev qt6-base-dev sqlite3 curl
+  ```
+- **Docker Engine & Docker Compose:** *(Opcional, para ejecución contenerizada)*.
+
+---
+
+### Opción 1: Despliegue en 1 Clic con Docker Compose (Servidor REST)
+
+Es la vía recomendada para poner en marcha el backend de producción sin instalar dependencias locales:
 
 ```bash
-# Construir y levantar el contenedor en segundo plano
+# 1. Clonar el repositorio
+git clone https://github.com/jorgebd21/CineManager.git
+cd CineManager
+
+# 2. Levantar el servicio en segundo plano (compilación multietapa + seed inicial)
 docker compose up -d --build
 
-# Verificar el estado y logs
+# 3. Comprobar estado operativo
+curl -s http://localhost:8080/api/v1/health | jq .
+
+# 4. Inspeccionar logs en vivo
 docker compose logs -f
 
-# Probar el endpoint de salud
-curl -i http://localhost:8080/api/v1/health
-
-# Detener el servicio
+# 5. Detener el contenedor
 docker compose down
 ```
 
 ---
 
-### Opción 2: Compilación y Ejecución Local con CMake
+### Opción 2: Compilación y Ejecución Nativa con CMake
 
-#### 1. Configuración y Compilación
+#### 1. Configurar y Compilar Todos los Objetivos
 ```bash
-# Configurar el proyecto con CMake
+# Configuración del proyecto en modo Release con Ninja o Make
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-
-# Compilar todos los objetivos (GUI, Servidor, Consolas y Tests)
-cmake --build build
+cmake --build build -j$(nproc)
 ```
 
-#### 2. Reconstruir la Base de Datos Inicial (Seed Data)
+#### 2. Inicializar la Base de Datos SQLite (Seed Data)
 ```bash
-rm -f data/cine.db && sqlite3 data/cine.db < data/db_init.sql
+# Generar la base de datos relacional con esquema y datos de prueba
+mkdir -p data
+sqlite3 data/cine.db < data/db_init.sql
 ```
 
-#### 3. Ejecutar la Aplicación Gráfica (GUI Qt6)
+#### 3. Ejecutar la Aplicación Gráfica de Escritorio (Qt6 GUI)
 ```bash
 ./build/bin/CineManagerGUI
 ```
@@ -189,22 +280,83 @@ rm -f data/cine.db && sqlite3 data/cine.db < data/db_init.sql
 ./build/bin/CineManagerServer
 ```
 
-#### 5. Ejecutar la Suite de Pruebas Automatizadas GoogleTest
+#### 5. Ejecutar la Suite Completa de Tests Automatizados (GoogleTest)
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
 ---
 
-### Opción 3: Script Automatizado de Desarrollo con Sanitizers (`build.sh`)
+### Opción 3: Entorno de Desarrollo con Sanitizers (`build.sh`)
 
-Para desarrollo interactivo con análisis dinámico de memoria mediante Clang AddressSanitizer o Valgrind:
+Para sesiones interactivas de depuración con detección dinámica de *memory leaks*, *buffer overflows* o carreras de datos:
 
 ```bash
-# Compilación rápida con AddressSanitizer activo
+# Compilar y ejecutar pruebas con AddressSanitizer (ASan) y UndefinedBehaviorSanitizer (UBSan)
 ./build.sh
 
-# Auditoría profunda de fugas de memoria con Valgrind
+# Ejecutar análisis exhaustivo con Valgrind
 ./build.sh --valgrind
 ```
 
+---
+
+## 📂 Estructura del Repositorio
+
+```text
+CineManager/
+├── apps/
+│   ├── console/              # Aplicaciones CLI (Administrador y Taquilla Cliente)
+│   │   ├── app/              # main_admin.cpp y main_client.cpp
+│   │   ├── include/          # Controladores y vistas de terminal
+│   │   └── src/              # Implementación de lógica de consola
+│   ├── gui/                  # Aplicación de escritorio Qt6 (CineManagerGUI)
+│   │   ├── app/              # main_gui.cpp (punto de entrada GUI)
+│   │   ├── include/          # Headers (ApiClient, MainWindow, CardWidgets, Dialogs)
+│   │   ├── src/              # Implementación cliente Qt6 y renderizador QR
+│   │   └── ui/               # Formularios Qt Designer (.ui) y hojas de estilo (style.qss)
+│   └── server/               # Microservicio Web REST API (CineManagerServer)
+│       ├── app/              # main_server.cpp (arranque de Crow C++)
+│       ├── include/          # api_controller.hpp
+│       └── src/              # api_controller.cpp (definición de rutas y endpoints)
+├── core/                     # Librería Estática Core (libCineManagerCore.a)
+│   ├── include/
+│   │   ├── db/               # Gestor de base de datos RAII, Facade y Repositorios
+│   │   ├── models/           # Entidades de dominio (Cine, Pelicula, Sala, Sesion, Reserva, Usuario)
+│   │   └── utils/            # Generador QR Nayuki C++20 (qrcodegen.hpp)
+│   └── src/                  # Implementación del dominio, repositorios y persistencia
+├── data/                     # Base de datos y scripts de sembrado
+│   ├── db_init.sql           # Script DDL/DML de inicialización y datos de prueba
+│   └── images/               # Carteles de películas y fotos de complejos
+├── docs/                     # Suite de Documentación Técnica y Comercial
+│   ├── assets/               # Capturas de pantalla, diagramas y demostraciones GIF
+│   ├── dev_documentation.md  # Especificación de ingeniería y arquitectura interna v2.0
+│   ├── openapi.yaml          # Especificación formal OpenAPI 3.0 (Swagger / Postman)
+│   └── roadmap.md            # Roadmap completado de la v2.0 y visión estratégica v3.0
+├── tests/                    # Suite de Pruebas Unitarias y de Concurrencia GoogleTest
+├── .github/workflows/        # Pipeline de Integración Continua (GitHub Actions CI)
+├── CMakeLists.txt            # Script maestro de compilación CMake
+├── Dockerfile                # Receta Dockerfile multietapa (Builder & Runner)
+├── docker-compose.yml        # Orquestación del microservicio REST API
+└── README.md                 # Portada principal del proyecto
+```
+
+---
+
+## 📚 Documentación Técnica Adicional
+
+- 📖 [Documentación Técnica de Desarrollo (`docs/dev_documentation.md`)](docs/dev_documentation.md): Detalles de concurrencia, ciclo de vida de transacciones, arquitectura interna y changelog consolidado.
+- 🌐 [Especificación OpenAPI 3.0 (`docs/openapi.yaml`)](docs/openapi.yaml): Contrato formal REST para clientes web, móviles y herramientas de prueba de APIs.
+- 🗺️ [Roadmap de Fases y Visión Futura (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos cumplidos v2.0 y backlog estratégico para la versión 3.0.
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Consulte el archivo `LICENSE` para más información.
+
+---
+
+<div align="center">
+  <sub>Desarrollado con pasión y rigor de ingeniería por <strong>Jorge Beneyto</strong> · 2026</sub>
+</div>
