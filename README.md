@@ -37,8 +37,14 @@ Actualmente nos encontramos refinando la **Fase 6 (Interfaz Gráfica Nativa Qt6)
   - [x] **Gestión y Bloqueo de Salas Llenas (`(LLENA)`)**: Detección en tiempo real de pases agotados y bloqueo visual de botones.
   - [x] **Sistema de Autenticación de Usuarios (`LoginDialog` / DNI)**: Registro, login con DNI, modo invitado y pasarela de pago protegida (*Checkout Gatekeeper*).
   - [x] Generación e impresión de Ticket de Entrada HTML agrupado con desglose de tarifas por asiento y titularidad de la entrada en QR.
-- [ ] **Fase 7: Arquitectura Distribuida & API**
-  - [ ] Transformación del Core en un servidor HTTP REST (Crow/Drogon) / gRPC.
+- [x] **Fase 7a: Servidor HTTP REST API (`Crow C++ Framework`)**
+  - [x] Backend de microservicio asíncrono multihilo en puerto `8080` (`CineManagerServer`).
+  - [x] Endpoints JSON: `GET /api/v1/health`, `GET /api/v1/cines`, `GET /api/v1/peliculas`, `GET /api/v1/sesiones`.
+  - [x] Autenticación y Registro JSON: `POST /api/v1/auth/login` y `POST /api/v1/auth/register`.
+  - [x] Pasarela de reservas transaccionales: `POST /api/v1/reservas`.
+- [x] **Fase 7b: Cliente HTTP REST API Qt6 (`ApiClient`)**
+  - [x] Clase cliente HTTP asíncrona `ApiClient` utilizando `QNetworkAccessManager` y `Qt6::Network`.
+  - [x] Autenticación y registro de usuario remoto en la interfaz gráfica conectando con el servidor web.
 
 ## 🛠️ Instrucciones de Compilación y Ejecución
 
