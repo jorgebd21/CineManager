@@ -50,7 +50,7 @@ target_link_libraries(CineManagerClient PRIVATE CineManagerCore)
 # ==============================================================================
 # 3. INTERFAZ GRÁFICA (Capa de Presentación / Qt GUI)
 # ==============================================================================
-find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Network REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -61,7 +61,7 @@ file(GLOB_RECURSE GUI_SOURCES "apps/gui/src/*.cpp" "apps/gui/include/*.h" "apps/
 
 add_executable(CineManagerGUI ${GUI_SOURCES} apps/gui/app/main_gui.cpp)
 target_include_directories(CineManagerGUI PRIVATE apps/gui/include)
-target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets)
+target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets Qt6::Network)
 
 # ==============================================================================
 # 4. SUITE DE PRUEBAS AUTOMATIZADAS (GoogleTest)
@@ -83,3 +83,36 @@ target_link_libraries(CineManagerTests PRIVATE CineManagerCore gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(CineManagerTests)
+
+# ==============================================================================
+# 5. SERVIDOR REST API (Capa de Adaptadores de Red / Crow C++ Framework)
+# ==============================================================================
+find_package(Threads REQUIRED)
+
+FetchContent_Declare(
+  asio
+  URL https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-30-2.tar.gz
+)
+FetchContent_Populate(asio)
+
+add_library(Asio INTERFACE)
+target_include_directories(Asio INTERFACE ${asio_SOURCE_DIR}/asio/include)
+target_compile_definitions(Asio INTERFACE ASIO_STANDALONE)
+
+FetchContent_Declare(
+  crow
+  URL https://github.com/CrowCpp/Crow/archive/refs/heads/master.zip
+)
+FetchContent_Populate(crow)
+
+add_library(Crow INTERFACE)
+add_library(Crow::Crow ALIAS Crow)
+target_include_directories(Crow INTERFACE ${crow_SOURCE_DIR}/include)
+target_link_libraries(Crow INTERFACE Asio Threads::Threads)
+target_compile_definitions(Crow INTERFACE ASIO_STANDALONE)
+
+file(GLOB_RECURSE SERVER_SOURCES "apps/server/src/*.cpp")
+
+add_executable(CineManagerServer ${SERVER_SOURCES} apps/server/app/main_server.cpp)
+target_include_directories(CineManagerServer PRIVATE apps/server/include)
+target_link_libraries(CineManagerServer PRIVATE CineManagerCore Crow::Crow)
