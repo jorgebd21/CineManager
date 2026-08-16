@@ -1,6 +1,9 @@
 -- Activar el soporte para claves foráneas en SQLite
 PRAGMA foreign_keys = ON;
--- Eliminar tablas si existen (útil para reiniciar la base de datos)
+
+-- ==========================================
+-- 0. Eliminar tablas si existen (reinicio)
+-- ==========================================
 DROP TABLE IF EXISTS reservas;
 DROP TABLE IF EXISTS sesiones;
 DROP TABLE IF EXISTS salas;
@@ -11,7 +14,7 @@ DROP TABLE IF EXISTS usuarios;
 -- ==========================================
 -- 1. Creación de la Estructura de Tablas
 -- ==========================================
--- Tabla de Usuarios
+
 CREATE TABLE usuarios (
     dni TEXT PRIMARY KEY,
     nombre TEXT NOT NULL,
@@ -21,20 +24,19 @@ CREATE TABLE usuarios (
     rol TEXT NOT NULL DEFAULT 'CLIENTE' CHECK (rol IN ('CLIENTE', 'ADMIN'))
 );
 
--- Tabla de Cines
 CREATE TABLE cines (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
     direccion TEXT
 );
--- Tabla de Películas
+
 CREATE TABLE peliculas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT NOT NULL,
     genero TEXT NOT NULL,
-    duracion INTEGER NOT NULL -- Duración en minutos
+    duracion INTEGER NOT NULL  -- Duración en minutos
 );
--- Tabla de Salas (cada sala pertenece a un cine)
+
 CREATE TABLE salas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cine_id INTEGER NOT NULL,
@@ -43,136 +45,137 @@ CREATE TABLE salas (
     columnas INTEGER NOT NULL,
     FOREIGN KEY (cine_id) REFERENCES cines(id) ON DELETE CASCADE
 );
--- Tabla de Sesiones / Funciones
+
 CREATE TABLE sesiones (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pelicula_id INTEGER NOT NULL,
     sala_id INTEGER NOT NULL,
-    fecha_hora TEXT NOT NULL,
-    -- Formato ISO8601: 'YYYY-MM-DD HH:MM:SS'
+    fecha_hora TEXT NOT NULL,  -- Formato ISO8601: 'YYYY-MM-DD HH:MM:SS'
     precio_entrada REAL NOT NULL,
     FOREIGN KEY (pelicula_id) REFERENCES peliculas(id) ON DELETE CASCADE,
     FOREIGN KEY (sala_id) REFERENCES salas(id) ON DELETE CASCADE
 );
--- Tabla de Reservas / Butacas Ocupadas
+
 CREATE TABLE reservas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sesion_id INTEGER NOT NULL,
     fila INTEGER NOT NULL,
     columna INTEGER NOT NULL,
-    estado TEXT NOT NULL DEFAULT 'PENDIENTE',
-    -- 'PENDIENTE', 'COMPRADO'
+    estado TEXT NOT NULL DEFAULT 'PENDIENTE',  -- 'PENDIENTE', 'COMPRADO'
     timestamp_creacion INTEGER NOT NULL DEFAULT 0,
-    -- Unix timestamp de creación
-    tipo TEXT CHECK (
-        tipo IN ('Adulto', 'Niño', 'Jubilado', 'Estudiante')
-    ),
+    tipo TEXT CHECK (tipo IN ('Adulto', 'Niño', 'Jubilado', 'Estudiante')),
     precio REAL,
     FOREIGN KEY (sesion_id) REFERENCES sesiones(id) ON DELETE CASCADE,
-    UNIQUE(sesion_id, fila, columna) -- Restricción: No se puede duplicar una butaca para la misma sesión
+    UNIQUE(sesion_id, fila, columna)
 );
--- ==========================================
--- 2. Inserción de Datos Iniciales (Seed Data)
--- ==========================================
--- Insertar Cine por defecto (para nuestra fase de cine único)
-INSERT INTO cines (id, nombre, direccion)
-VALUES (
-        1,
-        'Cine Central Metrópolis',
-        'Av. de la Constitución 45'
-    ),
-    (
-        2,
-        'Cine Capitol Premium',
-        'Gran Vía 12, Planta 3'
-    );
--- Insertar Películas iniciales (tomadas de tus archivos txt)
-INSERT INTO peliculas (id, titulo, genero, duracion)
-VALUES (1, 'Avatar 2', 'CIENCIA_FICCION', 192),
-    (2, 'Pulp Fiction', 'DRAMA', 154),
-    (3, 'Gladiator 2', 'ACCION', 150),
-    (4, 'Interstellar', 'CIENCIA_FICCION', 169),
-    (5, 'The Dark Knight', 'ACCION', 152),
-    (6, 'The Hangover', 'COMEDIA', 100),
-    (7, 'The Conjuring', 'TERROR', 112),
-    (8, 'La La Land', 'ROMANCE', 128);
--- Insertar Salas de prueba para el Cine Central (cine_id: 1) y Cine Capitol (cine_id: 2)
-INSERT INTO salas (id, cine_id, numero_sala, filas, columnas)
-VALUES (1, 1, 1, 5, 7),
-    -- Sala pequeña: 5 filas x 7 columnas = 35 butacas (Cine 1)
-    (2, 1, 2, 8, 8),
-    -- Sala mediana: 8 filas x 8 columnas = 64 butacas (Cine 1)
-    (3, 2, 1, 6, 6),
-    -- Sala mediana: 6 filas x 6 columnas = 36 butacas (Cine 2)
-    (4, 2, 2, 4, 5),
-    -- Sala pequeña: 4 filas x 5 columnas = 20 butacas (Cine 2)
-    -- SALAS CON VALORES ABSURDOS DE PRUEBA (Cine 1)
-    (5, 1, 3, 20, 20),
-    -- Sala gigante: 20x20 = 400 butacas (Cine 1, Sala 3)
-    (6, 1, 4, 2, 2),
-    -- Sala minúscula (Cápsula VIP): 2x2 = 4 butacas (Cine 1, Sala 4)
-    (7, 1, 5, 3, 15),
-    -- Sala extra-ancha: 3x15 = 45 butacas (Cine 1, Sala 5)
-    (8, 1, 6, 12, 3);
--- Sala extra-estrecha (pasillo): 12x3 = 36 butacas (Cine 1, Sala 6)
--- Insertar Sesiones de prueba para hoy/mañana
-INSERT INTO sesiones (
-        id,
-        pelicula_id,
-        sala_id,
-        fecha_hora,
-        precio_entrada
-    )
-VALUES -- Cine 1 (Sala 1 y 2)
-    (1, 1, 1, datetime('now', '+1 hour'), 7.50),
-    -- Avatar 2 en Sala 1 (Empieza en 1h)
-    (2, 1, 1, datetime('now', '+3 hours'), 8.00),
-    -- Avatar 2 en Sala 1 (Empieza en 3h)
-    (3, 2, 2, datetime('now', '+2 hours'), 6.00),
-    -- Pulp Fiction en Sala 2 (Empieza en 2h)
-    (4, 3, 2, datetime('now', '+4 hours'), 7.00),
-    -- Gladiator 2 en Sala 2 (Empieza en 4h)
-    (5, 4, 1, datetime('now', '-1 hour'), 6.50),
-    -- Interstellar en Sala 1 (CADUCADA, hace 1h)
-    (12, 1, 1, datetime('now', '+1 day'), 7.50),
-    -- Avatar 2 en Sala 1 (Mañana)
-    (13, 1, 1, datetime('now', '+27 hours'), 8.00),
-    -- Avatar 2 en Sala 1 (Mañana + 3h)
-    (14, 1, 2, datetime('now', '+2 days'), 8.00),
-    -- Avatar 2 en Sala 2 (Pasado mañana)
-    (15, 1, 2, datetime('now', '+52 hours'), 8.50),
-    -- Avatar 2 en Sala 2 (Pasado mañana + 4h)
-    (16, 1, 1, datetime('now', '+3 days'), 6.50),
-    -- Avatar 2 en Sala 1 (En 3 días)
-    (17, 1, 1, datetime('now', '+77 hours'), 7.50),
-    -- Avatar 2 en Sala 1 (En 3 días + 5h)
-    (22, 1, 1, datetime('now', '-3 hours'), 7.50),
-    -- Avatar 2 en Sala 1 (CADUCADA, hace 3h para pruebas de criba)
-    -- Sesiones asociadas a las salas absurdas (Avatar 2, Cine 1)
-    (18, 1, 5, datetime('now', '+30 hours'), 9.00),
-    -- Avatar 2 en Sala Gigante (20x20)
-    (19, 1, 6, datetime('now', '+50 hours'), 12.00),
-    -- Avatar 2 en Sala VIP (2x2)
-    (20, 1, 7, datetime('now', '+73 hours'), 7.50),
-    -- Avatar 2 en Sala Ancha (3x15)
-    (21, 1, 8, datetime('now', '+78 hours'), 7.00),
-    -- Avatar 2 en Sala Pasillo (12x3)
-    -- Cine 2 (Sala 3 y 4)
-    (6, 2, 3, datetime('now', '+3 hours'), 6.00),
-    -- Pulp Fiction en Sala 3
-    (7, 3, 3, datetime('now', '+5 hours'), 7.00),
-    -- Gladiator 2 en Sala 3
-    (8, 5, 4, datetime('now', '+2 hours'), 7.50),
-    -- The Dark Knight en Sala 4
-    (9, 6, 4, datetime('now', '+4 hours'), 5.50),
-    -- The Hangover en Sala 4
-    (10, 7, 3, datetime('now', '+6 hours'), 6.00),
-    -- The Conjuring en Sala 3
-    (11, 8, 4, datetime('now', '-2 hours'), 6.50);
--- La La Land en Sala 4 (CADUCADA, hace 2h)
 
--- Insertar Usuarios de prueba (Semilla)
-INSERT INTO usuarios (dni, nombre, apellidos, email, password_hash, rol)
-VALUES 
-    ('12345678X', 'Juan', 'Pérez Gómez', 'juan.perez@email.com', '1234', 'CLIENTE'),
-    ('87654321Y', 'Admin', 'CineManager', 'admin@cinemanager.com', 'admin123', 'ADMIN');
+-- ==========================================
+-- 2. Cines
+-- ==========================================
+INSERT INTO cines (id, nombre, direccion) VALUES
+    (1, 'Cine Central Metrópolis',  'Av. de la Constitución 45, Madrid'),
+    (2, 'Cine Capitol Premium',     'Gran Vía 12, Planta 3, Madrid');
+
+-- ==========================================
+-- 3. Películas (catálogo compartido)
+-- ==========================================
+INSERT INTO peliculas (id, titulo, genero, duracion) VALUES
+    (1,  'Dune: Parte Dos',         'CIENCIA_FICCION', 166),
+    (2,  'Oppenheimer',             'DRAMA',           180),
+    (3,  'Gladiator II',            'ACCION',          148),
+    (4,  'El Señor de los Anillos: La Guerra de los Rohirrim', 'ANIMACION', 134),
+    (5,  'Alien: Romulus',          'TERROR',          119),
+    (6,  'Deadpool & Wolverine',    'ACCION',          128),
+    (7,  'Cónclave',                'DRAMA',           120),
+    (8,  'Un Lugar Tranquilo 3',    'TERROR',          103),
+    (9,  'Inside Out 2',            'ANIMACION',        96),
+    (10, 'Challengers',             'DRAMA',           131);
+
+-- ==========================================
+-- 4. Salas
+--    Cine 1: 3 salas (pequeña, mediana, grande)
+--    Cine 2: 3 salas (pequeña, mediana, VIP)
+-- ==========================================
+INSERT INTO salas (id, cine_id, numero_sala, filas, columnas) VALUES
+    -- Cine Central Metrópolis (cine_id=1)
+    (1, 1, 1,  5,  7),  -- Sala 1: 35 butacas (compacta, pases frecuentes)
+    (2, 1, 2,  8,  9),  -- Sala 2: 72 butacas (mediana, estrenos)
+    (3, 1, 3, 10, 12),  -- Sala 3: 120 butacas (grande, blockbusters)
+    -- Cine Capitol Premium (cine_id=2)
+    (4, 2, 1,  4,  6),  -- Sala 1: 24 butacas (pequeña, sesiones especiales)
+    (5, 2, 2,  7,  8),  -- Sala 2: 56 butacas (mediana, cartelera estándar)
+    (6, 2, 3,  6,  6);  -- Sala 3: 36 butacas (formato cuadrado, pases matinales)
+
+-- ==========================================
+-- 5. Sesiones
+--    Convención de horarios:
+--      - Sesión matinal:   +2h desde ahora
+--      - Sesión tarde:     +5h
+--      - Sesión noche:     +8h
+--      - Mañana tarde:     +1 día +5h (~29h)
+--      - Mañana noche:     +1 día +8h (~32h)
+--      - Pasado mañana:    +2 días +5h
+-- ==========================================
+INSERT INTO sesiones (id, pelicula_id, sala_id, fecha_hora, precio_entrada) VALUES
+
+    -- ---- CINE 1: Sala 1 (pequeña, 5x7) ----
+    -- Dune Parte Dos: 2 pases hoy
+    (1,  1, 1, datetime('now', '+2 hours'),          7.50),
+    (2,  1, 1, datetime('now', '+5 hours'),          7.50),
+    -- Alien Romulus: pase nocturno hoy + mañana tarde
+    (3,  5, 1, datetime('now', '+8 hours'),          6.50),
+    (4,  5, 1, datetime('now', '+29 hours'),         6.50),
+
+    -- ---- CINE 1: Sala 2 (mediana, 8x9) ----
+    -- Oppenheimer: tarde hoy, noche hoy, mañana tarde
+    (5,  2, 2, datetime('now', '+3 hours'),          9.00),
+    (6,  2, 2, datetime('now', '+7 hours'),          9.00),
+    (7,  2, 2, datetime('now', '+31 hours'),         9.00),
+    -- Inside Out 2: sesión familiar de tarde
+    (8,  9, 2, datetime('now', '+4 hours'),          6.00),
+    (9,  9, 2, datetime('now', '+28 hours'),         6.00),
+
+    -- ---- CINE 1: Sala 3 (grande, 10x12) ----
+    -- Gladiator II: 3 pases hoy, 2 mañana
+    (10, 3, 3, datetime('now', '+1 hour'),           8.50),
+    (11, 3, 3, datetime('now', '+4 hours'),          8.50),
+    (12, 3, 3, datetime('now', '+8 hours'),          8.50),
+    (13, 3, 3, datetime('now', '+25 hours'),         8.50),
+    (14, 3, 3, datetime('now', '+30 hours'),         8.50),
+    -- Deadpool & Wolverine: tarde hoy + pasado mañana
+    (15, 6, 3, datetime('now', '+6 hours'),          8.00),
+    (16, 6, 3, datetime('now', '+53 hours'),         8.00),
+
+    -- ---- CINE 2: Sala 4 (pequeña VIP, 4x6) ----
+    -- Cónclave: pase único de tarde y noche
+    (17, 7, 4, datetime('now', '+5 hours'),         10.00),
+    (18, 7, 4, datetime('now', '+9 hours'),         10.00),
+    -- Challengers: pase VIP tarde mañana
+    (19, 10, 4, datetime('now', '+29 hours'),       10.00),
+
+    -- ---- CINE 2: Sala 5 (mediana, 7x8) ----
+    -- Dune Parte Dos: también en Capitol (película compartida)
+    (20, 1, 5, datetime('now', '+2 hours'),          8.00),
+    (21, 1, 5, datetime('now', '+6 hours'),          8.00),
+    -- Un Lugar Tranquilo 3: terror de noche
+    (22, 8, 5, datetime('now', '+8 hours'),          7.00),
+    (23, 8, 5, datetime('now', '+32 hours'),         7.00),
+    -- Inside Out 2: también en Capitol
+    (24, 9, 5, datetime('now', '+3 hours'),          6.50),
+
+    -- ---- CINE 2: Sala 6 (cuadrada, 6x6) ----
+    -- El Señor de los Anillos Rohirrim: matinal y tarde
+    (25, 4, 6, datetime('now', '+2 hours'),          7.50),
+    (26, 4, 6, datetime('now', '+5 hours'),          7.50),
+    -- Alien Romulus: también en Capitol
+    (27, 5, 6, datetime('now', '+7 hours'),          7.00),
+    (28, 5, 6, datetime('now', '+55 hours'),         7.00);
+
+-- ==========================================
+-- 6. Usuarios de prueba (seed)
+-- ==========================================
+INSERT INTO usuarios (dni, nombre, apellidos, email, password_hash, rol) VALUES
+    ('12345678X', 'Juan',     'Pérez Gómez',    'juan.perez@email.com',   '1234',     'CLIENTE'),
+    ('99887766Z', 'María',    'López Ruiz',      'maria.lopez@email.com',  'pass2024',  'CLIENTE'),
+    ('11223344A', 'Carlos',   'García Sánchez',  'carlos.garcia@email.com','cinema99', 'CLIENTE'),
+    ('87654321Y', 'Admin',    'CineManager',     'admin@cinemanager.com',  'admin123', 'ADMIN');
