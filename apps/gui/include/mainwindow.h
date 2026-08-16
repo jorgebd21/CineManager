@@ -13,6 +13,7 @@
 #include <set>
 
 #include "db/datamanager.hpp"
+#include "models/usuario.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -35,10 +36,15 @@ class MainWindow : public QMainWindow {
   void alPulsarInicio();
   void alFiltrarPeliculas();
   void alConfirmarCompra();
+  void alPulsarBotonUsuario();
 
  private:
+  void actualizarBotonUsuario();
+
   Ui::MainWindow* ui;
   DataManager db;
+  Usuario usuarioActual;
+  QPushButton* btnUsuario;
 
   int idCineSeleccionado;
   int idPeliculaSeleccionada;

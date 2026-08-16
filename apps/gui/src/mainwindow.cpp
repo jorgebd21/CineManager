@@ -4,6 +4,7 @@
 #include <map>
 
 #include "cinecardwidget.h"
+#include "logindialog.h"
 #include "moviecardwidget.h"
 #include "qrhelper.h"
 #include "tarifasdialog.h"
@@ -76,6 +77,42 @@ MainWindow::MainWindow(QWidget* parent)
 
   connect(ui->botonConfirmar, &QPushButton::clicked, this,
           &MainWindow::alConfirmarCompra);
+
+  // Crear botón de usuario en la interfaz
+  btnUsuario = new QPushButton(this);
+  btnUsuario->setStyleSheet(
+      "QPushButton { background-color: #1E202D; color: #E5C07B; font-weight: "
+      "bold; border: 1px solid #2B2E3D; border-radius: 6px; padding: 6px 14px; "
+      "} QPushButton:hover { background-color: #2B2E3D; color: #61AFEF; }");
+  connect(btnUsuario, &QPushButton::clicked, this,
+          &MainWindow::alPulsarBotonUsuario);
+
+  // Añadir btnUsuario al header superior de la ventana
+  ui->horizontalLayoutHeader->addWidget(btnUsuario);
+
+  // Mostrar el LoginDialog nada más abrir la aplicación
+  LoginDialog loginInicial(db, this);
+  loginInicial.exec();
+  usuarioActual = loginInicial.getUsuarioObtenido();
+  actualizarBotonUsuario();
+}
+
+void MainWindow::alPulsarBotonUsuario() {
+  LoginDialog loginDlg(db, this);
+  if (loginDlg.exec() == QDialog::Accepted) {
+    usuarioActual = loginDlg.getUsuarioObtenido();
+    actualizarBotonUsuario();
+  }
+}
+
+void MainWindow::actualizarBotonUsuario() {
+  if (usuarioActual.esValido()) {
+    btnUsuario->setText(QString("👤 %1 (%2)")
+                            .arg(QString::fromStdString(usuarioActual.getNombre()))
+                            .arg(QString::fromStdString(usuarioActual.getDni())));
+  } else {
+    btnUsuario->setText("👤 Iniciar Sesión");
+  }
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -417,8 +454,7 @@ void MainWindow::alFiltrarPeliculas() {
       }
     }
   }
-
-  if (visibles == 0) {
+      if (visibles == 0) {
     ui->labelNoResultados->show();
     ui->listaPeliculas->hide();
   } else {
@@ -429,6 +465,16 @@ void MainWindow::alFiltrarPeliculas() {
 
 void MainWindow::alConfirmarCompra() {
   if (butacasSeleccionadas.empty()) return;
+
+  // Gatekeeper: Si el usuario no ha iniciado sesión, exigir Login antes de continuar
+  if (!usuarioActual.esValido()) {
+    LoginDialog loginDlg(db, this);
+    if (loginDlg.exec() != QDialog::Accepted || !loginDlg.estaLogueado()) {
+      return;  // No se completa la compra si permanece como invitado
+    }
+    usuarioActual = loginDlg.getUsuarioObtenido();
+    actualizarBotonUsuario();
+  }
 
   TarifasDialog dialog(butacasSeleccionadas, this);
   if (dialog.exec() != QDialog::Accepted) {
@@ -469,15 +515,21 @@ void MainWindow::alConfirmarCompra() {
     std::strftime(dateBuf, sizeof(dateBuf), "%A, %d de %B - %H:%M", timeinfo);
     QString fechaHoraStr = QString::fromStdString(dateBuf).toUpper();
 
+    QString clienteNombre = QString::fromStdString(usuarioActual.getNombre() + " " + usuarioActual.getApellidos());
+    QString clienteDni = QString::fromStdString(usuarioActual.getDni());
+
     QString qrPayload =
         QString(
             "CINEMANAGER TICKET\n"
-            "Pelicula: %1\n"
-            "Cine: %2\n"
-            "Sala: Sala %3\n"
-            "Sesion: %4\n"
-            "Asientos: %5\n"
-            "Total: %6 €")
+            "Cliente: %1 (%2)\n"
+            "Pelicula: %3\n"
+            "Cine: %4\n"
+            "Sala: Sala %5\n"
+            "Sesion: %6\n"
+            "Asientos: %7\n"
+            "Total: %8 €")
+            .arg(clienteNombre)
+            .arg(clienteDni)
             .arg(QString::fromStdString(peli.getTitulo()))
             .arg(QString::fromStdString(cine.getNombre()))
             .arg(sesion.getIdSala())
@@ -503,22 +555,25 @@ void MainWindow::alConfirmarCompra() {
             "<table cellspacing='4' style='color:#ffffff; font-size:11px; "
             "font-family: sans-serif;'>"
             "<tr><td style='color:#abb2bf; font-weight:bold; "
-            "width:70px;'>CINE:</td><td>%4</td></tr>"
+            "width:75px;'>TITULAR:</td><td>%4 (%5)</td></tr>"
+            "<tr><td style='color:#abb2bf; font-weight:bold;'>CINE:</td><td>%6</td></tr>"
             "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>SALA:</td><td>Sala %5</td></tr>"
+            "font-weight:bold;'>SALA:</td><td>Sala %7</td></tr>"
             "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>SESIÓN:</td><td>%6</td></tr>"
+            "font-weight:bold;'>SESIÓN:</td><td>%8</td></tr>"
             "<tr><td style='color:#abb2bf; "
-            "font-weight:bold;'>ASIENTOS:</td><td>%7</td></tr>"
+            "font-weight:bold;'>ASIENTOS:</td><td>%9</td></tr>"
             "</table>"
             "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
             "0;'>"
             "<p style='font-size:14px; font-weight:bold; color:#00f0b5; "
-            "margin:0;'>TOTAL COMPRA: %8</p>"
+            "margin:0;'>TOTAL COMPRA: %10</p>"
             "</body></html>")
             .arg(QString::fromStdString(peli.getTitulo()))
             .arg(QString::fromStdString(generoToString(peli.getGenero())))
             .arg(peli.getDuracion())
+            .arg(clienteNombre)
+            .arg(clienteDni)
             .arg(QString::fromStdString(cine.getNombre()))
             .arg(sesion.getIdSala())
             .arg(fechaHoraStr)

@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoginDialog</class>
+ <widget class="QDialog" name="LoginDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Acceso a CineManager</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+QDialog {
+    background-color: #12131C;
+    color: #FFFFFF;
+    font-family: 'Segoe UI', sans-serif;
+}
+QTabWidget::pane {
+    border: 1px solid #2B2E3D;
+    background-color: #1E202D;
+    border-radius: 8px;
+}
+QTabBar::tab {
+    background-color: #161822;
+    color: #A0A5BA;
+    padding: 10px 25px;
+    font-weight: bold;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    margin-right: 2px;
+}
+QTabBar::tab:selected {
+    background-color: #1E202D;
+    color: #E5C07B;
+    border-bottom: 2px solid #E5C07B;
+}
+QLabel {
+    color: #ABB2BF;
+    font-size: 13px;
+}
+QLineEdit {
+    background-color: #161822;
+    border: 1px solid #2B2E3D;
+    border-radius: 6px;
+    color: #FFFFFF;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+QLineEdit:focus {
+    border: 1px solid #61AFEF;
+}
+QPushButton {
+    background-color: #E5C07B;
+    color: #12131C;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+}
+QPushButton:hover {
+    background-color: #D19A66;
+}
+QPushButton#btnInvitado {
+    background-color: transparent;
+    color: #61AFEF;
+    border: 1px solid #61AFEF;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+QPushButton#btnInvitado:hover {
+    background-color: rgba(97, 175, 239, 0.1);
+}
+   </string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayoutMain">
+   <property name="spacing">
+    <number>15</number>
+   </property>
+   <property name="leftMargin">
+    <number>20</number>
+   </property>
+   <property name="topMargin">
+    <number>20</number>
+   </property>
+   <property name="rightMargin">
+    <number>20</number>
+   </property>
+   <property name="bottomMargin">
+    <number>20</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="lblHeaderTitle">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600; color:#e5c07b;&quot;&gt;🎬 CineManager&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:10pt; color:#a0a5ba;&quot;&gt;Inicia sesión o regístrate para comprar tus entradas&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabLogin">
+      <attribute name="title">
+       <string>Iniciar Sesión</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutLogin">
+       <property name="spacing">
+        <number>12</number>
+       </property>
+       <property name="leftMargin">
+        <number>15</number>
+       </property>
+       <property name="topMargin">
+        <number>15</number>
+       </property>
+       <property name="rightMargin">
+        <number>15</number>
+       </property>
+       <property name="bottomMargin">
+        <number>15</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblDniLogin">
+         <property name="text">
+          <string>DNI del usuario:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputDniLogin">
+         <property name="placeholderText">
+          <string>Ej: 12345678X</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblPasswordLogin">
+         <property name="text">
+          <string>Contraseña:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputPasswordLogin">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+         <property name="placeholderText">
+          <string>••••••••</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblErrorLogin">
+         <property name="styleSheet">
+          <string notr="true">color: #E06C75; font-weight: bold;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacerLogin">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnIniciarSesion">
+         <property name="text">
+          <string>Iniciar Sesión</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabRegistro">
+      <attribute name="title">
+       <string>Registrarse</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayoutRegistro">
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <property name="leftMargin">
+        <number>15</number>
+       </property>
+       <property name="topMargin">
+        <number>15</number>
+       </property>
+       <property name="rightMargin">
+        <number>15</number>
+       </property>
+       <property name="bottomMargin">
+        <number>15</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lblDniReg">
+         <property name="text">
+          <string>DNI:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputDniRegistro">
+         <property name="placeholderText">
+          <string>Ej: 12345678X</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblNombreReg">
+         <property name="text">
+          <string>Nombre:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputNombreRegistro">
+         <property name="placeholderText">
+          <string>Ej: Juan</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblApellidosReg">
+         <property name="text">
+          <string>Apellidos:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputApellidosRegistro">
+         <property name="placeholderText">
+          <string>Ej: Pérez Gómez</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblEmailReg">
+         <property name="text">
+          <string>Correo Electrónico:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputEmailRegistro">
+         <property name="placeholderText">
+          <string>juan.perez@email.com</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblPasswordReg">
+         <property name="text">
+          <string>Contraseña:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="inputPasswordRegistro">
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+         <property name="placeholderText">
+          <string>••••••••</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="lblErrorRegistro">
+         <property name="styleSheet">
+          <string notr="true">color: #E06C75; font-weight: bold;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnRegistrar">
+         <property name="text">
+          <string>Crear Cuenta</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutFooter">
+     <item>
+      <spacer name="spacerFooter">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnInvitado">
+       <property name="text">
+        <string>Continuar como invitado ➔</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
