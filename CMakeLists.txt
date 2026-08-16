@@ -62,3 +62,24 @@ file(GLOB_RECURSE GUI_SOURCES "apps/gui/src/*.cpp" "apps/gui/include/*.h" "apps/
 add_executable(CineManagerGUI ${GUI_SOURCES} apps/gui/app/main_gui.cpp)
 target_include_directories(CineManagerGUI PRIVATE apps/gui/include)
 target_link_libraries(CineManagerGUI PRIVATE CineManagerCore Qt6::Widgets)
+
+# ==============================================================================
+# 4. SUITE DE PRUEBAS AUTOMATIZADAS (GoogleTest)
+# ==============================================================================
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+file(GLOB_RECURSE TEST_SOURCES "tests/*.cpp")
+
+add_executable(CineManagerTests ${TEST_SOURCES})
+target_link_libraries(CineManagerTests PRIVATE CineManagerCore gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(CineManagerTests)
