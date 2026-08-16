@@ -1,4 +1,5 @@
 #include "db/database.hpp"
+#include "db/db_exceptions.hpp"
 
 #include <iostream>
 
@@ -28,7 +29,7 @@ SqliteDatabase& SqliteDatabase::operator=(SqliteDatabase&& other) noexcept {
 bool SqliteDatabase::abrirSQL(const std::string& customPath) {
   std::lock_guard<std::mutex> lock(dbMutex);
   if (db != nullptr) {
-    sqlite3_close(db);
+    sqlite3_close_v2(db);
     db = nullptr;
   }
 
@@ -184,7 +185,7 @@ SqliteTransaction::SqliteTransaction(sqlite3* database) : db(database) {
     if (rc != SQLITE_OK) {
       std::string err = sqlite3_errmsg(db);
       db = nullptr;
-      throw std::runtime_error("Error al iniciar transaccion SQLite: " + err);
+      throw db::DatabaseException("Error al iniciar transaccion SQLite: " + err);
     }
   }
 }
