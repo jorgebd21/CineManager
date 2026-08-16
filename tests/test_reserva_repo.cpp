@@ -6,7 +6,7 @@
 
 class ReservaRepoTest : public ::testing::Test {
  protected:
-  SqliteDatabase db;
+  SqliteDatabase db{"test_cine.db"};
   ReservaRepository repo{db};
 
   void SetUp() override {

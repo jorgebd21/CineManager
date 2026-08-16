@@ -9,7 +9,7 @@
 class ConcurrencyTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    SqliteDatabase db;
+    SqliteDatabase db{"test_cine.db"};
     SqliteStatement(db.getDb(),
                     "CREATE TABLE IF NOT EXISTS cines ("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, direccion TEXT);").step();
@@ -43,7 +43,7 @@ class ConcurrencyTest : public ::testing::Test {
 };
 
 TEST_F(ConcurrencyTest, ReservasConcurrentesMismoAsiento) {
-  DataManager dm;
+  DataManager dm{"test_cine.db"};
   int idSesion = 10;
   int fila = 2;
   int columna = 3;
@@ -77,7 +77,7 @@ TEST_F(ConcurrencyTest, ReservasConcurrentesMismoAsiento) {
 }
 
 TEST_F(ConcurrencyTest, MultiplesReservasAtomicasRollback) {
-  DataManager dm;
+  DataManager dm{"test_cine.db"};
   int idSesion = 20;
 
   // Creamos un asiento reservado previamente (fila 0, col 0)

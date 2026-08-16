@@ -1,7 +1,12 @@
 #include <gtest/gtest.h>
+#include <filesystem>
 
-// Punto de entrada opcional si se usa gtest_main, pero tenerlo explicitado permite configuraciones futuras
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  int result = RUN_ALL_TESTS();
+  std::error_code ec;
+  std::filesystem::remove("test_cine.db", ec);
+  std::filesystem::remove("test_cine.db-wal", ec);
+  std::filesystem::remove("test_cine.db-shm", ec);
+  return result;
 }

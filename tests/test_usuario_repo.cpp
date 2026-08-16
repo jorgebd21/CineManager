@@ -7,7 +7,7 @@
 
 class UsuarioRepoTest : public ::testing::Test {
  protected:
-  SqliteDatabase db;
+  SqliteDatabase db{"test_cine.db"};
   UsuarioRepository repo{db};
 
   void SetUp() override {

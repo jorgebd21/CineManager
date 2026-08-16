@@ -8,7 +8,7 @@
 
 class CinemaReposTest : public ::testing::Test {
  protected:
-  SqliteDatabase db;
+  SqliteDatabase db{"test_cine.db"};
   CineRepository cineRepo{db};
   PeliculaRepository peliculaRepo{db};
   SalaRepository salaRepo{db};
