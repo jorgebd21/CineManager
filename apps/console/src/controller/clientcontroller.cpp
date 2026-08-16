@@ -1,6 +1,12 @@
 #include "controller/clientcontroller.hpp"
 
-using namespace std;
+using std::cerr;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::to_string;
+using std::vector;
 
 bool ClientController::iniciarSesion() {
   cout << "========================================" << endl;

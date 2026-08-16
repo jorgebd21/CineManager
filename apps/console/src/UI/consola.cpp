@@ -11,20 +11,18 @@
 #include "models/sala.hpp"
 #include "utils/time_utils.hpp"
 
-using namespace std;
-
 void Consola::mostrarMenu() {
-  cout << "=== CineManager ===" << endl;
-  cout << "1. Cartelera" << endl;
-  cout << "2. Reservar Asiento" << endl;
-  cout << "3. Comprar Entrada" << endl;
-  cout << "4. Salir" << endl;
+  std::cout << "=== CineManager ===" << std::endl;
+  std::cout << "1. Cartelera" << std::endl;
+  std::cout << "2. Reservar Asiento" << std::endl;
+  std::cout << "3. Comprar Entrada" << std::endl;
+  std::cout << "4. Salir" << std::endl;
 }
 
 void Consola::mostrarSala(const Sala& sala,
                           const std::vector<Reserva>& reservas) {
-  cout << "=== Sala " << sala.getId() << " ===" << endl;
-  cout << "Capacidad: " << sala.getCapacidad() - reservas.size() << endl;
+  std::cout << "=== Sala " << sala.getId() << " ===" << std::endl;
+  std::cout << "Capacidad: " << sala.getCapacidad() - reservas.size() << std::endl;
 
   for (int i = 0; i < sala.getFilas(); i++) {
     for (int j = 0; j < sala.getColumnas(); j++) {
@@ -33,88 +31,88 @@ void Consola::mostrarSala(const Sala& sala,
                                            return reserva.getFila() == i &&
                                                   reserva.getColumna() == j;
                                          })) {
-        cout << "[X] ";
+        std::cout << "[X] ";
       } else {
-        cout << "[-] ";
+        std::cout << "[-] ";
       }
     }
-    cout << endl;
+    std::cout << std::endl;
   }
 }
 
 void Consola::mostrarPelicula(const Pelicula& pelicula) {
-  cout << "=== Película " << pelicula.getId() << " ===" << endl;
-  cout << "Título: " << pelicula.getTitulo() << endl;
-  cout << "Duración: " << pelicula.getDuracion() << " minutos" << endl;
-  cout << "Género: " << (int)pelicula.getGenero() << endl;
+  std::cout << "=== Película " << pelicula.getId() << " ===" << std::endl;
+  std::cout << "Título: " << pelicula.getTitulo() << std::endl;
+  std::cout << "Duración: " << pelicula.getDuracion() << " minutos" << std::endl;
+  std::cout << "Género: " << (int)pelicula.getGenero() << std::endl;
 }
 
 void Consola::mostrarCine(const Cine& cine) {
-  cout << "=== Cine " << cine.getId() << " ===" << endl;
-  cout << "ID: " << cine.getId() << endl;
-  cout << "Nombre: " << cine.getNombre() << endl;
-  cout << "Direccion: " << cine.getDireccion() << endl;
+  std::cout << "=== Cine " << cine.getId() << " ===" << std::endl;
+  std::cout << "ID: " << cine.getId() << std::endl;
+  std::cout << "Nombre: " << cine.getNombre() << std::endl;
+  std::cout << "Direccion: " << cine.getDireccion() << std::endl;
 }
 void Consola::mostrarSesion(const Sesion& sesion) {
-  cout << "=== Sala " << sesion.getId() << " ===" << endl;
-  cout << "ID: " << sesion.getId() << endl;
-  cout << "Pelicula: " << sesion.getPelicula().getTitulo() << endl;
-  cout << "Sala: " << sesion.getIdSala() << endl;
+  std::cout << "=== Sala " << sesion.getId() << " ===" << std::endl;
+  std::cout << "ID: " << sesion.getId() << std::endl;
+  std::cout << "Pelicula: " << sesion.getPelicula().getTitulo() << std::endl;
+  std::cout << "Sala: " << sesion.getIdSala() << std::endl;
   std::tm tm_local = utils::safeLocalTime(sesion.getHoraInicio());
-  cout << "Hora: " << std::put_time(&tm_local, "%Y-%m-%d %H:%M:%S")
-       << endl;
+  std::cout << "Hora: " << std::put_time(&tm_local, "%Y-%m-%d %H:%M:%S")
+            << std::endl;
 }
 void Consola::mostrarReporte(int totales, int ocupados, std::string_view titulo) {
-  cout << endl << "=== Reporte de Ocupación " << titulo << " ===" << endl;
-  cout << "Entradas Vendidas: " << ocupados << " / " << totales << endl;
+  std::cout << std::endl << "=== Reporte de Ocupación " << titulo << " ===" << std::endl;
+  std::cout << "Entradas Vendidas: " << ocupados << " / " << totales << std::endl;
   if (totales > 0) {
     double porcentaje = (ocupados * 100.0) / totales;
-    cout << "Porcentaje de Ocupación: " << porcentaje << "%" << endl;
+    std::cout << "Porcentaje de Ocupación: " << porcentaje << "%" << std::endl;
   } else {
-    cout << "Este cine no tiene sesiones programadas." << endl;
+    std::cout << "Este cine no tiene sesiones programadas." << std::endl;
   }
-  cout << "==========================================" << endl;
+  std::cout << "==========================================" << std::endl;
 }
 void Consola::mostrarTicket(const Reserva& reserva, const Pelicula& pelicula,
                             const Sesion& sesion) {
-  cout << endl;
-  cout << "==========================================" << endl;
-  cout << "            TICKET DE ENTRADA             " << endl;
-  cout << "==========================================" << endl;
-  cout << "  Película : " << pelicula.getTitulo() << endl;
-  cout << "  Duración : " << pelicula.getDuracion() << " min" << endl;
-  cout << "  Sala     : Sala " << sesion.getIdSala() << endl;
-  cout << "  Asiento  : Fila " << reserva.getFila() + 1 << ", Butaca "
-       << reserva.getColumna() + 1 << endl;
+  std::cout << std::endl;
+  std::cout << "==========================================" << std::endl;
+  std::cout << "            TICKET DE ENTRADA             " << std::endl;
+  std::cout << "==========================================" << std::endl;
+  std::cout << "  Película : " << pelicula.getTitulo() << std::endl;
+  std::cout << "  Duración : " << pelicula.getDuracion() << " min" << std::endl;
+  std::cout << "  Sala     : Sala " << sesion.getIdSala() << std::endl;
+  std::cout << "  Asiento  : Fila " << reserva.getFila() + 1 << ", Butaca "
+            << reserva.getColumna() + 1 << std::endl;
   std::tm tm_local = utils::safeLocalTime(sesion.getHoraInicio());
-  cout << "  Horario  : "
-       << std::put_time(&tm_local, "%Y-%m-%d %H:%M") << endl;
-  cout << "  Estado   : " << reserva.getEstado() << endl;
-  cout << "==========================================" << endl;
-  cout << "  ¡Compra realizada con éxito! Disfrute de la función." << endl;
-  cout << "==========================================" << endl
-       << endl;
+  std::cout << "  Horario  : "
+            << std::put_time(&tm_local, "%Y-%m-%d %H:%M") << std::endl;
+  std::cout << "  Estado   : " << reserva.getEstado() << std::endl;
+  std::cout << "==========================================" << std::endl;
+  std::cout << "  ¡Compra realizada con éxito! Disfrute de la función." << std::endl;
+  std::cout << "==========================================" << std::endl
+            << std::endl;
 }
 
 void Consola::mostrarMenuAdmin() {
-  cout << "=== CineManager ADMIN ===" << endl;
-  cout << "1. Gestion Cines" << endl;
-  cout << "2. Gestion Peliculas" << endl;
-  cout << "3. Gestion Salas" << endl;
-  cout << "4. Gestion Sesiones" << endl;
-  cout << "5. Reporte de Ocupacion" << endl;
-  cout << "6. Salir" << endl;
-  cout << "=========================" << endl;
+  std::cout << "=== CineManager ADMIN ===" << std::endl;
+  std::cout << "1. Gestion Cines" << std::endl;
+  std::cout << "2. Gestion Peliculas" << std::endl;
+  std::cout << "3. Gestion Salas" << std::endl;
+  std::cout << "4. Gestion Sesiones" << std::endl;
+  std::cout << "5. Reporte de Ocupacion" << std::endl;
+  std::cout << "6. Salir" << std::endl;
+  std::cout << "=========================" << std::endl;
 }
 
 void subMenuAdmin(std::string_view nombre) {
-  cout << "=== Menu Gestion " << nombre << " ===" << endl;
-  cout << "1. Listar" << endl;
-  cout << "2. Añadir" << endl;
-  cout << "3. Modificar" << endl;
-  cout << "4. Eliminar" << endl;
-  cout << "5. Volver" << endl;
-  cout << "=========================" << endl;
+  std::cout << "=== Menu Gestion " << nombre << " ===" << std::endl;
+  std::cout << "1. Listar" << std::endl;
+  std::cout << "2. Añadir" << std::endl;
+  std::cout << "3. Modificar" << std::endl;
+  std::cout << "4. Eliminar" << std::endl;
+  std::cout << "5. Volver" << std::endl;
+  std::cout << "=========================" << std::endl;
 }
 
 void Consola::mostrarSubmenuCines() { subMenuAdmin("Cine"); }
@@ -127,15 +125,15 @@ void Consola::mostrarSubmenuSesiones() { subMenuAdmin("Seciones"); }
 
 int Consola::pedirEntero(std::string_view mensaje) {
   int lectura;
-  cout << mensaje << endl;
+  std::cout << mensaje << std::endl;
   while (true) {
-    if (cin >> lectura) {
-      cin.ignore(10000, '\n');
+    if (std::cin >> lectura) {
+      std::cin.ignore(10000, '\n');
       return lectura;
     } else {
-      cout << "Valor no valido, vuelva a introducirlo" << endl;
-      cin.clear();
-      cin.ignore(10000, '\n');
+      std::cout << "Valor no valido, vuelva a introducirlo" << std::endl;
+      std::cin.clear();
+      std::cin.ignore(10000, '\n');
     }
   }
 }

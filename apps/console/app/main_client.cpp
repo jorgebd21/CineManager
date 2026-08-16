@@ -2,8 +2,6 @@
 #include "controller/clientcontroller.hpp"
 #include "db/datamanager.hpp"
 
-using namespace std;
-
 int main() {
   Consola consola;
   DataManager db;
