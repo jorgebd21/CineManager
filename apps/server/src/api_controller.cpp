@@ -34,10 +34,12 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     return crow::response(200, res);
   });
 
-  // 3. Obtener lista de películas en cartelera
+  // 3. Obtener lista de películas en cartelera (solo con sesiones vigentes)
   CROW_ROUTE(app, "/api/v1/peliculas")
-  ([this]() {
-    std::vector<Pelicula> peliculas = db.obtenerPeliculas();
+  ([this](const crow::request& req) {
+    const char* cineParam = req.url_params.get("cine_id");
+    int idCine = cineParam ? std::atoi(cineParam) : 0;
+    std::vector<Pelicula> peliculas = db.obtenerCartelera(idCine);
     std::vector<crow::json::wvalue> listaJson;
     listaJson.reserve(peliculas.size());
     for (const auto& p : peliculas) {

@@ -39,6 +39,9 @@ class ApiClient : public QObject {
                    QObject* context = nullptr);
   void obtenerCines(std::function<void(bool, QList<Cine>)> callback,
                     QObject* context = nullptr);
+  void obtenerPeliculas(int idCine,
+                        std::function<void(bool, QList<Pelicula>)> callback,
+                        QObject* context = nullptr);
   void obtenerPeliculas(std::function<void(bool, QList<Pelicula>)> callback,
                         QObject* context = nullptr);
   void obtenerSesiones(int idCine,

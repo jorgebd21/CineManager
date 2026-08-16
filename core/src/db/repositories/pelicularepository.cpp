@@ -67,13 +67,27 @@ std::vector<Pelicula> PeliculaRepository::obtenerCartelera(int idCine) {
   std::vector<Pelicula> peliculas;
 
   try {
-    SqliteStatement stmt(
-        db.getDb(),
-        "SELECT DISTINCT p.id, p.titulo, p.genero, p.duracion FROM peliculas p "
-        "JOIN sesiones s ON p.id = s.pelicula_id JOIN salas sa ON s.sala_id = "
-        "sa.id WHERE sa.cine_id = ? AND s.fecha_hora >= datetime('now')");
+    std::string sql;
+    if (idCine > 0) {
+      sql =
+          "SELECT DISTINCT p.id, p.titulo, p.genero, p.duracion FROM peliculas "
+          "p "
+          "JOIN sesiones s ON p.id = s.pelicula_id "
+          "JOIN salas sa ON s.sala_id = sa.id "
+          "WHERE sa.cine_id = ? AND s.fecha_hora >= datetime('now')";
+    } else {
+      sql =
+          "SELECT DISTINCT p.id, p.titulo, p.genero, p.duracion FROM peliculas "
+          "p "
+          "JOIN sesiones s ON p.id = s.pelicula_id "
+          "WHERE s.fecha_hora >= datetime('now')";
+    }
 
-    if (!stmt.bindInt(1, idCine)) return peliculas;
+    SqliteStatement stmt(db.getDb(), sql);
+
+    if (idCine > 0) {
+      if (!stmt.bindInt(1, idCine)) return peliculas;
+    }
 
     while (stmt.step() == SQLITE_ROW) {
       peliculas.emplace_back(stmt.getColumnInt(0), stmt.getColumnText(1),
@@ -81,7 +95,8 @@ std::vector<Pelicula> PeliculaRepository::obtenerCartelera(int idCine) {
                              stmt.getColumnInt(3));
     }
   } catch (const std::exception& e) {
-    std::cerr << "Error en PeliculaRepository::obtenerCartelera: " << e.what() << std::endl;
+    std::cerr << "Error en PeliculaRepository::obtenerCartelera: " << e.what()
+              << std::endl;
   }
 
   return peliculas;

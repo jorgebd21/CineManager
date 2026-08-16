@@ -136,8 +136,9 @@ void MainWindow::alSeleccionarCine(int idCine) {
   ui->labelNoResultados->hide();
   ui->listaPeliculas->show();
 
-  // Cargar películas asíncronamente desde la API
+  // Cargar películas asíncronamente desde la API (solo cartelera del cine seleccionado)
   api->obtenerPeliculas(
+      idCineSeleccionado,
       [this](bool ok, QList<Pelicula> peliculas) {
         if (!ok) return;
         listaPeliculas = peliculas;

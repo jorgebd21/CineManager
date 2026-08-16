@@ -34,16 +34,16 @@ class DataManager {
   std::unordered_map<int, std::shared_ptr<std::mutex>> sessionMutexes;
   std::mutex mapMutex;
 
-  std::jthread cleanerThread;
-  std::condition_variable_any cvCleaner;
-  std::mutex cvMutex;
-
   CineRepository cineRepo;
   PeliculaRepository peliculaRepo;
   SalaRepository salaRepo;
   SesionRepository sesionRepo;
   ReservaRepository reservaRepo;
   UsuarioRepository usuarioRepo;
+
+  std::mutex cvMutex;
+  std::condition_variable_any cvCleaner;
+  std::jthread cleanerThread;
 
   void iniciarLimpiezaLoop(std::stop_token stoken);
 

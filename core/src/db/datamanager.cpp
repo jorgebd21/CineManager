@@ -17,8 +17,11 @@ DataManager::DataManager(const std::string& customDbPath)
 }
 
 DataManager::~DataManager() {
-  // jthread auto-requests stop and joins upon destruction, but we notify CV to wake it immediately
-  cvCleaner.notify_all();
+  if (cleanerThread.joinable()) {
+    cleanerThread.request_stop();
+    cvCleaner.notify_all();
+    cleanerThread.join();
+  }
 }
 
 std::shared_ptr<std::mutex> DataManager::obtenerMutexSesion(int idSesion) {

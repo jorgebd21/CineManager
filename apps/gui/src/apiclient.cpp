@@ -64,8 +64,12 @@ void ApiClient::obtenerCines(std::function<void(bool, QList<Cine>)> callback,
 }
 
 void ApiClient::obtenerPeliculas(
-    std::function<void(bool, QList<Pelicula>)> callback, QObject* context) {
-  QUrl url(baseUrl + "/api/v1/peliculas");
+    int idCine, std::function<void(bool, QList<Pelicula>)> callback,
+    QObject* context) {
+  QString endpoint = (idCine > 0)
+                         ? QString("/api/v1/peliculas?cine_id=%1").arg(idCine)
+                         : QString("/api/v1/peliculas");
+  QUrl url(baseUrl + endpoint);
   QNetworkRequest req(url);
 
   QNetworkReply* reply = manager->get(req);
@@ -98,6 +102,11 @@ void ApiClient::obtenerPeliculas(
   } else {
     connect(reply, &QNetworkReply::finished, this, onFinished);
   }
+}
+
+void ApiClient::obtenerPeliculas(
+    std::function<void(bool, QList<Pelicula>)> callback, QObject* context) {
+  obtenerPeliculas(0, callback, context);
 }
 
 void ApiClient::obtenerSesiones(
