@@ -49,6 +49,9 @@ Actualmente nos encontramos refinando la **Fase 6 (Interfaz Gráfica Nativa Qt6)
   - [x] `Dockerfile` multietapa (*builder* y *runner*) optimizado para producción.
   - [x] Orquestación con `docker-compose.yml` y volúmenes persistentes en `./data`.
   - [x] Flujo de integración continua en `.github/workflows/ci.yml` ejecutando GoogleTest en cada push.
+- [x] **Fase 9: Saneamiento de Deuda Técnica en Base de Datos SQLite**
+  - [x] Activación de claves foráneas (`PRAGMA foreign_keys = ON;`) para integridad referencial estricta.
+  - [x] Modo de concurrencia de alto rendimiento (`PRAGMA journal_mode = WAL;`) para acceso concurrente no bloqueante.
 
 ## 🛠️ Instrucciones de Compilación y Ejecución
 

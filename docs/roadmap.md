@@ -28,6 +28,7 @@ gantt
     Fase 7a · REST API (Crow C++ Server)  :done, f7a,    2026-08-16, 2026-08-16
     Fase 7b · Cliente HTTP Qt6 (ApiClient):done, f7b,    2026-08-16, 2026-08-16
     Fase 8 · Despliegue Docker / CI/CD    :done, f8,     2026-08-16, 2026-08-16
+    Fase 9 · Saneamiento SQLite (WAL/FK)  :done, f9,     2026-08-16, 2026-08-16
 ```
 
 ---
