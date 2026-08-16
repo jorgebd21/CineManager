@@ -157,6 +157,20 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     }
 
     int idSesion = reqJson["sesion_id"].i();
+    Sesion sesion = db.obtenerSesion(idSesion);
+    if (!sesion.esValido()) {
+      crow::json::wvalue err;
+      err["error"] = "Sesion no encontrada o invalida.";
+      return crow::response(404, err);
+    }
+
+    Sala sala = db.obtenerSala(sesion.getIdSala());
+    if (!sala.esValido()) {
+      crow::json::wvalue err;
+      err["error"] = "Sala asociada a la sesion no encontrada.";
+      return crow::response(404, err);
+    }
+
     const auto& listaReservas = reqJson["reservas"];
 
     std::vector<Reserva> reservasParaCrear;
@@ -170,6 +184,13 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
       }
       int fila = item["fila"].i();
       int columna = item["columna"].i();
+
+      if (fila < 0 || fila >= sala.getFilas() || columna < 0 || columna >= sala.getColumnas()) {
+        crow::json::wvalue err;
+        err["error"] = "Coordenadas de butaca fuera de los limites de la sala.";
+        return crow::response(400, err);
+      }
+
       std::string tipo = item.has("tipo") ? std::string(item["tipo"].s()) : "Adulto";
       float precio = item.has("precio") ? static_cast<float>(item["precio"].d()) : 7.50f;
 

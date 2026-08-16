@@ -116,8 +116,11 @@ int ClientController::realizarReserva(int cineId) {
 
   Reserva reservaTemporal(-1, sesionId, fila - 1, columna - 1, "PENDIENTE",
                           std::time(nullptr));
-  if (reservaTemporal.getFila() < 0 || reservaTemporal.getColumna() < 0) {
-    cout << "Asiento invalido" << endl;
+  if (reservaTemporal.getFila() < 0 ||
+      reservaTemporal.getFila() >= sala.getFilas() ||
+      reservaTemporal.getColumna() < 0 ||
+      reservaTemporal.getColumna() >= sala.getColumnas()) {
+    cout << "Asiento invalido (coordenadas fuera de los limites de la sala)" << endl;
     return -1;
   }
 
