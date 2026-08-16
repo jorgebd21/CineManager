@@ -4,7 +4,11 @@
 #include <iostream>
 
 SqliteDatabase::SqliteDatabase(const std::string& customPath) {
-  abrirSQL(customPath);
+  if (!abrirSQL(customPath)) {
+    throw db::DatabaseException(
+        "Error al inicializar la base de datos SQLite en: " +
+        (customPath.empty() ? "../data/cine.db" : customPath));
+  }
 }
 
 SqliteDatabase::~SqliteDatabase() {
