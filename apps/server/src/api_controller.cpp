@@ -130,9 +130,11 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
   CROW_ROUTE(app, "/api/v1/auth/login").methods(crow::HTTPMethod::POST)
   ([this](const crow::request& req) {
     auto reqJson = crow::json::load(req.body);
-    if (!reqJson || !reqJson.has("dni") || !reqJson.has("password")) {
+    if (!reqJson || !reqJson.has("dni") || !reqJson.has("password") ||
+        reqJson["dni"].t() != crow::json::type::String ||
+        reqJson["password"].t() != crow::json::type::String) {
       crow::json::wvalue err;
-      err["error"] = "Se requiere DNI y contraseña en formato JSON.";
+      err["error"] = "Se requiere DNI y contraseña en formato JSON string.";
       return crow::response(400, err);
     }
 
@@ -161,9 +163,14 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     auto reqJson = crow::json::load(req.body);
     if (!reqJson || !reqJson.has("dni") || !reqJson.has("nombre") ||
         !reqJson.has("apellidos") || !reqJson.has("email") ||
-        !reqJson.has("password")) {
+        !reqJson.has("password") ||
+        reqJson["dni"].t() != crow::json::type::String ||
+        reqJson["nombre"].t() != crow::json::type::String ||
+        reqJson["apellidos"].t() != crow::json::type::String ||
+        reqJson["email"].t() != crow::json::type::String ||
+        reqJson["password"].t() != crow::json::type::String) {
       crow::json::wvalue err;
-      err["error"] = "Faltan campos obligatorios para el registro.";
+      err["error"] = "Faltan campos obligatorios o formato inválido para el registro.";
       return crow::response(400, err);
     }
 
@@ -196,9 +203,11 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
   CROW_ROUTE(app, "/api/v1/reservas").methods(crow::HTTPMethod::POST)
   ([this](const crow::request& req) {
     auto reqJson = crow::json::load(req.body);
-    if (!reqJson || !reqJson.has("sesion_id") || !reqJson.has("reservas")) {
+    if (!reqJson || !reqJson.has("sesion_id") || !reqJson.has("reservas") ||
+        reqJson["sesion_id"].t() != crow::json::type::Number ||
+        reqJson["reservas"].t() != crow::json::type::List) {
       crow::json::wvalue err;
-      err["error"] = "Se requiere sesion_id y lista de reservas.";
+      err["error"] = "Se requiere sesion_id entero y lista de reservas en formato array.";
       return crow::response(400, err);
     }
 
@@ -223,9 +232,12 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
     const std::time_t ahora = std::time(nullptr);
 
     for (const auto& item : listaReservas) {
-      if (!item.has("fila") || !item.has("columna")) {
+      if (item.t() != crow::json::type::Object || !item.has("fila") ||
+          !item.has("columna") ||
+          item["fila"].t() != crow::json::type::Number ||
+          item["columna"].t() != crow::json::type::Number) {
         crow::json::wvalue err;
-        err["error"] = "Cada reserva debe contener fila y columna.";
+        err["error"] = "Cada reserva debe contener fila y columna enteros.";
         return crow::response(400, err);
       }
       int fila = item["fila"].i();
@@ -237,8 +249,12 @@ void ApiController::registrarRutas(crow::SimpleApp& app) {
         return crow::response(400, err);
       }
 
-      std::string tipo = item.has("tipo") ? std::string(item["tipo"].s()) : "Adulto";
-      float precio = item.has("precio") ? static_cast<float>(item["precio"].d()) : 7.50f;
+      std::string tipo = (item.has("tipo") && item["tipo"].t() == crow::json::type::String)
+                             ? std::string(item["tipo"].s())
+                             : "Adulto";
+      float precio = (item.has("precio") && item["precio"].t() == crow::json::type::Number)
+                         ? static_cast<float>(item["precio"].d())
+                         : 7.50f;
 
       reservasParaCrear.emplace_back(-1, idSesion, fila, columna, "COMPRADO",
                                     ahora, tipo, precio);
