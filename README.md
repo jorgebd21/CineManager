@@ -45,6 +45,10 @@ Actualmente nos encontramos refinando la **Fase 6 (Interfaz Gráfica Nativa Qt6)
 - [x] **Fase 7b: Cliente HTTP REST API Qt6 (`ApiClient`)**
   - [x] Clase cliente HTTP asíncrona `ApiClient` utilizando `QNetworkAccessManager` y `Qt6::Network`.
   - [x] Autenticación y registro de usuario remoto en la interfaz gráfica conectando con el servidor web.
+- [x] **Fase 8: Despliegue en Docker, Docker Compose y CI/CD**
+  - [x] `Dockerfile` multietapa (*builder* y *runner*) optimizado para producción.
+  - [x] Orquestación con `docker-compose.yml` y volúmenes persistentes en `./data`.
+  - [x] Flujo de integración continua en `.github/workflows/ci.yml` ejecutando GoogleTest en cada push.
 
 ## 🛠️ Instrucciones de Compilación y Ejecución
 

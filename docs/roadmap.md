@@ -27,9 +27,7 @@ gantt
     Testing · Suite GoogleTest            :done, f_test, 2026-08-16, 2026-08-16
     Fase 7a · REST API (Crow C++ Server)  :done, f7a,    2026-08-16, 2026-08-16
     Fase 7b · Cliente HTTP Qt6 (ApiClient):done, f7b,    2026-08-16, 2026-08-16
-
-    section ⏳ Planificado
-    Fase 8 · Despliegue Docker / CI/CD    :f8,     2026-09-01, 2026-09-20
+    Fase 8 · Despliegue Docker / CI/CD    :done, f8,     2026-08-16, 2026-08-16
 ```
 
 ---
