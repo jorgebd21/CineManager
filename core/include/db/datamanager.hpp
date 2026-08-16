@@ -3,10 +3,10 @@
 
 #include <sqlite3.h>
 
-#include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -24,18 +24,18 @@
 #include "models/sala.hpp"
 #include "models/sesion.hpp"
 #include "models/usuario.hpp"
+
 class DataManager {
  private:
   static constexpr int TIEMPO_EXPIRACION_SEGUNDOS = 300;
 
   SqliteDatabase db;
 
-  std::unordered_map<int, std::unique_ptr<std::mutex>> sessionMutexes;
+  std::unordered_map<int, std::shared_ptr<std::mutex>> sessionMutexes;
   std::mutex mapMutex;
 
-  std::thread cleanerThread;
-  std::atomic<bool> stopCleaner{false};
-  std::condition_variable cvCleaner;
+  std::jthread cleanerThread;
+  std::condition_variable_any cvCleaner;
   std::mutex cvMutex;
 
   CineRepository cineRepo;
@@ -45,20 +45,18 @@ class DataManager {
   ReservaRepository reservaRepo;
   UsuarioRepository usuarioRepo;
 
+  void iniciarLimpiezaLoop(std::stop_token stoken);
+
  public:
-  DataManager()
-      : db(),
-        cineRepo(db),
-        peliculaRepo(db),
-        salaRepo(db),
-        sesionRepo(db),
-        reservaRepo(db),
-        usuarioRepo(db) {
-    cleanerThread = std::thread(&DataManager::iniciarLimpiezaLoop, this);
-  };
+  explicit DataManager(const std::string& customDbPath = "");
   ~DataManager();
 
-  void iniciarLimpiezaLoop();
+  // Non-copyable, non-movable facade
+  DataManager(const DataManager&) = delete;
+  DataManager& operator=(const DataManager&) = delete;
+  DataManager(DataManager&&) = delete;
+  DataManager& operator=(DataManager&&) = delete;
+
   std::vector<Reserva> obtenerPendientes();
 
   int crearCine(const Cine& cine);
@@ -66,6 +64,7 @@ class DataManager {
   int crearPelicula(const Pelicula& pelicula);
   int crearSesion(const Sesion& sesion);
   int crearReserva(const Reserva& reserva);
+  bool crearReservasMultiples(int idSesion, const std::vector<Reserva>& reservas);
 
   Cine obtenerCine(int id);
   Sala obtenerSala(int id);
@@ -73,7 +72,7 @@ class DataManager {
   Sesion obtenerSesion(int id);
   Reserva obtenerReserva(int id);
 
-  std::mutex& obtenerMutexSesion(int idSesion);
+  std::shared_ptr<std::mutex> obtenerMutexSesion(int idSesion);
 
   std::vector<Pelicula> obtenerCartelera(int idCine);
   std::vector<Sesion> obtenerSesionesDePelicula(int idCine, int idPelicula);

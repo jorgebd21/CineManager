@@ -14,15 +14,49 @@ int ReservaRepository::crear(const Reserva& reserva) {
         !stmt.bindInt(2, reserva.getFila()) ||
         !stmt.bindInt(3, reserva.getColumna()) ||
         !stmt.bindText(4, reserva.getEstado()) ||
-        !stmt.bindInt(5, reserva.getTimestampCreacion()) ||
+        !stmt.bindInt64(5, static_cast<sqlite3_int64>(reserva.getTimestampCreacion())) ||
         !stmt.bindText(6, reserva.getTipo()) ||
         !stmt.bindFloat(7, reserva.getPrecio()))
-      return false;
+      return -1;
+
     if (stmt.step() != SQLITE_DONE) return -1;
 
-    return sqlite3_last_insert_rowid(db.getDb());
+    return static_cast<int>(sqlite3_last_insert_rowid(db.getDb()));
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::crear: " << e.what() << std::endl;
+    return -1;
+  }
+}
+
+bool ReservaRepository::crearMultiples(const std::vector<Reserva>& reservas) {
+  if (reservas.empty()) return true;
+
+  SqliteTransaction tx(db.getDb());
+  try {
+    for (const auto& reserva : reservas) {
+      SqliteStatement stmt(db.getDb(),
+                           "INSERT INTO reservas (sesion_id, fila, columna, "
+                           "estado, timestamp_creacion, tipo, precio) VALUES (?, "
+                           "?, ?, ?, ?, ?, ?)");
+      if (!stmt.bindInt(1, reserva.getIdSesion()) ||
+          !stmt.bindInt(2, reserva.getFila()) ||
+          !stmt.bindInt(3, reserva.getColumna()) ||
+          !stmt.bindText(4, reserva.getEstado()) ||
+          !stmt.bindInt64(5, static_cast<sqlite3_int64>(reserva.getTimestampCreacion())) ||
+          !stmt.bindText(6, reserva.getTipo()) ||
+          !stmt.bindFloat(7, reserva.getPrecio())) {
+        tx.rollback();
+        return false;
+      }
+      if (stmt.step() != SQLITE_DONE) {
+        tx.rollback();
+        return false;
+      }
+    }
+    return tx.commit();
+  } catch (const std::exception& e) {
+    std::cerr << "Error en ReservaRepository::crearMultiples: " << e.what() << std::endl;
+    tx.rollback();
     return false;
   }
 }
@@ -39,13 +73,13 @@ Reserva ReservaRepository::obtenerPorId(int id) {
     if (stmt.step() == SQLITE_ROW) {
       return Reserva(id, stmt.getColumnInt(1), stmt.getColumnInt(2),
                      stmt.getColumnInt(3), stmt.getColumnText(4),
-                     stmt.getColumnInt(5), stmt.getColumnText(6),
-                     stmt.getColumnFloat(7));
+                     static_cast<std::time_t>(stmt.getColumnInt64(5)),
+                     stmt.getColumnText(6), stmt.getColumnFloat(7));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::obtenerPorId: " << e.what() << std::endl;
   }
-  return Reserva(-1, -1, -1, -1, "", -1);
+  return Reserva(-1, -1, -1, -1, "", 0);
 }
 
 std::vector<Reserva> ReservaRepository::obtenerPorSesion(int idSesion) {
@@ -60,13 +94,14 @@ std::vector<Reserva> ReservaRepository::obtenerPorSesion(int idSesion) {
     if (!stmt.bindInt(1, idSesion)) return reservas;
 
     while (stmt.step() == SQLITE_ROW) {
-      reservas.push_back(Reserva(
+      reservas.emplace_back(
           stmt.getColumnInt(0), stmt.getColumnInt(1), stmt.getColumnInt(2),
-          stmt.getColumnInt(3), stmt.getColumnText(4), stmt.getColumnInt(5),
-          stmt.getColumnText(6), stmt.getColumnFloat(7)));
+          stmt.getColumnInt(3), stmt.getColumnText(4),
+          static_cast<std::time_t>(stmt.getColumnInt64(5)),
+          stmt.getColumnText(6), stmt.getColumnFloat(7));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::obtenerPorSesion: " << e.what() << std::endl;
   }
 
   return reservas;
@@ -77,15 +112,19 @@ std::vector<Reserva> ReservaRepository::obtenerPendientes() {
 
   try {
     SqliteStatement stmt(db.getDb(),
-                         "SELECT id, sesion_id, timestamp_creacion FROM "
-                         "reservas WHERE estado = 'PENDIENTE'");
+                         "SELECT id, sesion_id, fila, columna, estado, "
+                         "timestamp_creacion, tipo, precio FROM reservas "
+                         "WHERE estado = 'PENDIENTE'");
 
     while (stmt.step() == SQLITE_ROW) {
-      reservas.push_back(Reserva(stmt.getColumnInt(0), stmt.getColumnInt(1), -1,
-                                 -1, "ANALIZANDO", stmt.getColumnInt(2)));
+      reservas.emplace_back(
+          stmt.getColumnInt(0), stmt.getColumnInt(1), stmt.getColumnInt(2),
+          stmt.getColumnInt(3), stmt.getColumnText(4),
+          static_cast<std::time_t>(stmt.getColumnInt64(5)),
+          stmt.getColumnText(6), stmt.getColumnFloat(7));
     }
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::obtenerPendientes: " << e.what() << std::endl;
   }
 
   return reservas;
@@ -104,11 +143,9 @@ bool ReservaRepository::actualizar(int id, const Reserva& reserva) {
         !stmt.bindFloat(6, reserva.getPrecio()) || !stmt.bindInt(7, id))
       return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::actualizar: " << e.what() << std::endl;
   }
   return false;
 }
@@ -118,11 +155,9 @@ bool ReservaRepository::eliminar(int id) {
     SqliteStatement stmt(db.getDb(), "DELETE FROM reservas WHERE id = ?");
     if (!stmt.bindInt(1, id)) return false;
 
-    if (stmt.step() == SQLITE_DONE) {
-      return true;
-    }
+    return (stmt.step() == SQLITE_DONE);
   } catch (const std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error en ReservaRepository::eliminar: " << e.what() << std::endl;
   }
   return false;
 }
