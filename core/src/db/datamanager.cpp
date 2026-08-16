@@ -23,7 +23,10 @@ DataManager::~DataManager() {
 void DataManager::detenerDemonioLimpieza() {
   if (cleanerThread.joinable()) {
     cleanerThread.request_stop();
-    cvCleaner.notify_all();
+    {
+      std::lock_guard<std::mutex> lock(cvMutex);
+      cvCleaner.notify_all();
+    }
     cleanerThread.join();
   }
 }
