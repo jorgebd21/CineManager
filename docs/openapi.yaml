@@ -1,0 +1,424 @@
+openapi: 3.0.3
+info:
+  title: CineManager REST API
+  description: >
+    Especificación OpenAPI 3.0 del backend REST API de CineManager v2.0.
+    Microservicio web de alto rendimiento desarrollado en C++20 utilizando el framework Crow y SQLite3.
+  version: 2.0.0
+  contact:
+    name: Jorge Beneyto
+    url: https://github.com/jorgebd21/CineManager
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo local / Contenedor Docker Compose
+
+tags:
+  - name: Health
+    description: Diagnóstico y estado del servicio
+  - name: Cines
+    description: Gestión y consulta de complejos de cine
+  - name: Peliculas
+    description: Consulta de cartelera y películas
+  - name: Sesiones
+    description: Pases y horarios de proyección
+  - name: Autenticación
+    description: Registro e inicio de sesión de usuarios por DNI
+  - name: Reservas
+    description: Creación transaccional de reservas y compra de entradas
+
+paths:
+  /api/v1/health:
+    get:
+      tags:
+        - Health
+      summary: Chequeo de salud del servicio
+      description: Retorna el estado operativo del microservicio y la versión de la API.
+      responses:
+        '200':
+          description: Servicio funcionando correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: "ok"
+                app: "CineManager REST API v2.0"
+
+  /api/v1/cines:
+    get:
+      tags:
+        - Cines
+      summary: Obtener catálogo de cines
+      description: Retorna la lista de todos los cines registrados con su dirección física.
+      responses:
+        '200':
+          description: Lista de cines obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cine'
+              example:
+                cines:
+                  - id: 1
+                    nombre: "Cine Central Metrópolis"
+                    direccion: "Av. de la Constitución 45"
+                  - id: 2
+                    nombre: "Cine Capitol Premium"
+                    direccion: "Gran Vía 12, Planta 3"
+
+  /api/v1/peliculas:
+    get:
+      tags:
+        - Peliculas
+      summary: Obtener cartelera de películas
+      description: Retorna la lista de películas disponibles en cartelera.
+      responses:
+        '200':
+          description: Lista de películas obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  peliculas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pelicula'
+              example:
+                peliculas:
+                  - id: 1
+                    titulo: "Inception"
+                    genero: "CIENCIA_FICCION"
+                    duracion: 148
+                  - id: 2
+                    titulo: "El Padrino"
+                    genero: "DRAMA"
+                    duracion: 175
+
+  /api/v1/sesiones:
+    get:
+      tags:
+        - Sesiones
+      summary: Obtener sesiones de cine
+      description: Retorna las sesiones programadas para un cine específico.
+      parameters:
+        - name: cine_id
+          in: query
+          description: Identificador del cine
+          required: false
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Lista de sesiones obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sesiones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sesion'
+              example:
+                sesiones:
+                  - id: 1
+                    pelicula_id: 1
+                    sala_id: 1
+                    fecha_hora: "2026-08-20 18:30"
+                  - id: 2
+                    pelicula_id: 2
+                    sala_id: 2
+                    fecha_hora: "2026-08-20 21:00"
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión de usuario
+      description: Autentica un usuario mediante su DNI y contraseña.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              dni: "12345678Z"
+              password: "admin"
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+              example:
+                dni: "12345678Z"
+                nombre: "Administrador"
+                apellidos: "Sistema"
+                email: "admin@cinemanager.com"
+                rol: "ADMIN"
+        '400':
+          description: Datos de solicitud inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Se requiere DNI y contraseña en formato JSON."
+        '401':
+          description: Credenciales incorrectas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "DNI o contraseña incorrectos."
+
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar nuevo usuario
+      description: Registra una nueva cuenta de cliente en la base de datos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              dni: "98765432B"
+              nombre: "Carlos"
+              apellidos: "Gómez"
+              email: "carlos@example.com"
+              password: "password123"
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dni:
+                    type: string
+                  nombre:
+                    type: string
+                  email:
+                    type: string
+              example:
+                dni: "98765432B"
+                nombre: "Carlos"
+                email: "carlos@example.com"
+        '400':
+          description: Faltan campos obligatorios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: El DNI ya está registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "El DNI ya se encuentra registrado."
+        '500':
+          description: Error interno al persistir el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/reservas:
+    post:
+      tags:
+        - Reservas
+      summary: Crear reservas / Comprar entradas
+      description: Bloquea y registra de forma transaccional un conjunto de butacas para una sesión.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservasRequest'
+            example:
+              sesion_id: 1
+              reservas:
+                - fila: 2
+                  columna: 3
+                  tipo: "Adulto"
+                  precio: 7.50
+                - fila: 2
+                  columna: 4
+                  tipo: "Estudiante"
+                  precio: 5.50
+      responses:
+        '201':
+          description: Reservas creadas satisfactoriamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  reservas_creadas:
+                    type: integer
+              example:
+                status: "exito"
+                reservas_creadas: 2
+        '400':
+          description: Solicitud malformada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicto - Butacas ocupadas o sesión inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "No se pudieron realizar las reservas (butacas ocupadas o sesión inválida)."
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        app:
+          type: string
+
+    Cine:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        direccion:
+          type: string
+
+    Pelicula:
+      type: object
+      properties:
+        id:
+          type: integer
+        titulo:
+          type: string
+        genero:
+          type: string
+          enum: [ACCION, COMEDIA, DRAMA, CIENCIA_FICCION, TERROR, ANIMACION, AVENTURA, SUSPENSE, DESCONOCIDO]
+        duracion:
+          type: integer
+          description: Duración en minutos
+
+    Sesion:
+      type: object
+      properties:
+        id:
+          type: integer
+        pelicula_id:
+          type: integer
+        sala_id:
+          type: integer
+        fecha_hora:
+          type: string
+          example: "2026-08-20 18:30"
+
+    Usuario:
+      type: object
+      properties:
+        dni:
+          type: string
+        nombre:
+          type: string
+        apellidos:
+          type: string
+        email:
+          type: string
+        rol:
+          type: string
+          enum: [ADMIN, CLIENTE]
+
+    LoginRequest:
+      type: object
+      required:
+        - dni
+        - password
+      properties:
+        dni:
+          type: string
+        password:
+          type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - dni
+        - nombre
+        - apellidos
+        - email
+        - password
+      properties:
+        dni:
+          type: string
+        nombre:
+          type: string
+        apellidos:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    ReservaItem:
+      type: object
+      required:
+        - fila
+        - columna
+      properties:
+        fila:
+          type: integer
+        columna:
+          type: integer
+        tipo:
+          type: string
+          enum: [Adulto, Niño, Jubilado, Estudiante]
+          default: "Adulto"
+        precio:
+          type: number
+          format: float
+          default: 7.50
+
+    CreateReservasRequest:
+      type: object
+      required:
+        - sesion_id
+        - reservas
+      properties:
+        sesion_id:
+          type: integer
+        reservas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReservaItem'
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
