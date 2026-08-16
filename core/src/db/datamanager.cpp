@@ -228,11 +228,16 @@ bool DataManager::actualizarReserva(int id, const Reserva& reserva) {
 }
 
 bool DataManager::eliminarReserva(int id) {
-  std::lock_guard<std::mutex> lockDb(db.getMutex());
-  Reserva r = reservaRepo.obtenerPorId(id);
+  Reserva r;
+  {
+    std::lock_guard<std::mutex> lockDb(db.getMutex());
+    r = reservaRepo.obtenerPorId(id);
+  }
+
   if (r.getId() != -1) {
     auto sesionMtx = obtenerMutexSesion(r.getIdSesion());
     std::lock_guard<std::mutex> lockSesion(*sesionMtx);
+    std::lock_guard<std::mutex> lockDb(db.getMutex());
     return reservaRepo.eliminar(id);
   }
   return false;
