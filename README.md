@@ -1,30 +1,38 @@
-# 🎬 CineManager v2.0
-
 <div align="center">
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg?style=flat&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/20)
-[![Qt6](https://img.shields.io/badge/Qt-6.x%20Widgets%20%26%20Network-41CD52?style=flat&logo=qt)](https://www.qt.io/)
-[![Crow C++](https://img.shields.io/badge/Crow-REST%20API-8A2BE2?style=flat)](https://crowcpp.org/)
-[![SQLite3](https://img.shields.io/badge/SQLite-3%20(WAL%20%2B%20FK)-003B57?style=flat&logo=sqlite)](https://www.sqlite.org/)
-[![CMake](https://img.shields.io/badge/CMake-3.20%2B-064F8C?style=flat&logo=cmake)](https://cmake.org/)
-[![GoogleTest](https://img.shields.io/badge/Tests-GoogleTest%20(100%25%20Passing)-brightgreen.svg?style=flat&logo=google)](https://github.com/google/googletest)
-[![Docker](https://img.shields.io/badge/Docker-Multi--stage%20%7C%20Compose-2496ED?style=flat&logo=docker)](https://www.docker.com/)
-[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=flat&logo=githubactions)](https://github.com/features/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENSE)
+# 🎬 CineManager
 
+### **Sistema Transaccional de Taquilla & Microservicio REST API en C++20**
+
+*Plataforma integral de alto rendimiento para gestión de complejos cinematográficos, reserva concurrente de butacas en tiempo real, backend asíncrono y cliente nativo Qt6.*
+
+<br/>
+
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)](https://en.cppreference.com/w/cpp/20)
+[![Qt6](https://img.shields.io/badge/Qt-6.x%20Widgets-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://www.qt.io/)
+[![Crow C++](https://img.shields.io/badge/Crow-REST%20API-8A2BE2?style=for-the-badge&logoColor=white)](https://crowcpp.org/)
+[![SQLite3 WAL](https://img.shields.io/badge/SQLite-3%20WAL%20%2B%20FK-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Docker](https://img.shields.io/badge/Docker-Multi--stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-Passing-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![GoogleTest](https://img.shields.io/badge/GoogleTest-100%25%20Passed-34A853?style=for-the-badge&logo=google&logoColor=white)](https://github.com/google/googletest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F1C40F?style=for-the-badge)](LICENSE)
+
+<br/>
+
+<!-- Showcase Hero Banner -->
 <p align="center">
-  <strong>Sistema Transaccional Distribuido de Alto Rendimiento para Gestión de Salas y Venta de Entradas Cinematográficas</strong>
+  <img src="docs/assets/cartelera.jpg" alt="CineManager Cartelera Preview" width="820px" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);" />
 </p>
 
-<p align="center">
-  <a href="#-visión-general">Visión General</a> •
-  <a href="#-showcase-visual">Showcase Visual</a> •
-  <a href="#-características-principales">Características</a> •
-  <a href="#-arquitectura-del-sistema">Arquitectura</a> •
-  <a href="#-catálogo-de-endpoints-rest-api">REST API</a> •
-  <a href="#-guía-rápida-de-despliegue">Quickstart</a> •
-  <a href="#-documentación-técnica">Documentación</a>
-</p>
+<br/>
+
+| ⚡ **C++20 Core** | 🖥️ **Qt6 Desktop** | 🚀 **Crow REST API** | 🔒 **Zero-Collisions** | 🎫 **ISO QR Code** |
+| :---: | :---: | :---: | :---: | :---: |
+| Librería estática desacoplada | Tema oscuro moderno y asíncrono | Microservicio web `:8080` | Mutex por sesión + SQLite WAL | Motor vectorial Nayuki C++20 |
+
+<br/>
+
+[🚀 Comenzar (Quickstart)](#-guía-rápida-de-despliegue) • [📸 Showcase Visual](#-showcase-visual) • [🏗️ Arquitectura](#-arquitectura-del-sistema) • [📡 REST API](#-catálogo-de-endpoints-rest-api) • [📖 Documentación Técnica](docs/dev_documentation.md) • [🗺️ Roadmap](docs/roadmap.md)
 
 </div>
 
@@ -32,7 +40,7 @@
 
 ## 📌 Visión General
 
-**CineManager v2.0** es una solución integral y desacoplada de taquilla y gestión de multicines diseñada bajo estándares profesionales de ingeniería de software en **C++20**. El sistema combina un núcleo de dominio transaccional compilado como librería estática independiente (`libCineManagerCore.a`), un microservicio backend RESTful asíncrono impulsado por **Crow C++**, y una aplicación de escritorio moderna desarrollada con **Qt6 (Widgets & Network)**.
+**CineManager ** es una solución integral y desacoplada de taquilla y gestión de multicines diseñada bajo estándares profesionales de ingeniería de software en **C++20**. El sistema combina un núcleo de dominio transaccional compilado como librería estática independiente (`libCineManagerCore.a`), un microservicio backend RESTful asíncrono impulsado por **Crow C++**, y una aplicación de escritorio moderna desarrollada con **Qt6 (Widgets & Network)**.
 
 El motor transaccional aborda problemas complejos de concurrencia y contención en la reserva de butacas mediante un esquema de **exclusión mutua fina (*fine-grained locking*)** por identificador de sesión, transacciones ACID en **SQLite3 con modo Write-Ahead Logging (WAL)** y un hilo demonio supervisor con mecanismos de *timeout* y liberación automática de bloqueos temporales.
 
@@ -50,7 +58,7 @@ Flujo de usuario completo capturado directamente desde la aplicación de escrito
 |:-:|:-:|
 | ![Pantalla de Login](docs/assets/login.jpg) | ![Pantalla de Registro](docs/assets/register.jpg) |
 
-*Autenticación segura por DNI con contraseña. Dispone de dos pestañas: inicio de sesión y registro. La opción **Continuar como invitado** permite comprar sin registrarse.*
+*Autenticación segura por DNI con contraseña. Dispone de dos pestañas: inicio de sesión y registro. La opción **Continuar como invitado** permite navegar sin registrarse hasta la hora de la compra que vuelve a salir la pantalla.*
 
 ---
 
@@ -342,9 +350,9 @@ CineManager/
 │   └── images/               # Carteles de películas y fotos de complejos
 ├── docs/                     # Suite de Documentación Técnica y Comercial
 │   ├── assets/               # Capturas de pantalla, diagramas y demostraciones GIF
-│   ├── dev_documentation.md  # Especificación de ingeniería y arquitectura interna v2.0
+│   ├── dev_documentation.md  # Especificación de ingeniería y arquitectura interna 
 │   ├── openapi.yaml          # Especificación formal OpenAPI 3.0 (Swagger / Postman)
-│   └── roadmap.md            # Roadmap completado de la v2.0 y visión estratégica v3.0
+│   └── roadmap.md            # Roadmap completado de la y visión estratégica 
 ├── tests/                    # Suite de Pruebas Unitarias y de Concurrencia GoogleTest
 ├── .github/workflows/        # Pipeline de Integración Continua (GitHub Actions CI)
 ├── CMakeLists.txt            # Script maestro de compilación CMake
@@ -359,7 +367,7 @@ CineManager/
 
 - 📖 [Documentación Técnica de Desarrollo (`docs/dev_documentation.md`)](docs/dev_documentation.md): Detalles de concurrencia, ciclo de vida de transacciones, arquitectura interna y changelog consolidado.
 - 🌐 [Especificación OpenAPI 3.0 (`docs/openapi.yaml`)](docs/openapi.yaml): Contrato formal REST para clientes web, móviles y herramientas de prueba de APIs.
-- 🗺️ [Roadmap de Fases y Visión Futura (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos cumplidos v2.0 y backlog estratégico para la versión 3.0.
+- 🗺️ [Roadmap de Fases y Visión Futura (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos cumplidos  y backlog estratégico para la versión 3.0.
 - 🖼️ [Índice de Assets Visuales (`docs/assets/README.md`)](docs/assets/README.md): Catálogo de todas las capturas de pantalla, su descripción y directrices de contribución para nuevos recursos multimedia.
 
 ---
@@ -371,5 +379,5 @@ Este proyecto se distribuye bajo los términos de la licencia **MIT**. Para más
 ---
 
 <div align="center">
-  <sub>Desarrollado con pasión y rigor de ingeniería por <strong>Jorge Baeza Diaz</strong> · 2026</sub>
+  <sub>Desarrollado con pasión por <strong>Jorge Baeza Diaz</strong> · 2026</sub>
 </div>
