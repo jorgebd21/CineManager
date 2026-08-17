@@ -2,6 +2,8 @@
 
 #include <QFile>
 #include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
 #include <QStatusBar>
 #include <map>
 
@@ -26,7 +28,9 @@ MainWindow::MainWindow(QWidget* parent)
       "../../data/images/background.jpg",
       QApplication::applicationDirPath() + "/data/images/background.jpg",
       QApplication::applicationDirPath() + "/../data/images/background.jpg",
-      "/home/jorgebd/Documentos/Proyectos/CineManager/data/images/background.jpg"
+      QApplication::applicationDirPath() + "/../../data/images/background.jpg",
+      "/home/jorgebd/Documentos/Proyectos/CineManager/data/images/background.jpg",
+      "/workspaces/CineManager/data/images/background.jpg"
   };
   for (const auto& ruta : posiblesFondos) {
     if (QFile::exists(ruta)) {
@@ -34,7 +38,6 @@ MainWindow::MainWindow(QWidget* parent)
       break;
     }
   }
-  actualizarFondo();
 
   ui->listaPeliculas->setViewMode(QListView::IconMode);
   ui->listaPeliculas->setResizeMode(QListView::Adjust);
@@ -111,19 +114,24 @@ MainWindow::~MainWindow() {
   delete ui;
 }
 
+void MainWindow::paintEvent(QPaintEvent* event) {
+  Q_UNUSED(event);
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
+  if (!pixmapFondoOriginal.isNull()) {
+    painter.drawPixmap(rect(), pixmapFondoOriginal);
+  } else {
+    painter.fillRect(rect(), QColor(18, 20, 29));
+  }
+}
+
 void MainWindow::actualizarFondo() {
-  if (pixmapFondoOriginal.isNull()) return;
-  QPixmap scaled = pixmapFondoOriginal.scaled(
-      this->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-  QPalette pal = this->palette();
-  pal.setBrush(QPalette::Window, QBrush(scaled));
-  this->setPalette(pal);
-  this->setAutoFillBackground(true);
+  update();
 }
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
   QMainWindow::resizeEvent(event);
-  actualizarFondo();
+  update();
 }
 
 void MainWindow::cargarCines() {

@@ -4,8 +4,8 @@
    Superficies: Background (#12141D), Card/Container (#1A1D28), Panel (#212534)
    ============================================================================== */
 
-QMainWindow {
-    background-color: #12141D;
+QMainWindow, QWidget#centralwidget, QStackedWidget {
+    background-color: transparent;
     color: #FFFFFF;
 }
 
