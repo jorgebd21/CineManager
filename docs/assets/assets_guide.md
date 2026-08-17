@@ -1,4 +1,4 @@
-# 🖼️ Assets Visuales — CineManager v2.0
+# 🖼️ Guía e Índice de Assets Visuales — CineManager
 
 > Directorio de recursos multimedia utilizados en el [`README.md` principal](../../README.md) y en [`docs/dev_documentation.md`](../dev_documentation.md).
 

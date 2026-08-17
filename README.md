@@ -40,7 +40,7 @@
 
 ## 📌 Visión General
 
-**CineManager ** es una solución integral y desacoplada de taquilla y gestión de multicines diseñada bajo estándares profesionales de ingeniería de software en **C++20**. El sistema combina un núcleo de dominio transaccional compilado como librería estática independiente (`libCineManagerCore.a`), un microservicio backend RESTful asíncrono impulsado por **Crow C++**, y una aplicación de escritorio moderna desarrollada con **Qt6 (Widgets & Network)**.
+**CineManager** es una solución integral y desacoplada de taquilla y gestión de multicines diseñada bajo estándares profesionales de ingeniería de software en **C++20**. El sistema combina un núcleo de dominio transaccional compilado como librería estática independiente (`libCineManagerCore.a`), un microservicio backend RESTful asíncrono impulsado por **Crow C++**, y una aplicación de escritorio moderna desarrollada con **Qt6 (Widgets & Network)**.
 
 El motor transaccional aborda problemas complejos de concurrencia y contención en la reserva de butacas mediante un esquema de **exclusión mutua fina (*fine-grained locking*)** por identificador de sesión, transacciones ACID en **SQLite3 con modo Write-Ahead Logging (WAL)** y un hilo demonio supervisor con mecanismos de *timeout* y liberación automática de bloqueos temporales.
 
@@ -350,9 +350,9 @@ CineManager/
 │   └── images/               # Carteles de películas y fotos de complejos
 ├── docs/                     # Suite de Documentación Técnica y Comercial
 │   ├── assets/               # Capturas de pantalla, diagramas y demostraciones GIF
-│   ├── dev_documentation.md  # Especificación de ingeniería y arquitectura interna 
+│   ├── dev_documentation.md  # Especificación de ingeniería y arquitectura interna
 │   ├── openapi.yaml          # Especificación formal OpenAPI 3.0 (Swagger / Postman)
-│   └── roadmap.md            # Roadmap completado de la y visión estratégica 
+│   └── roadmap.md            # Roadmap de desarrollo y evolución continua
 ├── tests/                    # Suite de Pruebas Unitarias y de Concurrencia GoogleTest
 ├── .github/workflows/        # Pipeline de Integración Continua (GitHub Actions CI)
 ├── CMakeLists.txt            # Script maestro de compilación CMake
@@ -367,8 +367,8 @@ CineManager/
 
 - 📖 [Documentación Técnica de Desarrollo (`docs/dev_documentation.md`)](docs/dev_documentation.md): Detalles de concurrencia, ciclo de vida de transacciones, arquitectura interna y changelog consolidado.
 - 🌐 [Especificación OpenAPI 3.0 (`docs/openapi.yaml`)](docs/openapi.yaml): Contrato formal REST para clientes web, móviles y herramientas de prueba de APIs.
-- 🗺️ [Roadmap de Fases y Visión Futura (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos cumplidos  y backlog estratégico para la versión 3.0.
-- 🖼️ [Índice de Assets Visuales (`docs/assets/README.md`)](docs/assets/README.md): Catálogo de todas las capturas de pantalla, su descripción y directrices de contribución para nuevos recursos multimedia.
+- 🗺️ [Roadmap y Evolución del Proyecto (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos implementados y backlog estratégico.
+- 🖼️ [Guía e Índice de Assets Visuales (`docs/assets/assets_guide.md`)](docs/assets/assets_guide.md): Catálogo de todas las capturas de pantalla, su descripción y directrices de contribución para nuevos recursos multimedia.
 
 ---
 
