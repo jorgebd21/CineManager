@@ -1,11 +1,11 @@
-# CineManager — Roadmap de Desarrollo y Visión v3.0
+# CineManager — Roadmap de Desarrollo y Evolución del Proyecto
 
-> **Versión del documento:** 2.2 · **Fecha de Actualización:** Agosto 2026  
-> **Estado del Proyecto:** ✅ **CineManager v2.0 Producción (100% Completado)**  
+> **Proyecto:** CineManager · **Fecha de Actualización:** 2026  
+> **Estado:** ✅ **En Producción (100% Funcional y Verificado)**  
 
 ---
 
-## 📅 Timeline de Desarrollo — Hitos Completados (v2.0)
+## 📅 Cronograma de Desarrollo y Evolución
 
 ```mermaid
 gantt
@@ -13,7 +13,7 @@ gantt
     dateFormat  YYYY-MM-DD
     axisFormat  %d %b %Y
 
-    section Versión 2.0 (Completada)
+    section Funcionalidades Implementadas
     Fase 1 - Motor Básico POO (Modelos en Memoria)        :done, f1, 2026-05-08, 2026-05-22
     Fase 2 - Persistencia IO en Ficheros CSV              :done, f2, 2026-05-22, 2026-06-08
     Fase 3 - Consola de Administración (CLI Admin)        :done, f3, 2026-06-08, 2026-06-22
@@ -26,21 +26,21 @@ gantt
     Fase 6 - Detección de Salas Llenas y Auth DNI         :done, f6d, 2026-08-10, 2026-08-14
     Testing - Suite GoogleTest Automatizada (100%)        :done, f_test, 2026-08-14, 2026-08-15
     Fase 7 - Backend REST API (Crow C++ Server 8080)      :done, f7a, 2026-08-15, 2026-08-16
-    Fase 7 - Cliente Asíncrono Qt6 (ApiClient Network)    :done, f7b, 2026-08-16, 2026-08-16
-    Fase 8 - Contenerización Docker y CI/CD Actions       :done, f8, 2026-08-16, 2026-08-16
-    Fase 9 - Saneamiento SQLite (WAL Mode y Foreign Keys) :done, f9, 2026-08-16, 2026-08-16
+    Fase 7 - Cliente Asíncrono Qt6 (ApiClient Network)    :done, f7b, 2026-08-16, 2026-08-17
+    Fase 8 - Contenerización Docker y CI/CD Actions       :done, f8, 2026-08-16, 2026-08-17
+    Fase 9 - Saneamiento SQLite (WAL Mode y Foreign Keys) :done, f9, 2026-08-16, 2026-08-17
 
-    section Versión 3.0 (Planificación)
-    Fase 10 - Pasarela de Pagos Reales (Stripe / Redsys)  :active, f10, 2026-09-01, 2026-09-25
-    Fase 11 - Sincronización Real-Time con WebSockets     :2026-09-26, 2026-10-15
-    Fase 12 - Internacionalización y Localización (i18n)  :2026-10-16, 2026-10-30
-    Fase 13 - Cliente WebAssembly y Frontend SPA          :2026-11-01, 2026-11-20
-    Fase 14 - Módulo de Analítica y BI para Gerencia      :2026-11-21, 2026-12-10
+    section Futuras Mejoras y Planificación
+    Fase 10 - Pasarela de Pagos Reales (Stripe / Redsys)  :active, f10, 2026-08-17, 2026-09-05
+    Fase 11 - Sincronización Real-Time con WebSockets     :2026-09-06, 2026-09-25
+    Fase 12 - Internacionalización y Localización (i18n)  :2026-09-26, 2026-10-15
+    Fase 13 - Cliente WebAssembly y Frontend SPA          :2026-10-16, 2026-11-05
+    Fase 14 - Módulo de Analítica y BI para Gerencia      :2026-11-06, 2026-11-25
 ```
 
 ---
 
-## 🔍 Checklist de Características — Versión 2.0 (Cierre Formal)
+## 🔍 Checklist de Características Implementadas
 
 ### 🎟️ Flujo de Taquilla y Experiencia de Usuario (GUI Qt6)
 - [x] **Exploración de Complejos**: Selección visual interactiva de cines mediante `CineCardWidget`.
@@ -72,9 +72,9 @@ gantt
 
 ---
 
-## 🔮 Visión Estratégica — CineManager v3.0
+## 🔮 Evolución y Próximas Mejoras
 
-Para la versión 3.0, el proyecto evolucionará de una aplicación de taquilla monolítica/cliente-servidor a una plataforma de entretenimiento omnicanal en la nube:
+Como parte del roadmap continuo del proyecto, se contemplan las siguientes iniciativas estratégicas:
 
 ### 💳 1. Pasarela de Pagos Reales (Stripe & Redsys)
 - Integración de webhooks y SDK C++ de Stripe para procesar cobros reales con tarjeta de crédito/débito y Apple Pay / Google Pay.
@@ -98,7 +98,7 @@ Para la versión 3.0, el proyecto evolucionará de una aplicación de taquilla m
 
 ---
 
-## 📋 Resumen del Backlog Técnico Resuelto (v2.0)
+## 📋 Resumen del Backlog Técnico Resuelto
 
 | ID | Módulo | Descripción | Severidad | Estado |
 | :---: | :--- | :--- | :---: | :---: |
@@ -116,5 +116,5 @@ Para la versión 3.0, el proyecto evolucionará de una aplicación de taquilla m
 ---
 
 <div align="center">
-  <sub>CineManager v2.0 · Roadmap Oficial y Planificación de Versiones · 2026</sub>
+  <sub>CineManager · Roadmap Oficial y Evolución Continua · 2026</sub>
 </div>

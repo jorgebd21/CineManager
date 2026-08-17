@@ -2,9 +2,9 @@ openapi: 3.0.3
 info:
   title: CineManager REST API
   description: >
-    Especificación OpenAPI 3.0 del backend REST API de CineManager v2.0.
+    Especificación OpenAPI 3.0 del backend REST API de CineManager.
     Microservicio web de alto rendimiento desarrollado en C++20 utilizando el framework Crow y SQLite3.
-  version: 2.0.0
+  version: 1.0.0
   contact:
     name: Jorge Beneyto
     url: https://github.com/jorgebd21/CineManager
@@ -42,7 +42,7 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
               example:
                 status: "ok"
-                app: "CineManager REST API v2.0"
+                app: "CineManager REST API"
 
   /api/v1/cines:
     get:

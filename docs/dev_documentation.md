@@ -1,7 +1,7 @@
-# CineManager v2.0 — Documentación Técnica y Manual de Arquitectura
+# CineManager — Documentación Técnica y Manual de Arquitectura
 
-> **Versión del documento:** 2.3 · **Fecha:** Agosto 2026  
-> **Estado:** Versión de Producción Consolidada  
+> **Proyecto:** CineManager · **Fecha:** 2026  
+> **Estado:** Producción Consolidada  
 > **Autor:** Jorge Beneyto · **Lenguaje:** C++20 · **Frameworks:** Qt6, Crow C++, SQLite3, GoogleTest  
 
 ---
@@ -24,13 +24,13 @@
    - 6.3 [Generación Vectorial de Código QR (Nayuki Engine)](#63-generación-vectorial-de-código-qr-nayuki-engine)
 7. [Suite de Pruebas Automatizadas (GoogleTest)](#7-suite-de-pruebas-automatizadas-googletest)
 8. [Infraestructura de Despliegue y CI/CD](#8-infraestructura-de-despliegue-y-cicd)
-9. [Registro de Versiones y Changelog de Estabilización](#9-registro-de-versiones-y-changelog-de-estabilización)
+9. [Registro de Hitos Técnicos y Estabilización](#9-registro-de-hitos-técnicos-y-estabilización)
 
 ---
 
 ## 1. Visión General y Patrones de Diseño
 
-CineManager v2.0 implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** combinada con el **Patrón Repositorio (Repository Pattern)** y el **Patrón Fachada (Facade Pattern)**. La lógica central del negocio y los mecanismos de acceso a datos se encuentran completamente aislados en la librería estática `libCineManagerCore.a`, garantizando que ninguna regla de negocio dependa de la interfaz gráfica (Qt6), del protocolo de red (Crow REST API) ni de la consola de administración.
+CineManager implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** combinada con el **Patrón Repositorio (Repository Pattern)** y el **Patrón Fachada (Facade Pattern)**. La lógica central del negocio y los mecanismos de acceso a datos se encuentran completamente aislados en la librería estática `libCineManagerCore.a`, garantizando que ninguna regla de negocio dependa de la interfaz gráfica (Qt6), del protocolo de red (Crow REST API) ni de la consola de administración.
 
 ```mermaid
 graph TB
@@ -222,7 +222,7 @@ El microservicio `CineManagerServer` (`apps/server/`) expone un servidor HTTP as
   ```json
   {
     "status": "ok",
-    "app": "CineManager REST API v2.0 (C++20 Hexagonal)"
+    "app": "CineManager REST API (C++20 Hexagonal)"
   }
   ```
 
@@ -457,7 +457,7 @@ Para garantizar la máxima nitidez y fiabilidad al escanear los tickets impresos
 - La clase `QrHelper` (`apps/gui/src/qrhelper.cpp`) genera una matriz con nivel de corrección de error `MEDIUM` y añade una zona de silencio (*quiet zone*) de 4 módulos (estándar ISO/IEC 18004).
 - La imagen se escala hacia el `QLabel` utilizando `Qt::FastTransformation` (interpolación por vecino más próximo), eliminando cualquier difuminado o degradado en los bordes de los módulos QR.
 
-### 6.4 Galería de Pantallas — CineManagerGUI v2.0
+### 6.4 Galería de Pantallas — CineManagerGUI
 
 Capturas reales de todas las vistas del cliente gráfico en producción:
 
@@ -530,25 +530,25 @@ Para desplegar y visualizar `CineManagerGUI` desde un contenedor Docker en entor
 
 ---
 
-## 9. Registro de Versiones y Changelog de Estabilización
+## 9. Registro de Hitos Técnicos y Estabilización
 
-Historial consolidado de hitos y resolución de deuda técnica completados durante el ciclo de vida de la versión 2.0:
+Historial consolidado de hitos y resolución de deuda técnica completados:
 
 | Identificador | Componente | Descripción de la Mejora / Refactorización | Hito de Cierre |
 | :---: | :--- | :--- | :---: |
-| **DT-01** | `database.cpp` | Implementación de resolución de rutas multi-fallback (`/proc/self/exe` y rutas relativas). | ✅ **v2.0-Final** |
-| **DT-02** | `database.cpp` | Activación estricta de integridad referencial con `PRAGMA foreign_keys = ON;`. | ✅ **v2.0-Final** |
-| **DT-03** | `database.cpp` | Habilitación de concurrencia de alto rendimiento mediante `PRAGMA journal_mode = WAL;`. | ✅ **v2.0-Final** |
-| **DT-04** | `mainwindow.cpp` | Diálogo modal `TarifasDialog`, desglose de tarifas dinámicas y persistencia en BD. | ✅ **v2.0-Final** |
-| **DT-05** | `main_gui.cpp` | Resolución robusta de `style.qss` con fallback en tiempo de ejecución. | ✅ **v2.0-Final** |
-| **DT-06** | `sesionrepository.cpp` | Optimización de consultas de sesiones y cartelera enriquecida. | ✅ **v2.0-Final** |
-| **DT-07** | `cinecardwidget.cpp` | Enriquecimiento visual de tarjetas de cine, cartelera interactiva y filtrado. | ✅ **v2.0-Final** |
-| **DT-08** | `qrhelper.cpp` | Sustitución de mock estático por generación matemática de QR vectorial Nayuki C++20. | ✅ **v2.0-Final** |
-| **DT-09** | `tests/` | Suite automatizada de pruebas GoogleTest e integración en pipeline CI/CD. | ✅ **v2.0-Final** |
-| **DT-10** | `datamanager.cpp` | Eliminación de condiciones TOCTOU en `eliminarReserva()` y transacciones seguras. | ✅ **v2.0-Final** |
+| **DT-01** | `database.cpp` | Implementación de resolución de rutas multi-fallback (`/proc/self/exe` y rutas relativas). | ✅ **Completado** |
+| **DT-02** | `database.cpp` | Activación estricta de integridad referencial con `PRAGMA foreign_keys = ON;`. | ✅ **Completado** |
+| **DT-03** | `database.cpp` | Habilitación de concurrencia de alto rendimiento mediante `PRAGMA journal_mode = WAL;`. | ✅ **Completado** |
+| **DT-04** | `mainwindow.cpp` | Diálogo modal `TarifasDialog`, desglose de tarifas dinámicas y persistencia en BD. | ✅ **Completado** |
+| **DT-05** | `main_gui.cpp` | Resolución robusta de `style.qss` con fallback en tiempo de ejecución. | ✅ **Completado** |
+| **DT-06** | `sesionrepository.cpp` | Optimización de consultas de sesiones y cartelera enriquecida. | ✅ **Completado** |
+| **DT-07** | `cinecardwidget.cpp` | Enriquecimiento visual de tarjetas de cine, cartelera interactiva y filtrado. | ✅ **Completado** |
+| **DT-08** | `qrhelper.cpp` | Sustitución de mock estático por generación matemática de QR vectorial Nayuki C++20. | ✅ **Completado** |
+| **DT-09** | `tests/` | Suite automatizada de pruebas GoogleTest e integración en pipeline CI/CD. | ✅ **Completado** |
+| **DT-10** | `datamanager.cpp` | Eliminación de condiciones TOCTOU en `eliminarReserva()` y transacciones seguras. | ✅ **Completado** |
 
 ---
 
 <div align="center">
-  <sub>CineManager v2.0 · Documentación Técnica de Referencia · 2026</sub>
+  <sub>CineManager · Documentación Técnica de Referencia · 2026</sub>
 </div>
