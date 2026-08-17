@@ -43,20 +43,6 @@ QLabel {
     color: #ABB2BF;
     font-size: 13px;
 }
-QLineEdit {
-    background-color: #161822;
-    border: 1px solid #2B2E3D;
-    border-radius: 6px;
-    color: #FFFFFF;
-    padding: 8px 12px;
-    font-size: 13px;
-}
-QLineEdit::placeholder {
-    color: #5C6370;
-}
-QLineEdit:focus {
-    border: 1px solid #61AFEF;
-}
 QPushButton {
     background-color: #E5C07B;
     color: #12131C;
