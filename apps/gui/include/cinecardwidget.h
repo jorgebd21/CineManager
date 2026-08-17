@@ -12,6 +12,8 @@ class CineCardWidget : public QWidget {
   CineCardWidget(const Cine& cine, QWidget* parent = nullptr);
   ~CineCardWidget();
 
+  QSize sizeHint() const override { return QSize(270, 315); }
+
  signals:
   void cineSeleccionado(int idCine);
 

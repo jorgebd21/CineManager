@@ -27,17 +27,17 @@ CineCardWidget::CineCardWidget(const Cine& cine, QWidget* parent)
   QLabel* labelNombre =
       new QLabel(QString::fromStdString(cine.getNombre()), this);
   labelNombre->setStyleSheet(
-      "font-weight: bold; font-size: 14px; color: #ffffff;");
+      "font-weight: bold; font-size: 14px; color: #ffffff; margin-top: 10px; margin-bottom: 2px;");
   layout->addWidget(labelNombre);
 
   QLabel* labelDireccion =
       new QLabel(QString::fromStdString(cine.getDireccion()), this);
-  labelDireccion->setStyleSheet("color: #abb2bf; font-size: 11px;");
+  labelDireccion->setStyleSheet("color: #abb2bf; font-size: 11px; margin-bottom: 2px;");
   layout->addWidget(labelDireccion);
 
   QLabel* labelValoracion = new QLabel("★ 4.5  •  Premium", this);
   labelValoracion->setStyleSheet(
-      "color: #E5C07B; font-size: 11px; font-weight: bold;");
+      "color: #E5C07B; font-size: 11px; font-weight: bold; margin-bottom: 8px;");
   layout->addWidget(labelValoracion);
 
   QPushButton* boton = new QPushButton("Seleccionar Cine", this);
@@ -49,8 +49,8 @@ CineCardWidget::CineCardWidget(const Cine& cine, QWidget* parent)
 
   connect(boton, &QPushButton::clicked, this, &CineCardWidget::alPulsarBoton);
 
-  layout->setContentsMargins(10, 10, 10, 10);
-  layout->setSpacing(6);
+  layout->setContentsMargins(12, 12, 12, 12);
+  layout->setSpacing(4);
 }
 
 CineCardWidget::~CineCardWidget() {}

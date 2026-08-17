@@ -12,6 +12,8 @@ class MovieCardWidget : public QWidget {
   MovieCardWidget(const Pelicula& pelicula, QWidget* parent = nullptr);
   ~MovieCardWidget();
 
+  QSize sizeHint() const override { return QSize(200, 370); }
+
   QString getTitulo() const { return titulo; }
   QString getGenero() const { return genero; }
 

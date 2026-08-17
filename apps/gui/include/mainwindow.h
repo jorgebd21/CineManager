@@ -41,14 +41,19 @@ class MainWindow : public QMainWindow {
   void alConfirmarCompra();
   void alPulsarBotonUsuario();
 
+ protected:
+  void resizeEvent(QResizeEvent* event) override;
+
  private:
   void cargarCines();
   void actualizarBotonUsuario();
+  void actualizarFondo();
 
   Ui::MainWindow* ui;
   ApiClient* api;
   Usuario usuarioActual;
   QPushButton* btnUsuario;
+  QPixmap pixmapFondoOriginal;
 
   int idCineSeleccionado{-1};
   int idPeliculaSeleccionada{-1};

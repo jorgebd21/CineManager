@@ -19,6 +19,23 @@ MainWindow::MainWindow(QWidget* parent)
 
   api = new ApiClient(this);
 
+  // Cargar imagen de fondo con olas en las esquinas
+  std::vector<QString> posiblesFondos = {
+      "data/images/background.jpg",
+      "../data/images/background.jpg",
+      "../../data/images/background.jpg",
+      QApplication::applicationDirPath() + "/data/images/background.jpg",
+      QApplication::applicationDirPath() + "/../data/images/background.jpg",
+      "/home/jorgebd/Documentos/Proyectos/CineManager/data/images/background.jpg"
+  };
+  for (const auto& ruta : posiblesFondos) {
+    if (QFile::exists(ruta)) {
+      pixmapFondoOriginal.load(ruta);
+      break;
+    }
+  }
+  actualizarFondo();
+
   ui->listaPeliculas->setViewMode(QListView::IconMode);
   ui->listaPeliculas->setResizeMode(QListView::Adjust);
   ui->listaPeliculas->setFlow(QListView::LeftToRight);
@@ -92,6 +109,21 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() {
   delete ui;
+}
+
+void MainWindow::actualizarFondo() {
+  if (pixmapFondoOriginal.isNull()) return;
+  QPixmap scaled = pixmapFondoOriginal.scaled(
+      this->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+  QPalette pal = this->palette();
+  pal.setBrush(QPalette::Window, QBrush(scaled));
+  this->setPalette(pal);
+  this->setAutoFillBackground(true);
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+  QMainWindow::resizeEvent(event);
+  actualizarFondo();
 }
 
 void MainWindow::cargarCines() {
@@ -214,8 +246,8 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
   }
   QPixmap pixmap(rutaPoster);
   ui->labelSesionPoster->setPixmap(pixmap.scaled(
-      200, 270, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
-  ui->labelSesionPoster->setFixedSize(200, 270);
+      240, 330, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+  ui->labelSesionPoster->setFixedSize(240, 330);
   ui->labelSesionTitulo->setText(QString::fromStdString(pelicula.getTitulo()));
 
   QString infoStr =
@@ -249,8 +281,8 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
         QVBoxLayout* scrollLayout =
             new QVBoxLayout(ui->scrollAreaWidgetContentsSesiones);
         scrollLayout->setAlignment(Qt::AlignTop);
-        scrollLayout->setSpacing(15);
-        scrollLayout->setContentsMargins(10, 10, 10, 10);
+        scrollLayout->setSpacing(14);
+        scrollLayout->setContentsMargins(4, 4, 4, 4);
 
         std::map<std::string, std::pair<std::string, std::vector<Sesion>>>
             sesionesPorDia;
@@ -278,13 +310,13 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
               new QLabel(QString::fromStdString(par.second.first).toUpper(),
                          ui->scrollAreaWidgetContentsSesiones);
           labelDia->setStyleSheet(
-              "font-weight: bold; font-size: 11px; color: #abb2bf; margin-top: "
-              "10px;");
+              "font-weight: bold; font-size: 12px; color: #E5C07B; margin-top: "
+              "8px; margin-bottom: 4px; letter-spacing: 0.5px;");
           scrollLayout->addWidget(labelDia);
 
           QHBoxLayout* layoutBotones = new QHBoxLayout();
           layoutBotones->setAlignment(Qt::AlignLeft);
-          layoutBotones->setSpacing(10);
+          layoutBotones->setSpacing(12);
 
           for (const auto& sesion : par.second.second) {
             std::time_t hora = sesion.getHoraInicio();
@@ -293,24 +325,27 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
             std::strftime(timeBuf, sizeof(timeBuf), "%H:%M", &timeinfo);
 
             QString textoBoton =
-                QString(timeBuf) + "\nSala " + QString::number(sesion.getIdSala());
+                QString("%1\nSala %2 • 7.50 €")
+                    .arg(timeBuf)
+                    .arg(sesion.getIdSala());
 
             QPushButton* botonSesion =
                 new QPushButton(textoBoton, ui->scrollAreaWidgetContentsSesiones);
-            botonSesion->setFixedSize(90, 50);
+            botonSesion->setFixedSize(140, 65);
             botonSesion->setProperty("idSesion", sesion.getId());
             botonSesion->setStyleSheet(
                 "QPushButton {"
                 "  background-color: #1E202D;"
                 "  border: 1px solid #2B2E3D;"
-                "  border-radius: 8px;"
+                "  border-radius: 10px;"
                 "  color: #FFFFFF;"
                 "  font-weight: bold;"
                 "  font-size: 11px;"
+                "  padding: 6px;"
                 "}"
                 "QPushButton:hover {"
-                "  background-color: #E5C07B;"
-                "  color: #12141D;"
+                "  background-color: #25293A;"
+                "  color: #E5C07B;"
                 "  border: 1px solid #E5C07B;"
                 "}");
 
@@ -320,6 +355,8 @@ void MainWindow::alSeleccionarPelicula(int idPelicula) {
           }
           scrollLayout->addLayout(layoutBotones);
         }
+
+        scrollLayout->addStretch();
 
         ui->stackedWidget->setCurrentIndex(2);
       },
@@ -580,37 +617,29 @@ void MainWindow::alConfirmarCompra() {
                 .arg(asientosStr)
                 .arg(QString::number(totalCompra, 'f', 2));
 
-        QPixmap qrPixmap = QrHelper::generarQR(qrPayload, 180);
+        QPixmap qrPixmap = QrHelper::generarQR(qrPayload, 240);
         ui->labelQR->setPixmap(qrPixmap);
-        ui->labelQR->setFixedSize(180, 180);
+        ui->labelQR->setFixedSize(240, 240);
 
         QString detallesHTML =
             QString(
-                "<html><body>"
-                "<p style='font-size:11px; font-weight:bold; color:#E5C07B; "
-                "margin-bottom:4px; letter-spacing:1px;'>TICKET DE ENTRADA</p>"
-                "<p style='font-size:16px; font-weight:bold; color:#ffffff; "
-                "margin:0;'>%1</p>"
-                "<p style='font-size:11px; color:#abb2bf; margin-top:2px;'>%2 • %3 "
-                "min</p>"
-                "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
-                "0;'>"
-                "<table cellspacing='4' style='color:#ffffff; font-size:11px; "
-                "font-family: sans-serif;'>"
-                "<tr><td style='color:#abb2bf; font-weight:bold; "
-                "width:75px;'>TITULAR:</td><td>%4 (%5)</td></tr>"
-                "<tr><td style='color:#abb2bf; font-weight:bold;'>CINE:</td><td>%6</td></tr>"
-                "<tr><td style='color:#abb2bf; "
-                "font-weight:bold;'>SALA:</td><td>Sala %7</td></tr>"
-                "<tr><td style='color:#abb2bf; "
-                "font-weight:bold;'>SESIÓN:</td><td>%8</td></tr>"
-                "<tr><td style='color:#abb2bf; "
-                "font-weight:bold;'>ASIENTOS:</td><td>%9</td></tr>"
+                "<html><body style='font-family: sans-serif; color: #FFFFFF;'>"
+                "<p style='font-size: 11px; font-weight: bold; color: #E5C07B; "
+                "margin: 0; letter-spacing: 1.5px;'>ENTRADA DIGITAL OFICIAL</p>"
+                "<h1 style='font-size: 19px; font-weight: bold; color: #FFFFFF; "
+                "margin: 4px 0 2px 0;'>%1</h1>"
+                "<p style='font-size: 12px; color: #61AFEF; margin: 0 0 8px 0; font-weight: bold;'>%2  •  %3 min</p>"
+                "<hr style='border: 0; border-top: 1px dashed #3E4452; margin: 6px 0;'>"
+                "<table cellpadding='3' cellspacing='0' style='width: 100%; color: #FFFFFF; font-size: 11px;'>"
+                "<tr><td style='color: #8C91A4; font-weight: bold; width: 85px;'>TITULAR:</td><td><b>%4</b> <span style='color:#8C91A4;'>(%5)</span></td></tr>"
+                "<tr><td style='color: #8C91A4; font-weight: bold;'>COMPLEJO:</td><td>%6</td></tr>"
+                "<tr><td style='color: #8C91A4; font-weight: bold;'>SALA:</td><td><b>Sala %7</b></td></tr>"
+                "<tr><td style='color: #8C91A4; font-weight: bold;'>HORARIO:</td><td><span style='color: #E5C07B; font-weight: bold;'>%8</span></td></tr>"
+                "<tr><td style='color: #8C91A4; font-weight: bold;'>ASIENTOS:</td><td><b style='color: #10B981;'>%9</b></td></tr>"
                 "</table>"
-                "<hr style='border: 0; border-top: 1px dashed #3e4452; margin: 8px "
-                "0;'>"
-                "<p style='font-size:14px; font-weight:bold; color:#E5C07B; "
-                "margin:0;'>TOTAL COMPRA: %10</p>"
+                "<hr style='border: 0; border-top: 1px dashed #3E4452; margin: 6px 0;'>"
+                "<p style='font-size: 15px; font-weight: bold; color: #E5C07B; "
+                "margin: 2px 0 0 0;'>TOTAL PAGADO: %10</p>"
                 "</body></html>")
                 .arg(QString::fromStdString(peli.getTitulo()))
                 .arg(QString::fromStdString(generoToString(peli.getGenero())))

@@ -30,14 +30,14 @@ MovieCardWidget::MovieCardWidget(const Pelicula& pelicula, QWidget* parent)
 
   QLabel* labelTitulo = new QLabel(QString::fromStdString(pelicula.getTitulo()), this);
   labelTitulo->setStyleSheet(
-      "font-weight: bold; font-size: 13px; color: #ffffff;");
+      "font-weight: bold; font-size: 13px; color: #ffffff; margin-top: 8px; margin-bottom: 2px;");
   layout->addWidget(labelTitulo);
 
-    QString infoStr =
+  QString infoStr =
       QString::fromStdString(generoToString(pelicula.getGenero())) +
       " • " + QString::number(pelicula.getDuracion()) + " min";
   QLabel* labelInfo = new QLabel(infoStr, this);
-  labelInfo->setStyleSheet("color: #abb2bf; font-size: 10px;");
+  labelInfo->setStyleSheet("color: #abb2bf; font-size: 10px; margin-bottom: 8px;");
   layout->addWidget(labelInfo);
 
   QPushButton* boton = new QPushButton("Comprar Entradas", this);
@@ -49,8 +49,8 @@ MovieCardWidget::MovieCardWidget(const Pelicula& pelicula, QWidget* parent)
 
   connect(boton, &QPushButton::clicked, this, &MovieCardWidget::alPulsarBoton);
 
-  layout->setContentsMargins(8, 8, 8, 8);
-  layout->setSpacing(5);
+  layout->setContentsMargins(10, 10, 10, 10);
+  layout->setSpacing(4);
 }
 
 MovieCardWidget::~MovieCardWidget() {}

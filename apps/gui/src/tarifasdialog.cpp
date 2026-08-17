@@ -74,6 +74,12 @@ TarifasDialog::TarifasDialog(const std::set<std::pair<int, int>>& butacas,
   }
 
   recalcularPrecioTotal();
+
+  // Ajustar la altura del diálogo progresivamente según la cantidad de butacas seleccionadas
+  int totalButacas = static_cast<int>(butacas.size());
+  int alturaCalculada = 130 + (totalButacas * 48);
+  alturaCalculada = std::clamp(alturaCalculada, 190, 420);
+  resize(460, alturaCalculada);
 }
 
 TarifasDialog::~TarifasDialog() { delete ui; }
