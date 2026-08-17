@@ -9,33 +9,33 @@
 
 ```mermaid
 gantt
-    title CineManager — Cronograma de Evolución Histórica y Futura
+    title CineManager — Cronograma de Evolución
     dateFormat  YYYY-MM-DD
     axisFormat  %d %b %Y
 
-    section ✅ Versión 2.0 (Completada)
-    Fase 1 · Motor Básico POO (Modelos en Memoria)       :done, f1,    2026-05-08, 2026-05-22
-    Fase 2 · Persistencia I/O en Ficheros CSV            :done, f2,    2026-05-22, 2026-06-08
-    Fase 3 · Consola de Administración (CLI Admin)       :done, f3,    2026-06-08, 2026-06-22
-    Fase 4 · Base de Datos Relacional SQLite3            :done, f4,    2026-06-22, 2026-07-06
-    Fase 5 · Concurrencia, Mutex y Hilo Demonio Limpiador:done, f5,    2026-07-06, 2026-07-12
-    Fase 6 · Core Library (Arquitectura Hexagonal)       :done, f6,    2026-07-12, 2026-07-16
-    Fase 6 · Front-end Nativo Qt6 (Widgets & QSS)        :done, f6a,   2026-07-16, 2026-07-28
-    Fase 6 · Tarifas Dinámicas (TarifasDialog)           :done, f6b,   2026-07-28, 2026-08-05
-    Fase 6 · Generación Vectorial de Código QR (Nayuki)  :done, f6c,   2026-08-05, 2026-08-10
-    Fase 6 · Detección de Salas Llenas y Auth DNI        :done, f6d,   2026-08-10, 2026-08-14
-    Testing · Suite GoogleTest Automatizada (100%)       :done, f_test,2026-08-14, 2026-08-15
-    Fase 7 · Backend REST API (Crow C++ Server :8080)    :done, f7a,   2026-08-15, 2026-08-16
-    Fase 7 · Cliente Asíncrono Qt6 (ApiClient Network)   :done, f7b,   2026-08-16, 2026-08-16
-    Fase 8 · Contenerización Docker & CI/CD Actions      :done, f8,    2026-08-16, 2026-08-16
-    Fase 9 · Saneamiento SQLite (WAL Mode & Foreign Keys):done, f9,    2026-08-16, 2026-08-16
+    section Versión 2.0 (Completada)
+    Fase 1 - Motor Básico POO (Modelos en Memoria)        :done, f1, 2026-05-08, 2026-05-22
+    Fase 2 - Persistencia IO en Ficheros CSV              :done, f2, 2026-05-22, 2026-06-08
+    Fase 3 - Consola de Administración (CLI Admin)        :done, f3, 2026-06-08, 2026-06-22
+    Fase 4 - Base de Datos Relacional SQLite3             :done, f4, 2026-06-22, 2026-07-06
+    Fase 5 - Concurrencia y Hilo Demonio Limpiador        :done, f5, 2026-07-06, 2026-07-12
+    Fase 6 - Core Library (Arquitectura Hexagonal)        :done, f6, 2026-07-12, 2026-07-16
+    Fase 6 - Front-end Nativo Qt6 (Widgets y QSS)         :done, f6a, 2026-07-16, 2026-07-28
+    Fase 6 - Tarifas Dinámicas (TarifasDialog)            :done, f6b, 2026-07-28, 2026-08-05
+    Fase 6 - Generación Vectorial Código QR (Nayuki)      :done, f6c, 2026-08-05, 2026-08-10
+    Fase 6 - Detección de Salas Llenas y Auth DNI         :done, f6d, 2026-08-10, 2026-08-14
+    Testing - Suite GoogleTest Automatizada (100%)        :done, f_test, 2026-08-14, 2026-08-15
+    Fase 7 - Backend REST API (Crow C++ Server 8080)      :done, f7a, 2026-08-15, 2026-08-16
+    Fase 7 - Cliente Asíncrono Qt6 (ApiClient Network)    :done, f7b, 2026-08-16, 2026-08-16
+    Fase 8 - Contenerización Docker y CI/CD Actions       :done, f8, 2026-08-16, 2026-08-16
+    Fase 9 - Saneamiento SQLite (WAL Mode y Foreign Keys) :done, f9, 2026-08-16, 2026-08-16
 
-    section 🚀 Versión 3.0 (Planificación Futura)
-    Fase 10 · Pasarela de Pagos Reales (Stripe / Redsys) :active, f10, 2026-09-01, 2026-09-25
-    Fase 11 · Sincronización Real-Time con WebSockets    :f11,         2026-09-20, 2026-10-15
-    Fase 12 · Internacionalización y Localización (i18n) :f12,         2026-10-10, 2026-10-30
-    Fase 13 · Cliente WebAssembly / Frontend SPA         :f13,         2026-10-25, 2026-11-20
-    Fase 14 · Módulo de Analítica y BI para Gerencia     :f14,         2026-11-15, 2026-12-10
+    section Versión 3.0 (Planificación)
+    Fase 10 - Pasarela de Pagos Reales (Stripe / Redsys)  :active, f10, 2026-09-01, 2026-09-25
+    Fase 11 - Sincronización Real-Time con WebSockets     :2026-09-26, 2026-10-15
+    Fase 12 - Internacionalización y Localización (i18n)  :2026-10-16, 2026-10-30
+    Fase 13 - Cliente WebAssembly y Frontend SPA          :2026-11-01, 2026-11-20
+    Fase 14 - Módulo de Analítica y BI para Gerencia      :2026-11-21, 2026-12-10
 ```
 
 ---
