@@ -457,6 +457,36 @@ Para garantizar la máxima nitidez y fiabilidad al escanear los tickets impresos
 - La clase `QrHelper` (`apps/gui/src/qrhelper.cpp`) genera una matriz con nivel de corrección de error `MEDIUM` y añade una zona de silencio (*quiet zone*) de 4 módulos (estándar ISO/IEC 18004).
 - La imagen se escala hacia el `QLabel` utilizando `Qt::FastTransformation` (interpolación por vecino más próximo), eliminando cualquier difuminado o degradado en los bordes de los módulos QR.
 
+### 6.4 Galería de Pantallas — CineManagerGUI v2.0
+
+Capturas reales de todas las vistas del cliente gráfico en producción:
+
+| Autenticación | Registro |
+|:-:|:-:|
+| ![Login DNI](assets/login.jpg) | ![Registro de Cuenta](assets/register.jpg) |
+
+| Selección de Cine | Cartelera de Películas |
+|:-:|:-:|
+| ![Selección de Cine](assets/cine.jpg) | ![Cartelera](assets/cartelera.jpg) |
+
+> 🤖 **Nota:** Las imágenes de portada de los complejos de cine y los carteles de las películas mostrados en la aplicación han sido **generados con Inteligencia Artificial** con fines demostrativos.
+
+| Selección de Sesión | Mapa de Butacas |
+|:-:|:-:|
+| ![Sesión / Horario](assets/sesion.jpg) | ![Sala con Butacas](assets/sala.jpg) |
+
+| Selección de Tarifa | Ticket con QR Real |
+|:-:|:-:|
+| ![Diálogo de Tarifas](assets/tipo_butaca.jpg) | ![Ticket con Código QR](assets/ticket.jpg) |
+
+<div align="center">
+
+**Error de Conexión — Servidor REST API No Disponible**
+
+![Error de API](assets/error_api.jng)
+
+</div>
+
 ---
 
 ## 7. Suite de Pruebas Automatizadas (GoogleTest)
@@ -491,6 +521,12 @@ El archivo `docker-compose.yml` mapea el puerto `8080:8080`, configura un volume
 
 ### 8.3 Pipeline de Integración Continua (GitHub Actions)
 Definido en `.github/workflows/ci.yml`, el flujo de CI se dispara en cada `push` o `pull_request` a las ramas principales, garantizando que el código compile sin advertencias y pase el 100% de los tests en un entorno limpio.
+
+### 8.4 Proyección Gráfica (GUI) en Docker vía X11 Forwarding
+Para desplegar y visualizar `CineManagerGUI` desde un contenedor Docker en entornos Linux, se requiere habilitar el acceso al servidor X11 del host:
+- `xhost +local:docker`: Otorga permisos al demonio de Docker para interactuar con la pantalla local.
+- Mapeo de volumen `-v /tmp/.X11-unix:/tmp/.X11-unix:rw` y variable de entorno `-e DISPLAY=$DISPLAY`.
+- `xhost -local:docker`: Revoca los permisos una vez finalizada la sesión por motivos de seguridad.
 
 ---
 

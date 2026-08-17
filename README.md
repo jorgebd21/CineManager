@@ -40,68 +40,61 @@ El motor transaccional aborda problemas complejos de concurrencia y contención 
 
 ## 📸 Showcase Visual
 
-Explore las interfaces principales del cliente gráfico de escritorio (**CineManagerGUI**) desarrolladas con Qt6 y estilizadas con una hoja de estilo moderna en tema oscuro (`style.qss`):
+Flujo de usuario completo capturado directamente desde la aplicación de escritorio **CineManagerGUI** (Qt6, tema oscuro):
+
+---
+
+### 🔐 1. Autenticación — Login por DNI y Registro de Cuenta
+
+| Iniciar Sesión | Registrar Cuenta |
+|:-:|:-:|
+| ![Pantalla de Login](docs/assets/login.jpg) | ![Pantalla de Registro](docs/assets/register.jpg) |
+
+*Autenticación segura por DNI con contraseña. Dispone de dos pestañas: inicio de sesión y registro. La opción **Continuar como invitado** permite comprar sin registrarse.*
+
+---
+
+### 🎬 2. Selección de Cine y Cartelera de Películas
+
+| Selección de Cine | Explorar Cartelera |
+|:-:|:-:|
+| ![Selección de Cine](docs/assets/cine.jpg) | ![Cartelera de Películas](docs/assets/cartelera.jpg) |
+
+*Tarjetas interactivas `CineCardWidget` y `MovieCardWidget` con búsqueda en tiempo real y filtrado por género (`ACCION`, `DRAMA`, `CIENCIA_FICCION`, `TERROR`, etc.).*
+
+> 🤖 **Nota:** Las imágenes de portada de los complejos de cine y los carteles de las películas mostrados en la aplicación han sido **generados con Inteligencia Artificial** con fines demostrativos.
+
+---
+
+### 📅 3. Elección de Horario y Mapa de Butacas
+
+| Selección de Sesión | Mapa Interactivo de Sala |
+|:-:|:-:|
+| ![Selección de Sesión](docs/assets/sesion.jpg) | ![Mapa de Butacas](docs/assets/sala.jpg) |
+
+*Sesiones agrupadas cronológicamente por día. El mapa de sala muestra en tiempo real butacas **Libres** 🟢, **Ocupadas** 🔴 y **Tu Selección** 🟡. Selección múltiple implementada con `std::set`.*
+
+---
+
+### 🎟️ 4. Selección de Tarifa y Ticket con Código QR Real
+
+| Diálogo de Tarifas Dinámicas | Ticket con QR Escaneable |
+|:-:|:-:|
+| ![Selección de Tipo de Butaca](docs/assets/tipo_butaca.jpg) | ![Ticket con QR](docs/assets/ticket.jpg) |
+
+*`TarifasDialog` calcula el precio por butaca (Adulto 7,50 €, Niño 5,00 €, Jubilado/Estudiante 5,50 €). El ticket incluye todos los datos de la compra y un **código QR real** generado algorítmicamente bajo estándar ISO/IEC 18004 (motor *Nayuki C++20*), listo para escanear.*
+
+---
+
+### ⚠️ 5. Gestión de Errores — Servidor No Disponible
 
 <div align="center">
 
-### 🎬 1. Selección de Cartelera y Mapa Interactivo de Butacas
-*Visualización de salas con matriz de butacas dinámica, detección automática de salas llenas `(LLENA)` y selección múltiple con `std::set`.*
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [docs/assets/screenshots/01_seleccion_cine_cartelera.png]                             │
-│                                                                                        │
-│                   [ Vista de Cartelera y Mapa de Sala de CineManager ]                 │
-│                                                                                        │
-│ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐  ┌─────────────────────────────┐ │
-│ │  Cine Central │ │ Cine Capitol  │ │  Cine Yelmo   │  │ [1] [2] [3] [4] [5] [6] [7] │ │
-│ │  Metrópolis   │ │    Premium    │ │  Plaza Mayor  │  │ [8] [9] [X] [X] [S] [S] [X] │ │
-│ └───────────────┘ └───────────────┘ └───────────────┘  └─────────────────────────────┘ │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/01_seleccion_cine_cartelera.png`](docs/assets/README.md)  
-> 🎞️ *Coloque la animación GIF en:* [`docs/assets/gifs/booking_flow_demo.gif`](docs/assets/README.md)
-
----
-
-### 🎟️ 2. Diálogo Modal de Tarifas Dinámicas y Ticket con Código QR
-*Cálculo en tiempo real de tarifas (Adulto, Niño, Jubilado, Estudiante) y emisión de ticket digital con código QR generado vectorialmente bajo estándar ISO/IEC 18004.*
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [docs/assets/screenshots/02_modal_tarifas_ticket_qr.png]                              │
-│                                                                                        │
-│  ┌────────────────────────────────────────┐   ┌─────────────────────────────────────┐  │
-│  │ 🎟️ Desglose de Tarifas por Butaca      │   │ 🎫 Ticket Oficial de Entrada        │  │
-│  │ - Butaca Fila 4, Col 5: Adulto (7.50€) │   │ ▄▄▄▄▄▄▄ ▄   ▄▄▄▄▄▄▄                 │  │
-│  │ - Butaca Fila 4, Col 6: Niño   (5.00€) │   │ █ ▄▄▄ █ ▀█▄ █ ▄▄▄ █  Cine: Central  │  │
-│  │ Total Compra: 12.50€                   │   │ █ ███ █ ▄▀█ █ ███ █  Sala: 1        │  │
-│  │ [ Confirmar Pago y Generar Entrada ]   │   │ ▀▀▀▀▀▀▀ ▀ ▀ ▀▀▀▀▀▀▀  Pelicula: Dune │  │
-│  └────────────────────────────────────────┘   └─────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/02_modal_tarifas_ticket_qr.png`](docs/assets/README.md)
-
----
-
-### 🔐 3. Pasarela de Autenticación DNI y Modo Invitado (*Checkout Gatekeeper*)
-*Mecanismo de control de acceso por DNI/Contraseña que protege la pasarela de compra, permitiendo registro rápido o continuidad como invitado.*
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ [docs/assets/screenshots/03_login_autenticacion_dni.png]                              │
-│                                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │ 🔐 Iniciar Sesión en CineManager                                                 │  │
-│  │ DNI: [ 12345678Z           ]   Contraseña: [ **********        ]                 │  │
-│  │ [ Iniciar Sesión ]  [ Registrar Nuevo Usuario ]  [ Continuar como Invitado ]     │  │
-│  └──────────────────────────────────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
-> 📷 *Coloque la captura de alta resolución en:* [`docs/assets/screenshots/03_login_autenticacion_dni.png`](docs/assets/README.md)  
-> 🎞️ *Coloque la animación GIF en:* [`docs/assets/gifs/auth_gatekeeper_demo.gif`](docs/assets/README.md)
+![Error de conexión con la API](docs/assets/error_api.jng)
 
 </div>
+
+*Cuando `CineManagerServer` no está activo, la GUI muestra un diálogo informativo con las instrucciones de arranque (vía Docker Compose o ejecución nativa).*
 
 ---
 
@@ -252,6 +245,25 @@ docker compose logs -f
 docker compose down
 ```
 
+> 🖥️ **Ejecución de la Interfaz Gráfica (GUI) en Docker (Permisos X11 / Pantalla):**  
+> Si compilas o ejecutas la aplicación de escritorio (`CineManagerGUI`) dentro de un contenedor Docker en Linux y deseas proyectar la ventana en la pantalla del host, debes otorgar permisos al servidor gráfico X11 antes de lanzar el contenedor:
+>
+> ```bash
+> # 1. Conceder permisos de acceso al servidor X11 local para Docker
+> xhost +local:docker
+> # (Alternativa para acceso local de root): xhost +local:root
+>
+> # 2. Ejecutar el contenedor compartiendo el socket X11 y la variable DISPLAY
+> docker run -it --rm \
+>   -e DISPLAY=$DISPLAY \
+>   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+>   -v ./data:/app/data \
+>   cinemanager /app/bin/CineManagerGUI
+>
+> # 3. (Opcional) Revocar los permisos de acceso al finalizar la sesión
+> xhost -local:docker
+> ```
+
 ---
 
 ### Opción 2: Compilación y Ejecución Nativa con CMake
@@ -348,6 +360,7 @@ CineManager/
 - 📖 [Documentación Técnica de Desarrollo (`docs/dev_documentation.md`)](docs/dev_documentation.md): Detalles de concurrencia, ciclo de vida de transacciones, arquitectura interna y changelog consolidado.
 - 🌐 [Especificación OpenAPI 3.0 (`docs/openapi.yaml`)](docs/openapi.yaml): Contrato formal REST para clientes web, móviles y herramientas de prueba de APIs.
 - 🗺️ [Roadmap de Fases y Visión Futura (`docs/roadmap.md`)](docs/roadmap.md): Registro de hitos cumplidos v2.0 y backlog estratégico para la versión 3.0.
+- 🖼️ [Índice de Assets Visuales (`docs/assets/README.md`)](docs/assets/README.md): Catálogo de todas las capturas de pantalla, su descripción y directrices de contribución para nuevos recursos multimedia.
 
 ---
 

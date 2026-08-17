@@ -1,19 +1,33 @@
-# Assets Visuales — CineManager Documentation
+# 🖼️ Assets Visuales — CineManager v2.0
 
-Este directorio almacena los recursos multimedia (capturas de pantalla, diagramas y demostraciones animadas) utilizados en el `README.md` principal y la documentación técnica.
+> Directorio de recursos multimedia utilizados en el [`README.md` principal](../../README.md) y en [`docs/dev_documentation.md`](../dev_documentation.md).
 
-## Estructura de Directorios
+---
 
-- `screenshots/`: Capturas de pantalla en alta resolución (1920x1080 o escaladas a 2x) en formato WebP o PNG optimizado.
-  - `01_seleccion_cine_cartelera.png`: Vista principal de selección de multicines y cartelera.
-  - `02_mapa_sala_butacas.png`: Mapa interactivo de la sala con selección múltiple de butacas.
-  - `03_modal_tarifas_ticket_qr.png`: Diálogo modal de tarifas dinámicas y ticket final con código QR.
-  - `04_login_autenticacion_dni.png`: Modal de autenticación de usuario y pasarela de checkout.
-- `gifs/`: Demostraciones animadas del flujo de usuario (grabaciones a 60fps optimizadas).
-  - `booking_flow_demo.gif`: Flujo completo desde la selección de butacas hasta la emisión del ticket.
-  - `auth_gatekeeper_demo.gif`: Flujo de validación de identidad en taquilla.
-- `diagrams/`: Exportaciones vectoriales (SVG) o imágenes de alta definición de diagramas arquitectónicos y modelos entidad-relación.
+## 📁 Archivos Disponibles
 
-## Directrices de Formato
-1. **Compresión**: Utilizar herramientas de optimización (`pngquant`, `cwebp`, `gifsicle`) para mantener los archivos por debajo de 2MB.
-2. **Tema Visual**: Las capturas deben tomarse utilizando el tema oscuro por defecto (`style.qss`).
+Capturas de pantalla reales tomadas directamente desde **CineManagerGUI** (Qt6, tema oscuro `style.qss`):
+
+| Archivo | Pantalla que representa |
+| :--- | :--- |
+| `login.jpg` | 🔐 Modal de inicio de sesión por DNI y contraseña |
+| `register.jpg` | 📝 Formulario de registro de nueva cuenta de usuario |
+| `cine.jpg` | 🏛️ Pantalla de selección de complejo de cine (`CineCardWidget`) |
+| `cartelera.jpg` | 🎬 Cartelera de películas con búsqueda y filtrado por género (`MovieCardWidget`) |
+| `sesion.jpg` | 📅 Selección de sesión: horarios agrupados por día con sala asignada |
+| `sala.jpg` | 💺 Mapa interactivo de butacas (Libre 🟢 / Ocupada 🔴 / Tu Selección 🟡) |
+| `tipo_butaca.jpg` | 🎟️ Diálogo `TarifasDialog`: desglose de tarifas dinámicas por butaca |
+| `ticket.jpg` | 🎫 Ticket de compra con código QR real escaneable (motor Nayuki ISO/IEC 18004) |
+| `error_api.jng` | ⚠️ Diálogo de error de conexión cuando el servidor REST API no está activo |
+
+> 🤖 **Nota:** Las imágenes de portada de los complejos de cine y los carteles de las películas mostrados en la aplicación han sido **generados con Inteligencia Artificial** con fines demostrativos.
+
+---
+
+## 📐 Directrices de Contribución
+
+1. **Formato preferido:** `.jpg` o `.webp` para capturas de pantalla; `.png` para diagramas con transparencia.
+2. **Resolución:** Mínimo 1024 px de ancho. Preferiblemente capturas a resolución nativa de pantalla.
+3. **Tamaño máximo:** Mantener cada archivo por debajo de **2 MB**. Usar `jpegoptim`, `pngquant` o `cwebp` para comprimir antes de subir.
+4. **Tema visual:** Todas las capturas deben tomarse con el tema oscuro por defecto de la aplicación (`apps/gui/ui/style.qss`).
+5. **Nomenclatura:** Usar nombres descriptivos en minúsculas con guiones bajos (ej. `mapa_sala_llena.jpg`).
